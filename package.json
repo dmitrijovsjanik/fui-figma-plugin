@@ -1,0 +1,45 @@
+{
+  "name": "fui-figma-plugin",
+  "version": "0.1.0",
+  "description": "Figma plugin: Fast UI Kit color generator with native Variables sync",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "build": "npm run build:ui && npm run build:code",
+    "build:ui": "vite build -c vite.config.ui.ts",
+    "build:code": "vite build -c vite.config.code.ts",
+    "dev": "vite build -c vite.config.ui.ts --watch & vite build -c vite.config.code.ts --watch",
+    "lint": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@hugeicons/core-free-icons": "^4.0.0",
+    "@hugeicons/react": "^1.1.6",
+    "@radix-ui/react-label": "^2.1.8",
+    "@radix-ui/react-popover": "^1.1.15",
+    "@radix-ui/react-slot": "^1.2.4",
+    "@radix-ui/react-switch": "^1.2.6",
+    "@radix-ui/react-toggle": "^1.1.10",
+    "@radix-ui/react-toggle-group": "^1.1.11",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "culori": "^4.0.2",
+    "lucide-react": "^0.577.0",
+    "react": "^19.0.0",
+    "react-colorful": "^5.6.1",
+    "react-dom": "^19.0.0",
+    "tailwind-merge": "^3.5.0"
+  },
+  "devDependencies": {
+    "@figma/plugin-typings": "^1.125.0",
+    "@types/node": "^22.10.0",
+    "@types/culori": "^4.0.1",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^5.1.4",
+    "typescript": "^5.9.3",
+    "vite": "^7.3.1",
+    "vite-plugin-singlefile": "^2.3.3",
+    "vitest": "^4.0.18"
+  }
+}

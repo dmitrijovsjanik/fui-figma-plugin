@@ -1,0 +1,118 @@
+/* ─── Container ─── */
+.container {
+  display: inline-flex;
+  align-items: stretch;
+  position: relative;
+  font-family: var(--fui-font-family);
+  box-sizing: border-box;
+  background-color: var(--fui-neutral-a-2);
+  border-radius: var(--fui-radius-xl);
+  gap: 0;
+
+  /* Container uses the sizing system — same height as a Button */
+  --switcher-inset: 2px;
+  font-size: var(--fui-current-font-size);
+  line-height: var(--fui-current-line-height);
+  padding: var(--switcher-inset);
+}
+
+/* ─── Binary toggle: whole container is clickable ─── */
+.binary {
+  cursor: pointer;
+}
+
+/* ─── Layout: fill ─── */
+.fill {
+  display: flex;
+  width: 100%;
+}
+
+.fill > .switch {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.fill > .switch > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ─── Layout: equal ─── */
+.equal {
+  display: inline-grid;
+  grid-auto-columns: 1fr;
+  grid-auto-flow: column;
+}
+
+/* ─── Sliding indicator ─── */
+.indicator {
+  position: absolute;
+  top: var(--switcher-inset);
+  bottom: var(--switcher-inset);
+  left: 0;
+  background-color: var(--fui-neutral-1);
+  border-radius: calc(var(--fui-radius-xl) - var(--switcher-inset));
+  box-shadow: var(--fui-shadow-sm);
+  transition: transform var(--fui-transition-normal),
+    width var(--fui-transition-normal);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ─── Switch item ─── */
+.switch {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--fui-font-family);
+  font-weight: var(--fui-font-weight-medium);
+  font-size: var(--fui-current-font-size);
+  line-height: var(--fui-current-line-height);
+  white-space: nowrap;
+  user-select: none;
+  box-sizing: border-box;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  color: var(--fui-neutral-9);
+  border-radius: calc(var(--fui-radius-xl) - var(--switcher-inset));
+  outline: none;
+  position: relative;
+  z-index: 1;
+  transition: color var(--fui-transition-fast);
+
+  /* Item padding: horizontal from pad system, vertical stretch from container */
+  padding: calc(var(--fui-current-pad-v) + var(--fui-current-comp-half) - var(--switcher-inset)) calc(var(--fui-current-pad-h) - var(--switcher-inset));
+  gap: var(--fui-current-gap);
+}
+
+.switch:hover:not(.active):not(.disabled) {
+  color: var(--fui-neutral-11);
+}
+
+.switch:focus-visible {
+  outline: 2px solid var(--fui-brand-9);
+  outline-offset: -2px;
+}
+
+/* Selected */
+.switch.active {
+  color: var(--fui-neutral-12);
+}
+
+/* Disabled */
+.switch.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* ─── Text label padding (matches Button .label) ─── */
+.label {
+  padding: var(--fui-current-text-padding);
+}
+
+/* ─── Icon-only ─── */
+.iconOnly {
+  aspect-ratio: 1;
+}

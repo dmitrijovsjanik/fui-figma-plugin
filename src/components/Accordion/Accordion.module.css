@@ -1,0 +1,184 @@
+/* ─── Root ─── */
+
+.accordion {
+  display: flex;
+  flex-direction: column;
+  font-family: var(--fui-font-family);
+  color: var(--fui-neutral-12);
+  width: 100%;
+}
+
+/* ─── Header row ─── */
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* ─── Trigger (button) ─── */
+
+.trigger {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+  text-align: start;
+  user-select: none;
+  border-radius: var(--fui-radius-sm);
+  transition: background-color var(--fui-transition-fast);
+}
+
+.trigger:focus-visible {
+  outline: 2px solid var(--fui-brand-9);
+  outline-offset: 3px;
+}
+
+.trigger:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* ─── Chevron ─── */
+
+.chevron {
+  color: var(--fui-neutral-11);
+  transition: transform var(--fui-transition-fast);
+}
+
+.open .chevron {
+  transform: rotate(90deg);
+}
+
+/* ─── Title ─── */
+
+.title {
+  flex: 1;
+  min-width: 0;
+  padding: 0 4px;
+  font-size: var(--fui-current-font-size);
+  line-height: var(--fui-current-line-height);
+  font-weight: var(--fui-font-weight-medium);
+}
+
+/* ─── Body ─── */
+
+.body {
+  transition: height var(--fui-transition-normal);
+  overflow: hidden;
+}
+
+.bodyInner {
+  font-size: var(--fui-current-font-size);
+  line-height: var(--fui-current-line-height);
+  padding: 4px 4px 0;
+  opacity: 0;
+  transform: translateY(-4px);
+  transition:
+    opacity var(--fui-transition-normal),
+    transform var(--fui-transition-normal);
+}
+
+.open .bodyInner {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ─── Disabled root ─── */
+
+.disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+/* ══════════════════════════════════════════
+   Variant: Panel
+   ══════════════════════════════════════════ */
+
+.panel {
+  background-color: white;
+  border: 1px solid var(--fui-neutral-a-6);
+  border-radius: var(--fui-radius-xl);
+  gap: 0;
+}
+
+.panel .header {
+  padding: calc(var(--fui-current-pad-v) + var(--fui-current-comp-half)) var(--fui-current-pad-h);
+}
+
+.panel .trigger {
+  border-radius: 0;
+}
+
+.panel .trigger:focus-visible {
+  outline: 2px solid var(--fui-brand-9);
+  outline-offset: 3px;
+  border-radius: var(--fui-radius-xl);
+}
+
+.panel .bodyInner {
+  border-top: 1px solid var(--fui-neutral-a-6);
+  padding: calc(var(--fui-current-pad-v) + var(--fui-current-comp-half)) var(--fui-current-pad-h);
+  color: var(--fui-neutral-11);
+}
+
+/* ══════════════════════════════════════════
+   Variant: Filled (container highlights on hover)
+   ══════════════════════════════════════════ */
+
+.filled {
+  background-color: white;
+  border-radius: var(--fui-radius-xl);
+  padding: calc(var(--fui-current-pad-v) + var(--fui-current-comp-half)) var(--fui-current-pad-h);
+  cursor: pointer;
+  transition: background-color var(--fui-transition-fast);
+}
+
+.filled:focus-visible {
+  outline: 2px solid var(--fui-brand-9);
+  outline-offset: 3px;
+}
+
+.filled:hover {
+  background-color: var(--fui-neutral-a-4);
+}
+
+.filled:active {
+  background-color: var(--fui-neutral-a-3);
+}
+
+.filled .trigger {
+  pointer-events: none;
+}
+
+.filled .bodyInner {
+  /* align with title: icon-box + trigger gap + title padding-left */
+  padding-left: calc(var(--fui-current-icon-box) + 4px + 4px);
+  color: var(--fui-neutral-11);
+}
+
+/* ══════════════════════════════════════════
+   Variant: Inline
+   ══════════════════════════════════════════ */
+
+.inline .trigger:focus-visible {
+  border-radius: var(--fui-radius-xl);
+}
+
+.inline .trigger:hover {
+  color: var(--fui-brand-11);
+}
+
+.inline .bodyInner {
+  /* align with title: icon-box + trigger gap + title padding-left */
+  padding-left: calc(var(--fui-current-icon-box) + 4px + 4px);
+  color: var(--fui-neutral-11);
+}

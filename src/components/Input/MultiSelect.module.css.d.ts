@@ -1,0 +1,26 @@
+declare const styles: {
+  readonly wrapper: string;
+  readonly fieldAnchor: string;
+  readonly labelRow: string;
+  readonly label: string;
+  readonly field: string;
+  readonly focused: string;
+  readonly error: string;
+  readonly disabled: string;
+  readonly bodyRow: string;
+  readonly actions: string;
+  readonly valueText: string;
+  readonly placeholder: string;
+  readonly tagsWrap: string;
+  readonly overflowCount: string;
+  readonly chevron: string;
+  readonly chevronOpen: string;
+  readonly slot: string;
+  readonly errorIcon: string;
+  readonly captionRow: string;
+  readonly caption: string;
+  readonly errorMessage: string;
+  readonly optionHighlighted: string;
+  readonly clearBtn: string;
+};
+export default styles;

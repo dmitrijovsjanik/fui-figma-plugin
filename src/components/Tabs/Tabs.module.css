@@ -1,0 +1,212 @@
+/* ─── Container ─── */
+.container {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  font-family: var(--fui-font-family);
+  box-sizing: border-box;
+  position: relative;
+}
+
+/* ─── Scroll area ─── */
+.scrollArea {
+  display: flex;
+  align-items: center;
+  position: relative;
+  overflow-x: auto;
+  overflow-y: hidden;
+  flex: 1;
+  min-width: 0;
+  scroll-behavior: smooth;
+
+  /* Hide scrollbar */
+  scrollbar-width: none;
+}
+
+.scrollArea::-webkit-scrollbar {
+  display: none;
+}
+
+/* ─── Tab ─── */
+.tab {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--fui-font-family);
+  font-weight: var(--fui-font-weight-medium);
+  white-space: nowrap;
+  user-select: none;
+  box-sizing: border-box;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  color: var(--fui-neutral-11);
+  flex-shrink: 0;
+  border-radius: var(--fui-radius-xl);
+  outline: none;
+  transition: background-color var(--fui-transition-fast),
+    color var(--fui-transition-fast);
+}
+
+.tab:hover:not(.active):not(.disabled) {
+  background-color: var(--fui-neutral-a-4);
+}
+
+.tab:focus-visible {
+  outline: 2px solid var(--fui-brand-9);
+  outline-offset: -2px;
+}
+
+/* Selected */
+.tab.active {
+  background-color: var(--fui-brand-a-5);
+  color: var(--fui-brand-11);
+}
+
+.tab.active:hover {
+  background-color: var(--fui-brand-a-6);
+}
+
+/* Disabled */
+.tab.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* ─── Label padding ─── */
+.label {
+  padding: 0 4px;
+}
+
+/* ─── Close button (uses IconBox behavior="highlight") ─── */
+.active .closeBtn {
+  color: var(--fui-brand-9);
+}
+
+.active .closeBtn:hover {
+  color: var(--fui-brand-11);
+}
+
+/* ─── Vertical divider ─── */
+.divider {
+  width: 1px;
+  align-self: stretch;
+  background-color: var(--fui-neutral-a-4);
+  flex-shrink: 0;
+}
+
+/* ─── Highlight (keyboard navigation) ─── */
+.optionHighlighted {
+  background-color: var(--fui-neutral-a-3);
+}
+
+/* ─── Underline variant ─── */
+.underline {
+  border-radius: 0;
+}
+
+.underline .tab {
+  border-radius: 0;
+  background: transparent;
+  color: var(--fui-neutral-9);
+}
+
+.underline .tab:hover:not(.active):not(.disabled) {
+  background: transparent;
+  color: var(--fui-neutral-11);
+}
+
+.underline .tab.active {
+  background: transparent;
+  color: var(--fui-brand-11);
+}
+
+.underline .tab.active:hover {
+  background: transparent;
+}
+
+/* Sliding indicator */
+.indicator {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 2px;
+  background-color: var(--fui-brand-9);
+  border-radius: 1px;
+  transition: transform var(--fui-transition-normal),
+    width var(--fui-transition-normal);
+  pointer-events: none;
+}
+
+/* ─── Fill layout ─── */
+.fillLayout {
+  overflow: hidden;
+}
+
+.tabFill {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.tabFill > span:first-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ─── Sizing (inherits from .fui-pad-* / .fui-text-* utility classes) ─── */
+.container {
+  gap: var(--fui-current-gap);
+}
+
+.tab {
+  font-size: var(--fui-current-font-size);
+  line-height: var(--fui-current-line-height);
+  padding: calc(var(--fui-current-pad-v) + var(--fui-current-comp-half)) var(--fui-current-pad-h);
+  gap: var(--fui-current-gap);
+}
+
+.scrollArea {
+  gap: 2px;
+}
+
+/* ─── Drag and drop ─── */
+
+.dropIndicator {
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  width: 2px;
+  background-color: var(--fui-brand-9);
+  border-radius: 1px;
+  pointer-events: none;
+  z-index: 1;
+  transition: transform 80ms ease-out;
+}
+
+.tabDragging {
+  opacity: 0.4;
+}
+
+.dragHandle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  cursor: grab;
+  color: var(--fui-neutral-9);
+  transition: color var(--fui-transition-fast);
+  transform: rotate(90deg);
+}
+
+.dragHandle:hover {
+  color: var(--fui-neutral-11);
+}
+
+.active .dragHandle {
+  color: var(--fui-brand-9);
+}
+
+.active .dragHandle:hover {
+  color: var(--fui-brand-11);
+}

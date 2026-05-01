@@ -1,0 +1,205 @@
+/* ─── Wrapper (label + field + dropdown + caption) ─── */
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+  font-family: var(--fui-font-family);
+  font-size: var(--fui-current-font-size);
+  line-height: var(--fui-current-line-height);
+}
+
+/* ─── Field anchor (positions dropdown relative to field) ─── */
+.fieldAnchor {
+  position: relative;
+}
+
+/* ─── Label row ─── */
+.labelRow {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.label {
+  flex: 1;
+  font-size: inherit;
+  font-weight: var(--fui-font-weight-medium);
+  line-height: inherit;
+  color: var(--fui-neutral-a-11);
+}
+
+.labelAction {
+  font-size: inherit;
+  font-weight: var(--fui-font-weight-medium);
+  line-height: inherit;
+  color: var(--fui-brand-11);
+  text-decoration: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  font-family: inherit;
+}
+
+/* ─── Field container ─── */
+.field {
+  display: flex;
+  align-items: center;
+  border-radius: min(var(--fui-radius-xl), var(--fui-current-half-height));
+  background-color: var(--fui-neutral-2);
+  border: var(--fui-current-border-width) solid transparent;
+  box-sizing: border-box;
+  cursor: pointer;
+  user-select: none;
+  outline: none;
+  transition: background-color var(--fui-transition-fast),
+    border-color var(--fui-transition-fast);
+  font-size: var(--fui-current-font-size);
+  line-height: var(--fui-current-line-height);
+  gap: var(--fui-current-gap);
+  padding: calc(var(--fui-current-pad-v) + var(--fui-current-comp-half) - var(--fui-current-border-width)) calc(var(--fui-current-pad-h) - var(--fui-current-border-width));
+}
+
+.field:focus-visible:not(.focused):not(.error) {
+  border-color: var(--fui-brand-9);
+}
+
+/* Inner variant: vertical layout with label & caption inside */
+.inner {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0;
+  padding: 0 !important;
+}
+
+.field:hover:not(.disabled):not(.error):not(.focused) {
+  background-color: var(--fui-neutral-2);
+  border-color: var(--fui-neutral-9);
+}
+
+.focused:not(.error) {
+  --fui-current-border-width: var(--fui-border-width-focus);
+  background-color: var(--fui-neutral-0);
+  border-color: var(--fui-brand-9);
+}
+
+.error {
+  background-color: var(--fui-danger-2);
+  border-color: var(--fui-danger-9);
+}
+
+.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ─── Inner variant: top group (label + body) ─── */
+.innerTop {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: stretch;
+  padding: calc(var(--fui-current-pad-v) + var(--fui-current-comp-half) - var(--fui-current-border-width)) calc(var(--fui-current-pad-h) - var(--fui-current-border-width));
+}
+
+.innerTop:not(:last-child) {
+  padding-bottom: var(--fui-current-pad-v);
+}
+
+.inner .labelRow {
+  padding: 0 4px;
+}
+
+/* ─── Body row ─── */
+.bodyRow {
+  display: flex;
+  align-items: center;
+  gap: var(--fui-current-gap);
+  flex: 1;
+  min-width: 0;
+}
+
+/* ─── Value display ─── */
+.value {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--fui-neutral-12);
+  padding: var(--fui-current-text-padding);
+}
+
+.placeholder {
+  color: var(--fui-neutral-a-9);
+}
+
+/* ─── Chevron ─── */
+.chevron {
+  flex-shrink: 0;
+  color: var(--fui-neutral-9);
+  transition: color var(--fui-transition-fast), transform var(--fui-transition-fast);
+}
+
+.chevronOpen {
+  transform: rotate(180deg);
+}
+
+/* ─── Slots ─── */
+.slot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: var(--fui-neutral-a-11);
+  transition: color var(--fui-transition-fast);
+}
+
+/* ─── Error icon ─── */
+.errorIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: var(--fui-danger-9);
+}
+
+/* ─── Option highlight (keyboard navigation) ─── */
+.optionHighlighted {
+  background-color: var(--fui-neutral-a-3);
+}
+
+/* ─── Caption row ─── */
+.captionRow {
+  display: flex;
+  gap: 4px;
+  align-items: flex-start;
+}
+
+/* Inner variant caption wrapper */
+.captionInner {
+  border-top: 1px solid rgba(208, 208, 208, 0.36);
+  padding: var(--fui-current-pad-v) calc(var(--fui-current-pad-h) - var(--fui-current-border-width));
+  padding-bottom: calc(var(--fui-current-pad-v) - var(--fui-current-border-width));
+}
+
+.captionInner .captionRow {
+  padding: 0 4px;
+}
+
+.caption {
+  flex: 1;
+  font-size: inherit;
+  font-weight: var(--fui-font-weight-normal);
+  line-height: inherit;
+  color: var(--fui-neutral-a-11);
+}
+
+.errorMessage {
+  flex: 1;
+  font-size: inherit;
+  font-weight: var(--fui-font-weight-normal);
+  line-height: inherit;
+  color: var(--fui-danger-11);
+}

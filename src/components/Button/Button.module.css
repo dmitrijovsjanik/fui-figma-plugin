@@ -1,0 +1,178 @@
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--fui-font-family);
+  font-weight: var(--fui-font-weight-medium);
+  border: none;
+  border-radius: var(--fui-radius-xl);
+  cursor: pointer;
+  transition: background-color var(--fui-transition-fast),
+    color var(--fui-transition-fast);
+  white-space: nowrap;
+  user-select: none;
+  box-sizing: border-box;
+
+  /* Driven by .fui-pad-* and .fui-text-* utility classes */
+  font-size: var(--fui-current-font-size);
+  line-height: var(--fui-current-line-height);
+  padding: calc(var(--fui-current-pad-v) + var(--fui-current-comp-half)) var(--fui-current-pad-h);
+  gap: var(--fui-current-gap);
+}
+
+.button:focus-visible {
+  outline: 2px solid var(--fui-brand-9);
+  outline-offset: 2px;
+}
+
+.button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* ─── Text label padding ─── */
+.label {
+  padding: var(--fui-current-text-padding);
+}
+
+/* ─── Primary (solid fill) ─── */
+.primary.brand {
+  background-color: var(--fui-brand-9);
+  color: #ffffff;
+}
+.primary.brand:hover {
+  background-color: var(--fui-brand-10);
+}
+.primary.brand:active,
+.primary.brand.pressed {
+  background-color: var(--fui-brand-9);
+}
+
+.primary.neutral {
+  background-color: var(--fui-neutral-9);
+  color: #ffffff;
+}
+.primary.neutral:hover {
+  background-color: var(--fui-neutral-10);
+}
+.primary.neutral:active,
+.primary.neutral.pressed {
+  background-color: var(--fui-neutral-9);
+}
+
+.primary.error {
+  background-color: var(--fui-danger-9);
+  color: #ffffff;
+}
+.primary.error:hover {
+  background-color: var(--fui-danger-10);
+}
+.primary.error:active,
+.primary.error.pressed {
+  background-color: var(--fui-danger-9);
+}
+
+/* ─── Secondary (light background) ─── */
+.secondary.brand {
+  background-color: var(--fui-brand-a-3);
+  color: var(--fui-brand-11);
+}
+.secondary.brand:hover {
+  background-color: var(--fui-brand-a-4);
+}
+.secondary.brand:active,
+.secondary.brand.pressed {
+  background-color: var(--fui-brand-a-3);
+}
+
+.secondary.neutral {
+  background-color: var(--fui-neutral-a-3);
+  color: var(--fui-neutral-11);
+}
+.secondary.neutral:hover {
+  background-color: var(--fui-neutral-a-4);
+}
+.secondary.neutral:active,
+.secondary.neutral.pressed {
+  background-color: var(--fui-neutral-a-3);
+}
+
+.secondary.error {
+  background-color: var(--fui-danger-a-3);
+  color: var(--fui-danger-11);
+}
+.secondary.error:hover {
+  background-color: var(--fui-danger-a-4);
+}
+.secondary.error:active,
+.secondary.error.pressed {
+  background-color: var(--fui-danger-a-3);
+}
+
+/* ─── Tertiary (no background) ─── */
+.tertiary {
+  background-color: transparent;
+}
+
+.tertiary.brand {
+  color: var(--fui-brand-11);
+}
+.tertiary.brand:hover {
+  background-color: var(--fui-brand-a-4);
+}
+.tertiary.brand:active,
+.tertiary.brand.pressed {
+  background-color: var(--fui-brand-a-3);
+}
+
+.tertiary.neutral {
+  color: var(--fui-neutral-11);
+}
+.tertiary.neutral:hover {
+  background-color: var(--fui-neutral-a-4);
+}
+.tertiary.neutral:active,
+.tertiary.neutral.pressed {
+  background-color: var(--fui-neutral-a-3);
+}
+
+.tertiary.error {
+  color: var(--fui-danger-11);
+}
+.tertiary.error:hover {
+  background-color: var(--fui-danger-a-4);
+}
+.tertiary.error:active,
+.tertiary.error.pressed {
+  background-color: var(--fui-danger-a-3);
+}
+
+/* ─── Split button group ─── */
+.splitGroup {
+  display: inline-flex;
+  align-items: stretch;
+  gap: 0;
+}
+
+.splitMain {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.splitDropdown {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  padding-left: 2px;
+  padding-right: 4px;
+}
+
+/* Divider between main and dropdown (except tertiary) */
+.splitGroup:not(.splitTertiary) .splitDropdown {
+  border-left: 1px solid currentColor;
+  border-left-color: rgba(255, 255, 255, 0.3);
+}
+
+.splitGroup.splitSecondary .splitDropdown {
+  border-left-color: rgba(0, 0, 0, 0.15);
+}

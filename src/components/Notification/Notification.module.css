@@ -1,0 +1,120 @@
+.notification {
+  display: flex;
+  align-items: flex-start;
+  font-family: var(--fui-font-family);
+  border-radius: var(--fui-radius-xl);
+  box-sizing: border-box;
+  transition: background-color var(--fui-transition-fast),
+    color var(--fui-transition-fast);
+  font-size: var(--fui-current-font-size);
+  line-height: var(--fui-current-line-height);
+  padding: calc(var(--fui-current-pad-v) + var(--fui-current-comp-half) - var(--fui-border-width)) calc(var(--fui-current-pad-h) - var(--fui-border-width));
+  gap: var(--fui-current-gap);
+}
+
+/* ─── Neutral ─── */
+.neutral {
+  background-color: #ffffff;
+  border: 1px solid var(--fui-neutral-a-6);
+  color: var(--fui-neutral-12);
+}
+
+.neutral .subtitle {
+  color: var(--fui-neutral-11);
+}
+
+/* ─── Success ─── */
+.success {
+  background-color: #ffffff;
+  border: 1px solid var(--fui-success-a-6);
+  color: var(--fui-success-12);
+}
+
+.success .subtitle {
+  color: var(--fui-success-11);
+}
+
+.success .statusIcon {
+  color: var(--fui-success-11);
+}
+
+/* ─── Warning ─── */
+.warning {
+  background-color: #ffffff;
+  border: 1px solid var(--fui-warning-a-6);
+  color: var(--fui-warning-12);
+}
+
+.warning .subtitle {
+  color: var(--fui-warning-11);
+}
+
+.warning .statusIcon {
+  color: var(--fui-warning-11);
+}
+
+/* ─── Danger ─── */
+.danger {
+  background-color: #ffffff;
+  border: 1px solid var(--fui-danger-a-6);
+  color: var(--fui-danger-12);
+}
+
+.danger .subtitle {
+  color: var(--fui-danger-11);
+}
+
+.danger .statusIcon {
+  color: var(--fui-danger-11);
+}
+
+/* ─── Info ─── */
+.info {
+  background-color: #ffffff;
+  border: 1px solid var(--fui-info-a-6);
+  color: var(--fui-info-12);
+}
+
+.info .subtitle {
+  color: var(--fui-info-11);
+}
+
+.info .statusIcon {
+  color: var(--fui-info-11);
+}
+
+/* ─── Icon ─── */
+.statusIcon {
+  flex-shrink: 0;
+  margin-top: 0px;
+}
+
+/* ─── Body ─── */
+.body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: var(--fui-current-text-padding);
+}
+
+.title {
+  font-weight: var(--fui-font-weight-medium);
+}
+
+.subtitle {
+  font-weight: var(--fui-font-weight-normal);
+  font-size: var(--fui-current-font-size);
+  line-height: var(--fui-current-line-height);
+}
+
+.content {
+  margin-top: var(--fui-space-2);
+  margin-bottom: var(--fui-space-1);
+}
+
+/* ─── Close button (uses IconBox behavior="highlight") ─── */
+.closeBtn {
+  align-self: flex-start;
+}

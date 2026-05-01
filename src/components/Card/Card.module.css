@@ -1,0 +1,63 @@
+.card {
+  display: flex;
+  box-sizing: border-box;
+  border: none;
+  border-radius: var(--fui-radius-xl);
+  cursor: pointer;
+  user-select: none;
+  font-family: var(--fui-font-family);
+  background: none;
+  text-align: inherit;
+  color: inherit;
+  width: 100%;
+  transition: background-color var(--fui-transition-fast),
+    color var(--fui-transition-fast);
+}
+
+.card:focus-visible {
+  outline: 2px solid var(--fui-brand-9);
+  outline-offset: 2px;
+}
+
+.card:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* ─── Padding ─── */
+.padSm {
+  padding: 8px;
+}
+.padMd {
+  padding: 12px;
+}
+.padLg {
+  padding: 16px;
+}
+
+/* ─── Ghost (transparent, like tertiary button) ─── */
+.ghost {
+  background-color: transparent;
+  color: var(--fui-neutral-12);
+}
+.ghost:hover {
+  background-color: var(--fui-neutral-a-4);
+}
+.ghost:active,
+.ghost.pressed {
+  background-color: var(--fui-neutral-a-3);
+}
+
+/* ─── Secondary (light fill, like secondary button) ─── */
+.secondary {
+  background-color: var(--fui-neutral-a-3);
+  color: var(--fui-neutral-12);
+}
+.secondary:hover {
+  background-color: var(--fui-neutral-a-4);
+}
+.secondary:active,
+.secondary.pressed {
+  background-color: var(--fui-neutral-a-3);
+}

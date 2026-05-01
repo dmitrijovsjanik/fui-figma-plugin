@@ -1,0 +1,86 @@
+/* ─── Base ─── */
+.item {
+  display: flex;
+  align-items: center;
+  font-family: var(--fui-font-family);
+  font-weight: var(--fui-font-weight-normal);
+  border-radius: var(--fui-menu-item-radius, var(--fui-radius-xl));
+  cursor: pointer;
+  transition: background-color var(--fui-transition-fast),
+    color var(--fui-transition-fast);
+  white-space: nowrap;
+  user-select: none;
+  box-sizing: border-box;
+  color: var(--fui-neutral-11);
+  background-color: transparent;
+
+  /* Driven by .fui-pad-* and .fui-text-* utility classes */
+  font-size: var(--fui-current-font-size);
+  line-height: var(--fui-current-line-height);
+  padding: calc(var(--fui-current-pad-v) + var(--fui-current-comp-half)) var(--fui-current-pad-h);
+  gap: var(--fui-current-gap);
+}
+
+.item:hover,
+.item.hovered {
+  background-color: var(--fui-neutral-a-4);
+}
+
+.item:focus-visible {
+  outline: 2px solid var(--fui-brand-9);
+  outline-offset: 2px;
+}
+
+/* ─── Disabled ─── */
+.item.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* ─── Selected (check icon visible) ─── */
+.selected {
+  background-color: var(--fui-brand-a-5);
+  color: var(--fui-brand-11);
+}
+
+.selected:hover,
+.selected.hovered {
+  background-color: var(--fui-brand-a-6);
+}
+
+/* ─── Slots ─── */
+.label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: var(--fui-current-text-padding);
+}
+
+.iconLeft {
+  flex-shrink: 0;
+  color: inherit;
+}
+
+.checkIcon {
+  flex-shrink: 0;
+  color: var(--fui-brand-11);
+  margin-left: auto;
+}
+
+/* ─── Vertical layout ─── */
+.vertical {
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  white-space: normal;
+  gap: 4px;
+}
+
+.vertical .label {
+  flex: none;
+  min-width: 0;
+  padding: 0;
+}

@@ -1,0 +1,24 @@
+declare const styles: {
+  readonly wrapper: string;
+  readonly labelRow: string;
+  readonly label: string;
+  readonly field: string;
+  readonly inner: string;
+  readonly innerTop: string;
+  readonly focused: string;
+  readonly error: string;
+  readonly disabled: string;
+  readonly bodyRow: string;
+  readonly textarea: string;
+  readonly autoHeight: string;
+  readonly slot: string;
+  readonly slotAction: string;
+  readonly errorIcon: string;
+  readonly captionRow: string;
+  readonly captionInner: string;
+  readonly caption: string;
+  readonly counter: string;
+  readonly counterOverflow: string;
+  readonly errorMessage: string;
+};
+export default styles;

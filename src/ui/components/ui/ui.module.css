@@ -1,0 +1,15 @@
+/* Popover */
+.popoverContent {
+  z-index: 50;
+  border-radius: var(--fui-radius-lg);
+  border: 1px solid var(--fui-neutral-6);
+  background-color: var(--fui-neutral-1);
+  padding: 12px;
+  box-shadow: var(--fui-shadow-md);
+  outline: none;
+  animation: popoverIn var(--fui-transition-fast);
+}
+@keyframes popoverIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}

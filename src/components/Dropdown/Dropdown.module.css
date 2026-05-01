@@ -1,0 +1,55 @@
+/* ─── Dropdown shell ─── */
+.dropdown {
+  position: fixed;
+  z-index: 9999;
+  overflow: hidden;
+  background-color: var(--fui-neutral-1);
+  border: 1px solid var(--fui-neutral-a-4);
+  border-radius: calc(min(var(--fui-radius-xl), var(--fui-dropdown-item-half-h, 20px)) + 4px);
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.08);
+  box-sizing: border-box;
+  font-family: var(--fui-font-family);
+}
+
+/* ─── Inner scrollable area ─── */
+.scroll {
+  overflow-y: hidden;
+  max-height: var(--fui-dropdown-scroll-max);
+  display: flex;
+  flex-direction: column;
+  gap: var(--fui-dropdown-gap, 2px);
+  padding: 0 4px;
+  box-sizing: border-box;
+}
+
+/* Scrollable top/bottom spacers.
+   ::before → [gap] → item₁ → [gap] → … → itemₙ → [gap] → ::after
+   Top visual  = ::before + gap = (4 - gap) + gap = 4px
+   Bottom visual = gap + ::after = gap + (4 - gap) = 4px */
+.scroll::before,
+.scroll::after {
+  content: '';
+  display: block;
+  flex-shrink: 0;
+  height: calc(4px - var(--fui-dropdown-gap, 2px));
+}
+
+.overflows .scroll {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+/* ─── Dense variant ─── */
+.dense {
+  --fui-menu-item-radius: 0px;
+  --fui-dropdown-gap: 0px;
+}
+
+.dense .scroll {
+  padding: 0;
+}
+
+.dense .scroll::before,
+.dense .scroll::after {
+  display: none;
+}

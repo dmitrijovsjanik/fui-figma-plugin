@@ -1,0 +1,243 @@
+.tree {
+  --tree-indent: 20px;
+  --tree-line-color: var(--fui-neutral-a-5);
+}
+
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+/* ─── Node ─── */
+
+.node {
+  list-style: none;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+/* ─── Row (mirrors MenuItem .item) ─── */
+
+.row {
+  display: flex;
+  align-items: center;
+  font-family: var(--fui-font-family);
+  font-weight: var(--fui-font-weight-normal);
+  font-size: var(--fui-current-font-size);
+  line-height: var(--fui-current-line-height);
+  color: var(--fui-neutral-11);
+  border-radius: var(--fui-menu-item-radius, var(--fui-radius-xl));
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+  box-sizing: border-box;
+  background-color: transparent;
+  position: relative;
+  padding: calc(var(--fui-current-pad-v) + var(--fui-current-comp-half)) var(--fui-current-pad-h);
+  gap: var(--fui-current-gap);
+  transition: background-color var(--fui-transition-fast),
+    color var(--fui-transition-fast);
+}
+
+.row:hover {
+  background-color: var(--fui-neutral-a-4);
+}
+
+.row:focus-visible {
+  outline: 2px solid var(--fui-brand-9);
+  outline-offset: 2px;
+}
+
+/* ─── Selected ─── */
+
+.row.selected {
+  background-color: var(--fui-brand-a-5);
+  color: var(--fui-brand-11);
+}
+
+.row.selected:hover {
+  background-color: var(--fui-brand-a-6);
+}
+
+/* ─── Disabled ─── */
+
+.row.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* ─── Connector line (horizontal tick) ─── */
+
+.connector {
+  position: absolute;
+  top: 50%;
+  width: calc(var(--tree-indent) * 0.5 - 4px);
+  height: 1px;
+  background: var(--tree-line-color);
+  pointer-events: none;
+}
+
+/* ─── Children group ─── */
+
+.children {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+/* ─── Vertical line ─── */
+/*
+ * Drawn on each <li>.node::before.
+ * Extended by 1px top/bottom to bridge the 2px gap between siblings.
+ * Last node: line stops at its row's vertical center.
+ */
+.lined > .node::before {
+  content: '';
+  position: absolute;
+  left: var(--tree-line-left);
+  top: -1px;
+  bottom: -1px;
+  width: 1px;
+  background: var(--tree-line-color);
+  pointer-events: none;
+}
+
+/* First node: don't extend above */
+.lined > .node:first-child::before {
+  top: 0;
+}
+
+/*
+ * Last node: stop the line at the row's center.
+ * Row center = pad-v + line-height / 2.
+ */
+.lined > .node.last::before {
+  bottom: auto;
+  height: calc(var(--fui-current-pad-v) + var(--fui-current-line-height) / 2 + 1px);
+}
+
+.lined > .node:first-child.last::before {
+  height: calc(var(--fui-current-pad-v) + var(--fui-current-line-height) / 2);
+}
+
+/* ─── Chevron ─── */
+
+.chevron {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--fui-current-icon-box);
+  height: var(--fui-current-icon-box);
+  flex-shrink: 0;
+  visibility: hidden;
+}
+
+.chevron.hasChildren {
+  visibility: visible;
+}
+
+.chevronIcon {
+  transition: transform var(--fui-transition-fast);
+}
+
+.chevron.expanded .chevronIcon {
+  transform: rotate(90deg);
+}
+
+/* ─── Icon ─── */
+
+.icon {
+  flex-shrink: 0;
+  color: inherit;
+}
+
+/* ─── Label ─── */
+
+.label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: var(--fui-current-text-padding);
+}
+
+/* ─── Sticky scroll header ─── */
+
+.stickyHeader {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: var(--fui-surface-1, var(--fui-neutral-1, #fff));
+  border-bottom: 1px solid var(--fui-neutral-a-4);
+  box-shadow: 0 1px 2px var(--fui-neutral-a-3);
+}
+
+.stickyHeader:empty {
+  border-bottom: none;
+  box-shadow: none;
+}
+
+.stickyRow {
+  display: flex;
+  align-items: center;
+  font-family: var(--fui-font-family);
+  font-weight: var(--fui-font-weight-normal);
+  font-size: var(--fui-current-font-size);
+  line-height: var(--fui-current-line-height);
+  color: var(--fui-neutral-11);
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+  box-sizing: border-box;
+  background-color: transparent;
+  padding: calc(var(--fui-current-pad-v) + var(--fui-current-comp-half)) var(--fui-current-pad-h);
+  gap: var(--fui-current-gap);
+  transition: background-color var(--fui-transition-fast);
+}
+
+.stickyRow:hover {
+  background-color: var(--fui-neutral-a-4);
+}
+
+/* ─── Breadcrumb row ─── */
+
+.breadcrumbRow {
+  display: flex;
+  align-items: center;
+  font-family: var(--fui-font-family);
+  font-weight: var(--fui-font-weight-normal);
+  font-size: var(--fui-current-font-size);
+  line-height: var(--fui-current-line-height);
+  color: var(--fui-neutral-9);
+  white-space: nowrap;
+  box-sizing: border-box;
+  padding: calc(var(--fui-current-pad-v) + var(--fui-current-comp-half)) var(--fui-current-pad-h);
+  gap: 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.breadcrumbSep {
+  color: var(--fui-neutral-a-6);
+  flex-shrink: 0;
+}
+
+.breadcrumbSegment {
+  cursor: pointer;
+  transition: color var(--fui-transition-fast);
+}
+
+.breadcrumbSegment:hover {
+  color: var(--fui-neutral-11);
+}

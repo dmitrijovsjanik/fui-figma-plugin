@@ -1,0 +1,51 @@
+.text {
+  font-family: var(--fui-font-family);
+  margin: 0;
+}
+
+/* Sizes */
+.size-56 { font-size: var(--fui-font-size-56); }
+.size-48 { font-size: var(--fui-font-size-48); }
+.size-40 { font-size: var(--fui-font-size-40); }
+.size-36 { font-size: var(--fui-font-size-36); }
+.size-32 { font-size: var(--fui-font-size-32); }
+.size-28 { font-size: var(--fui-font-size-28); }
+.size-24 { font-size: var(--fui-font-size-24); }
+.size-22 { font-size: var(--fui-font-size-22); }
+.size-20 { font-size: var(--fui-font-size-20); }
+.size-18 { font-size: var(--fui-font-size-18); }
+.size-16 { font-size: var(--fui-font-size-16); }
+.size-14 { font-size: var(--fui-font-size-14); }
+.size-12 { font-size: var(--fui-font-size-12); }
+
+/* Weights */
+.weight-normal { font-weight: var(--fui-font-weight-normal); }
+.weight-medium { font-weight: var(--fui-font-weight-medium); }
+.weight-semibold { font-weight: var(--fui-font-weight-semibold); }
+.weight-bold { font-weight: var(--fui-font-weight-bold); }
+
+/* Line heights: sizes 28–56 (single variant) */
+.lh-56 { line-height: var(--fui-line-height-56); }
+.lh-48 { line-height: var(--fui-line-height-48); }
+.lh-40 { line-height: var(--fui-line-height-40); }
+.lh-36 { line-height: var(--fui-line-height-36); }
+.lh-32 { line-height: var(--fui-line-height-32); }
+.lh-28 { line-height: var(--fui-line-height-28); }
+
+/* Line heights: sizes 12–24 compact */
+.lh-24-compact { line-height: var(--fui-line-height-24-compact); }
+.lh-22-compact { line-height: var(--fui-line-height-22-compact); }
+.lh-20-compact { line-height: var(--fui-line-height-20-compact); }
+.lh-18-compact { line-height: var(--fui-line-height-18-compact); }
+.lh-16-compact { line-height: var(--fui-line-height-16-compact); }
+.lh-14-compact { line-height: var(--fui-line-height-14-compact); }
+.lh-12-compact { line-height: var(--fui-line-height-12-compact); }
+
+/* Line heights: sizes 12–24 fine */
+.lh-24-fine { line-height: var(--fui-line-height-24-fine); }
+.lh-22-fine { line-height: var(--fui-line-height-22-fine); }
+.lh-20-fine { line-height: var(--fui-line-height-20-fine); }
+.lh-18-fine { line-height: var(--fui-line-height-18-fine); }
+.lh-16-fine { line-height: var(--fui-line-height-16-fine); }
+.lh-14-fine { line-height: var(--fui-line-height-14-fine); }
+.lh-12-fine { line-height: var(--fui-line-height-12-fine); }

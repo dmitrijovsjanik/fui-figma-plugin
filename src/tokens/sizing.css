@@ -1,0 +1,138 @@
+/* ─── Two-axis sizing system: padding × text ─── */
+/* This file is NOT auto-generated. Safe to edit. */
+
+:root {
+  /* ─── Padding axis (container density) ─── */
+  --fui-pad-sm-v: 4px;
+  --fui-pad-sm-h: 4px;
+  --fui-pad-sm-gap: 0px;
+
+  --fui-pad-md-v: 8px;
+  --fui-pad-md-h: 8px;
+  --fui-pad-md-gap: 0px;
+
+  --fui-pad-lg-v: 12px;
+  --fui-pad-lg-h: 12px;
+  --fui-pad-lg-gap: 0px;
+
+  /* ─── Border widths ─── */
+  --fui-border-width: 1px;
+  --fui-border-width-focus: 2px;
+
+  /* ─── Inheritable current-context variables (defaults = 14) ─── */
+  --fui-current-font-size: var(--fui-font-size-14);
+  --fui-current-line-height: 20px;
+  --fui-current-icon-size: 16px;
+  --fui-current-icon-box: 20px;
+  --fui-current-text-padding: 0 4px;
+  --fui-current-comp-half: 0px;
+  --fui-current-pad-v: var(--fui-pad-md-v);
+  --fui-current-pad-h: var(--fui-pad-md-h);
+  --fui-current-gap: var(--fui-pad-md-gap);
+  --fui-current-border-width: var(--fui-border-width);
+
+  /* Dynamic pill half-height: (pad*2 + lineHeight + comp + border*2) / 2 */
+  --fui-current-half-height: calc(
+    (var(--fui-current-pad-v) * 2 + var(--fui-current-line-height) + var(--fui-current-comp-half) * 2 + var(--fui-border-width) * 2) / 2
+  );
+}
+
+/* ─── Padding utility classes ─── */
+.fui-pad-sm {
+  --fui-current-pad-v: var(--fui-pad-sm-v);
+  --fui-current-pad-h: var(--fui-pad-sm-h);
+  --fui-current-gap: var(--fui-pad-sm-gap);
+}
+
+.fui-pad-md {
+  --fui-current-pad-v: var(--fui-pad-md-v);
+  --fui-current-pad-h: var(--fui-pad-md-h);
+  --fui-current-gap: var(--fui-pad-md-gap);
+}
+
+.fui-pad-lg {
+  --fui-current-pad-v: var(--fui-pad-lg-v);
+  --fui-current-pad-h: var(--fui-pad-lg-h);
+  --fui-current-gap: var(--fui-pad-lg-gap);
+}
+
+/* ─── Text utility classes (numeric font-size) ─── */
+/* icon-box = line-height, icon-size = fontSize + 2 */
+/* comp-half = compensation to round up to 4px grid */
+
+.fui-text-12 {
+  --fui-current-font-size: var(--fui-font-size-12);
+  --fui-current-line-height: 16px;
+  --fui-current-icon-size: 14px;
+  --fui-current-icon-box: 16px;
+  --fui-current-text-padding: 0 4px;
+  --fui-current-comp-half: 0px;
+  font-size: var(--fui-current-font-size);
+  line-height: var(--fui-current-line-height);
+}
+
+.fui-text-14 {
+  --fui-current-font-size: var(--fui-font-size-14);
+  --fui-current-line-height: 20px;
+  --fui-current-icon-size: 16px;
+  --fui-current-icon-box: 20px;
+  --fui-current-text-padding: 0 4px;
+  --fui-current-comp-half: 0px;
+  font-size: var(--fui-current-font-size);
+  line-height: var(--fui-current-line-height);
+}
+
+.fui-text-16 {
+  --fui-current-font-size: var(--fui-font-size-16);
+  --fui-current-line-height: 22px;
+  --fui-current-icon-size: 18px;
+  --fui-current-icon-box: 22px;
+  --fui-current-text-padding: 0 4px;
+  --fui-current-comp-half: 1px;
+  font-size: var(--fui-current-font-size);
+  line-height: var(--fui-current-line-height);
+}
+
+.fui-text-18 {
+  --fui-current-font-size: var(--fui-font-size-18);
+  --fui-current-line-height: 24px;
+  --fui-current-icon-size: 20px;
+  --fui-current-icon-box: 24px;
+  --fui-current-text-padding: 0 4px;
+  --fui-current-comp-half: 0px;
+  font-size: var(--fui-current-font-size);
+  line-height: var(--fui-current-line-height);
+}
+
+.fui-text-20 {
+  --fui-current-font-size: var(--fui-font-size-20);
+  --fui-current-line-height: 28px;
+  --fui-current-icon-size: 22px;
+  --fui-current-icon-box: 28px;
+  --fui-current-text-padding: 0 4px;
+  --fui-current-comp-half: 0px;
+  font-size: var(--fui-current-font-size);
+  line-height: var(--fui-current-line-height);
+}
+
+.fui-text-22 {
+  --fui-current-font-size: var(--fui-font-size-22);
+  --fui-current-line-height: 30px;
+  --fui-current-icon-size: 24px;
+  --fui-current-icon-box: 30px;
+  --fui-current-text-padding: 0 4px;
+  --fui-current-comp-half: 1px;
+  font-size: var(--fui-current-font-size);
+  line-height: var(--fui-current-line-height);
+}
+
+.fui-text-24 {
+  --fui-current-font-size: var(--fui-font-size-24);
+  --fui-current-line-height: 32px;
+  --fui-current-icon-size: 26px;
+  --fui-current-icon-box: 32px;
+  --fui-current-text-padding: 0 4px;
+  --fui-current-comp-half: 0px;
+  font-size: var(--fui-current-font-size);
+  line-height: var(--fui-current-line-height);
+}

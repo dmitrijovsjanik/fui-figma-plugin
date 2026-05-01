@@ -1,0 +1,586 @@
+/* ─── Wrapper (label + field + caption) ─── */
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  font-family: var(--fui-font-family);
+  font-size: var(--fui-current-font-size);
+  line-height: var(--fui-current-line-height);
+}
+
+/* ─── Label row ─── */
+.labelRow {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.label {
+  flex: 1;
+  font-size: inherit;
+  font-weight: var(--fui-font-weight-medium);
+  line-height: inherit;
+  color: var(--fui-neutral-a-11);
+}
+
+.labelAction {
+  font-size: inherit;
+  font-weight: var(--fui-font-weight-medium);
+  line-height: inherit;
+  color: var(--fui-brand-11);
+  text-decoration: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  font-family: inherit;
+}
+
+/* ─── Field container (field mode) ─── */
+.field {
+  position: relative;
+  display: flex;
+  align-items: center;
+  border-radius: min(var(--fui-radius-xl), var(--fui-current-half-height));
+  --fui-field-bg: var(--fui-neutral-a-2);
+  background-color: var(--fui-field-bg);
+  border: var(--fui-current-border-width) solid transparent;
+  box-sizing: border-box;
+  cursor: pointer;
+  transition: background-color var(--fui-transition-fast),
+    border-color var(--fui-transition-fast);
+  font-size: var(--fui-current-font-size);
+  line-height: var(--fui-current-line-height);
+  gap: var(--fui-current-gap);
+  padding: calc(var(--fui-current-pad-v) + var(--fui-current-comp-half) - var(--fui-current-border-width)) calc(var(--fui-current-pad-h) - var(--fui-current-border-width));
+}
+
+/* Inner variant */
+.inner {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0;
+  padding: 0 !important;
+}
+
+/* Input mode: stable border via box-shadow, clip track within border-radius */
+.inputMode {
+  cursor: text;
+  overflow: hidden;
+  --fui-current-border-width: 1px !important;
+}
+
+.inputMode.focused:not(.error) {
+  border-color: var(--fui-brand-9);
+  box-shadow: 0 0 0 1px var(--fui-brand-9);
+}
+
+/* ─── Input mode ─── */
+.inputRow {
+  display: flex;
+  align-items: center;
+  gap: var(--fui-current-gap);
+  flex: 1;
+  min-width: 0;
+}
+
+.inputNative {
+  flex: 1;
+  min-width: 0;
+  box-sizing: border-box;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  color: var(--fui-neutral-12);
+  padding: var(--fui-current-text-padding);
+}
+
+.inputNative::placeholder {
+  color: var(--fui-neutral-a-9);
+}
+
+.inputNative:disabled {
+  cursor: not-allowed;
+}
+
+/* Wrapper positions the field and the thumb layer together */
+.inputFieldWrap {
+  position: relative;
+}
+
+/* Thumb layer — aligned to the center of the 2px track at the bottom of the field */
+.inlineThumbLayer {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 2px;
+  height: 0;
+  z-index: 2;
+  cursor: pointer;
+  touch-action: none;
+}
+
+/* Inline track bar — flush to the bottom edge inside the field */
+.inlineTrack {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  border-radius: 0;
+  background: var(--fui-neutral-a-4);
+  touch-action: none;
+  cursor: pointer;
+}
+
+/* In inner input mode, track is flow-positioned (not absolute) */
+.inner .inlineTrack {
+  position: relative;
+}
+
+.inlineTrackFill {
+  position: absolute;
+  inset: 0;
+  right: auto;
+  background: var(--fui-brand-9);
+  border-radius: 0;
+  pointer-events: none;
+}
+
+/* Wrapper for track + thumb in inner input mode — thumb can overflow */
+.inlineTrackWrap {
+  position: relative;
+  overflow: visible;
+}
+
+.inlineTrackWrap .inlineThumbLayer {
+  bottom: 1px;
+}
+
+.inlineTrackThumb {
+  position: absolute;
+  top: 0;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--fui-brand-9);
+  border: 2px solid var(--fui-neutral-0);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+  transform: translate(-50%, -50%);
+  transition: box-shadow var(--fui-transition-fast),
+    transform var(--fui-transition-fast);
+  pointer-events: auto;
+}
+
+.inlineTrackThumb:hover,
+.inlineTrackThumb.active {
+  transform: translate(-50%, -50%) scale(1.2);
+  box-shadow: 0 0 0 3px var(--fui-brand-a-3);
+}
+
+/* Remove transition during drag — for both field-level and wrapper-level dragging */
+.dragging .inlineTrackThumb,
+.dragging .inlineTrackFill {
+  transition: none;
+}
+
+.field:hover:not(.disabled):not(.error):not(.focused) {
+  border-color: var(--fui-neutral-9);
+}
+
+.focused:not(.error) {
+  --fui-field-bg: var(--fui-neutral-0);
+  --fui-current-border-width: var(--fui-border-width-focus);
+  background-color: var(--fui-field-bg);
+  border-color: var(--fui-brand-9);
+}
+
+.error {
+  --fui-field-bg: var(--fui-danger-2);
+  background-color: var(--fui-field-bg);
+  border-color: var(--fui-danger-9);
+}
+
+.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* ─── Inner variant: top group ─── */
+.innerTop {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: stretch;
+  padding: calc(var(--fui-current-pad-v) + var(--fui-current-comp-half) - var(--fui-current-border-width)) calc(var(--fui-current-pad-h) - var(--fui-current-border-width));
+}
+
+.innerTop:not(:last-child) {
+  padding-bottom: var(--fui-current-pad-v);
+}
+
+.inner .labelRow {
+  padding: 0 4px;
+}
+
+/* ─── Body row ─── */
+.bodyRow {
+  display: flex;
+  align-items: center;
+  gap: var(--fui-current-gap);
+  flex: 1;
+  min-width: 0;
+  position: relative;
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* ─── Slots ─── */
+.slot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: var(--fui-neutral-a-11);
+  transition: color var(--fui-transition-fast);
+  pointer-events: auto;
+}
+
+/* ─── Value label (stable width) ─── */
+.valueLabel {
+  position: relative;
+  flex-shrink: 0;
+  white-space: nowrap;
+  color: var(--fui-neutral-12);
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  font-variant-numeric: tabular-nums;
+  user-select: none;
+  -webkit-user-select: none;
+  text-align: center;
+  pointer-events: auto;
+}
+
+/* Invisible spans that establish the max width across all possible values */
+.valueSizer {
+  display: flex;
+  flex-direction: column;
+  visibility: hidden;
+  height: 0;
+  overflow: hidden;
+}
+
+.valueVisible {
+  display: block;
+}
+
+/* ─── Track (field mode) — covers the entire field visually ─── */
+.track {
+  position: absolute;
+  inset: calc(-1 * var(--fui-current-border-width));
+  border-radius: inherit;
+  touch-action: none;
+  outline: none;
+}
+
+/* Clips the fill color within the field shape */
+.fillClip {
+  position: absolute;
+  inset: 0;
+  border-radius: calc(min(var(--fui-radius-xl), var(--fui-current-half-height)) - var(--fui-current-border-width));
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/* Invisible spacer — matches native input height so field is same size as TextInline */
+.trackSpacer {
+  flex: 1;
+  min-width: 0;
+  min-height: var(--fui-current-line-height);
+  pointer-events: none;
+}
+
+.fill {
+  position: absolute;
+  inset: 0;
+  right: auto;
+  background: var(--fui-brand-a-3);
+  border-radius: 0;
+  pointer-events: none;
+}
+
+.indicator {
+  position: absolute;
+  top: 3px;
+  bottom: 3px;
+  width: 6px;
+  border-radius: 999px;
+  background: var(--fui-brand-9);
+  border: 2px solid var(--fui-neutral-0);
+  transform: translateX(-50%);
+  transition: width var(--fui-transition-fast),
+    box-shadow var(--fui-transition-fast);
+  cursor: pointer;
+  z-index: 1;
+}
+
+.indicator:hover {
+  width: 8px;
+  box-shadow: 0 0 0 4px var(--fui-brand-a-3);
+}
+
+.indicator.active {
+  width: 8px;
+  box-shadow: 0 0 0 4px var(--fui-brand-a-3);
+}
+
+.error .indicator {
+  background: var(--fui-danger-9);
+}
+
+.error .indicator:hover,
+.error .indicator.active {
+  box-shadow: 0 0 0 4px var(--fui-danger-a-3);
+}
+
+/* ─── Tick marks ─── */
+.tick {
+  position: absolute;
+  top: 15%;
+  bottom: 15%;
+  width: 2px;
+  border-radius: 1px;
+  background: var(--fui-neutral-a-5);
+  transform: translateX(-50%);
+  cursor: pointer;
+  z-index: 1;
+  pointer-events: auto;
+  transition: background-color var(--fui-transition-fast),
+    transform var(--fui-transition-fast);
+}
+
+/* Wider invisible hit area */
+.tick::before {
+  content: '';
+  position: absolute;
+  inset: -4px -8px;
+}
+
+/* ─── Tick layer — constrains ticks to the body row height within the track ─── */
+.tickLayer {
+  position: absolute;
+  left: 0;
+  right: 0;
+  /* Match the field's padding so ticks span the input line area */
+  top: calc(var(--fui-current-pad-v) + var(--fui-current-comp-half));
+  bottom: calc(var(--fui-current-pad-v) + var(--fui-current-comp-half));
+  pointer-events: none;
+}
+
+/* In inner mode, offset ticks past the label area */
+.inner .tickLayer {
+  top: calc(
+    var(--fui-current-pad-v) + var(--fui-current-comp-half)
+    + var(--fui-slider-label-offset, 0px)
+  );
+  bottom: calc(var(--fui-current-pad-v) + var(--fui-current-comp-half) + var(--fui-slider-caption-offset, 0px));
+}
+
+.tickFilled {
+  background: var(--fui-brand-a-7);
+}
+
+.tickMinor {
+  top: 30%;
+  bottom: 30%;
+}
+
+/* Hint tooltip — only visible once warmed up */
+.tick::after {
+  content: attr(data-hint);
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 2px 6px;
+  border-radius: var(--fui-radius-sm, 4px);
+  background: var(--fui-neutral-12);
+  color: var(--fui-neutral-0);
+  font-size: var(--fui-font-size-12, 12px);
+  font-family: var(--fui-font-family);
+  line-height: 16px;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--fui-transition-fast);
+}
+
+.tick.hintReady:hover::after {
+  opacity: 1;
+}
+
+.tick:hover {
+  background: var(--fui-neutral-a-9);
+  transform: translateX(-50%) scaleY(1.15);
+}
+
+.tickFilled:hover {
+  background: var(--fui-brand-a-9);
+}
+
+/* Compact mode ticks — small marks above/below the 4px track */
+.compactTrack .tick {
+  top: 6px;
+  bottom: 6px;
+  width: 2px;
+}
+
+.compactTrack .tickMinor {
+  top: 8px;
+  bottom: 8px;
+}
+
+.compactTrack .tick::before {
+  inset: -6px -8px;
+}
+
+.error .fill {
+  background: var(--fui-danger-a-3);
+}
+
+/* ─── Compact mode ─── */
+.compactField {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  gap: 8px;
+  padding: calc(var(--fui-current-pad-v) + var(--fui-current-comp-half)) 0;
+  font-size: var(--fui-current-font-size);
+  line-height: var(--fui-current-line-height);
+}
+
+.compactField.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Track visual is 4px but hit area extends via padding for comfortable interaction */
+.compactTrack {
+  position: relative;
+  flex: 1;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--fui-neutral-a-4);
+  touch-action: none;
+  outline: none;
+  pointer-events: auto;
+  /* Expand clickable area without changing visual size */
+  padding: 10px 0;
+  margin: -10px 0;
+  background-clip: content-box;
+}
+
+.compactFill {
+  position: absolute;
+  /* Stay within the visual 4px track, not the padding hit area */
+  top: 10px;
+  bottom: 10px;
+  left: 0;
+  background: var(--fui-brand-9);
+  border-radius: 2px;
+  pointer-events: none;
+}
+
+.compactField.error .compactFill {
+  background: var(--fui-danger-9);
+}
+
+.compactThumb {
+  position: absolute;
+  top: 50%;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--fui-brand-9);
+  border: 2px solid var(--fui-neutral-0);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+  transform: translate(-50%, -50%);
+  transition: box-shadow var(--fui-transition-fast),
+    transform var(--fui-transition-fast);
+  z-index: 1;
+  outline: none;
+}
+
+.compactField.error .compactThumb {
+  background: var(--fui-danger-9);
+}
+
+.compactThumb:hover,
+.compactThumb.active {
+  transform: translate(-50%, -50%) scale(1.15);
+  box-shadow: 0 0 0 4px var(--fui-brand-a-3);
+}
+
+.compactField.error .compactThumb:hover,
+.compactField.error .compactThumb.active {
+  box-shadow: 0 0 0 4px var(--fui-danger-a-3);
+}
+
+/* Remove transition during drag */
+.dragging .indicator,
+.dragging .compactThumb,
+.dragging .compactFill,
+.dragging .fill {
+  transition: none;
+}
+
+/* ─── Error icon ─── */
+.errorIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: var(--fui-danger-9);
+}
+
+/* ─── Caption row ─── */
+.captionRow {
+  display: flex;
+  gap: 4px;
+  align-items: flex-start;
+}
+
+.captionInner {
+  border-top: 1px solid rgba(208, 208, 208, 0.36);
+  padding: var(--fui-current-pad-v) calc(var(--fui-current-pad-h) - var(--fui-current-border-width));
+  padding-bottom: calc(var(--fui-current-pad-v) - var(--fui-current-border-width));
+}
+
+.captionInner .captionRow {
+  padding: 0 4px;
+}
+
+.caption {
+  flex: 1;
+  font-size: inherit;
+  font-weight: var(--fui-font-weight-normal);
+  line-height: inherit;
+  color: var(--fui-neutral-a-11);
+}
+
+.errorMessage {
+  flex: 1;
+  font-size: inherit;
+  font-weight: var(--fui-font-weight-normal);
+  line-height: inherit;
+  color: var(--fui-danger-11);
+}

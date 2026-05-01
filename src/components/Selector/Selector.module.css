@@ -1,0 +1,242 @@
+/* ─── Shared ─── */
+.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* ─── Checkbox ─── */
+.checkbox {
+  width: 16px;
+  height: 16px;
+  min-width: 16px;
+  min-height: 16px;
+  border-radius: min(var(--fui-radius-sm), 4px);
+  background-color: var(--fui-neutral-0);
+  border: 1px solid var(--fui-neutral-a-6);
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: clip;
+  cursor: pointer;
+  transition: background-color var(--fui-transition-fast),
+    border-color var(--fui-transition-fast);
+}
+
+.checkbox.large {
+  width: 18px;
+  height: 18px;
+  min-width: 18px;
+  min-height: 18px;
+  border-radius: min(var(--fui-radius-sm), 4px);
+}
+
+.checkbox.small {
+  width: 14px;
+  height: 14px;
+  min-width: 14px;
+  min-height: 14px;
+  border-radius: min(var(--fui-radius-sm), 4px);
+}
+
+.checkbox:hover {
+  border-color: var(--fui-neutral-9);
+}
+
+.checkbox.checked {
+  background-color: var(--fui-brand-9);
+  border-color: var(--fui-brand-9);
+}
+
+.checkbox.checked:hover {
+  border-color: var(--fui-brand-9);
+}
+
+.checkbox.error {
+  background-color: var(--fui-danger-a-3);
+  border-color: var(--fui-danger-9);
+}
+
+.checkbox.error.checked {
+  background-color: var(--fui-danger-9);
+  border-color: var(--fui-danger-9);
+}
+
+.checkbox.indeterminate {
+  background-color: var(--fui-neutral-0);
+  border-color: var(--fui-neutral-a-6);
+}
+
+.checkbox.indeterminate:hover {
+  border-color: var(--fui-neutral-9);
+}
+
+.checkmark {
+  flex-shrink: 0;
+  display: block;
+}
+
+.checkmarkBrand {
+  flex-shrink: 0;
+  display: block;
+}
+
+/* ─── Radio ─── */
+.radio {
+  width: 16px;
+  height: 16px;
+  min-width: 16px;
+  min-height: 16px;
+  border-radius: 9999px;
+  background-color: var(--fui-neutral-0);
+  border: 1px solid var(--fui-neutral-a-6);
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: clip;
+  cursor: pointer;
+  transition: background-color var(--fui-transition-fast),
+    border-color var(--fui-transition-fast);
+}
+
+.radio.large {
+  width: 18px;
+  height: 18px;
+  min-width: 18px;
+  min-height: 18px;
+}
+
+.radio.small {
+  width: 14px;
+  height: 14px;
+  min-width: 14px;
+  min-height: 14px;
+}
+
+.radio:hover {
+  border-color: var(--fui-neutral-9);
+}
+
+.radio.checked {
+  background-color: var(--fui-brand-9);
+  border-color: var(--fui-brand-9);
+}
+
+.radio.checked:hover {
+  border-color: var(--fui-brand-9);
+}
+
+.radio.error {
+  background-color: var(--fui-danger-a-3);
+  border-color: var(--fui-danger-9);
+}
+
+.radio.error.checked {
+  background-color: var(--fui-danger-9);
+  border-color: var(--fui-danger-9);
+}
+
+.radioDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 9999px;
+  background-color: var(--fui-neutral-0);
+}
+
+.large .radioDot {
+  width: 6px;
+  height: 6px;
+}
+
+.small .radioDot {
+  width: 5px;
+  height: 5px;
+}
+
+/* ─── Switcher ─── */
+.switcher {
+  width: 28px;
+  height: 16px;
+  min-width: 28px;
+  min-height: 16px;
+  border-radius: 9999px;
+  background-color: var(--fui-neutral-a-3);
+  padding: 2px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  overflow: clip;
+  cursor: pointer;
+  transition: background-color var(--fui-transition-fast);
+}
+
+.switcher.large {
+  width: 32px;
+  height: 18px;
+  min-width: 32px;
+  min-height: 18px;
+}
+
+.switcher.small {
+  width: 24px;
+  height: 14px;
+  min-width: 24px;
+  min-height: 14px;
+}
+
+.switcher:hover {
+  background-color: var(--fui-neutral-a-4);
+}
+
+.switcher.checked {
+  background-color: var(--fui-brand-9);
+}
+
+.switcher.checked:hover {
+  background-color: var(--fui-brand-10);
+}
+
+.switcherThumb {
+  width: 12px;
+  height: 12px;
+  border-radius: 9999px;
+  background-color: var(--fui-neutral-0);
+  flex-shrink: 0;
+  box-shadow: 0px 0px 6px 0px rgba(0, 0, 0, 0.02),
+    0px 2px 4px 0px rgba(0, 0, 0, 0.08);
+  transition: transform var(--fui-transition-fast);
+  transform: translateX(0);
+}
+
+.checked .switcherThumb {
+  transform: translateX(12px);
+}
+
+.large .switcherThumb {
+  width: 14px;
+  height: 14px;
+}
+
+.large.checked .switcherThumb {
+  transform: translateX(14px);
+}
+
+.small .switcherThumb {
+  width: 10px;
+  height: 10px;
+}
+
+.small.checked .switcherThumb {
+  transform: translateX(10px);
+}
+
+/* ─── Selector container (for alignment in MenuItem) ─── */
+.selectorWrap {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+}

@@ -1,0 +1,336 @@
+/* ─── Wrapper (label + field + caption) ─── */
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  font-family: var(--fui-font-family);
+  font-size: var(--fui-current-font-size);
+  line-height: var(--fui-current-line-height);
+}
+
+/* ─── Label row ─── */
+.labelRow {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.label {
+  flex: 1;
+  font-size: inherit;
+  font-weight: var(--fui-font-weight-medium);
+  line-height: inherit;
+  color: var(--fui-neutral-a-11);
+}
+
+.labelAction {
+  font-size: inherit;
+  font-weight: var(--fui-font-weight-medium);
+  line-height: inherit;
+  color: var(--fui-brand-11);
+  text-decoration: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  font-family: inherit;
+}
+
+/* ─── Field container ─── */
+.field {
+  display: flex;
+  align-items: center;
+  border-radius: min(var(--fui-radius-xl), var(--fui-current-half-height));
+  --fui-field-bg: var(--fui-neutral-a-2);
+  background-color: var(--fui-field-bg);
+  border: var(--fui-current-border-width) solid transparent;
+  box-sizing: border-box;
+  cursor: text;
+  transition: background-color var(--fui-transition-fast),
+    border-color var(--fui-transition-fast);
+  font-size: var(--fui-current-font-size);
+  line-height: var(--fui-current-line-height);
+  gap: var(--fui-current-gap);
+  padding: calc(var(--fui-current-pad-v) + var(--fui-current-comp-half) - var(--fui-current-border-width)) calc(var(--fui-current-pad-h) - var(--fui-current-border-width));
+}
+
+/* Inner variant: vertical layout with label & caption inside */
+.inner {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0;
+  padding: 0 !important;
+}
+
+.field:hover:not(.disabled):not(.error):not(.success):not(.focused) {
+  border-color: var(--fui-neutral-9);
+}
+
+.focused:not(.error):not(.success) {
+  --fui-field-bg: var(--fui-neutral-0);
+  --fui-current-border-width: var(--fui-border-width-focus);
+  background-color: var(--fui-field-bg);
+  border-color: var(--fui-brand-9);
+}
+
+.error {
+  --fui-field-bg: var(--fui-danger-2);
+  background-color: var(--fui-field-bg);
+  border-color: var(--fui-danger-9);
+}
+
+.success {
+  --fui-field-bg: var(--fui-success-2);
+  background-color: var(--fui-field-bg);
+  border-color: var(--fui-success-9);
+}
+
+.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ─── Inner variant: top group (label + body) ─── */
+.innerTop {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: stretch;
+  padding: calc(var(--fui-current-pad-v) + var(--fui-current-comp-half) - var(--fui-current-border-width)) calc(var(--fui-current-pad-h) - var(--fui-current-border-width));
+}
+
+/* When innerTop is not the last child, keep bottom padding at full value */
+.innerTop:not(:last-child) {
+  padding-bottom: var(--fui-current-pad-v);
+}
+
+.inner .labelRow {
+  padding: 0 4px;
+}
+
+/* ─── Body row (wraps lead/input/trail inside field) ─── */
+.bodyRow {
+  display: flex;
+  align-items: center;
+  gap: var(--fui-current-gap);
+  flex: 1;
+  min-width: 0;
+}
+
+/* ─── Separator (for compound fields) ─── */
+.separator {
+  width: 1px;
+  align-self: stretch;
+  background-color: var(--fui-neutral-a-4);
+  flex-shrink: 0;
+}
+
+/* ─── Input wrapper (for fade mask) ─── */
+.inputWrap {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+  position: relative;
+}
+
+.inputContent {
+  display: flex;
+  align-items: center;
+  gap: 1px;
+  flex: 1;
+  min-width: 0;
+}
+
+/* ─── Native input ─── */
+.input {
+  flex: 1;
+  min-width: 0;
+  box-sizing: border-box;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  color: var(--fui-neutral-12);
+  padding: var(--fui-current-text-padding);
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+.input::placeholder {
+  color: var(--fui-neutral-a-9);
+}
+
+.input:disabled {
+  cursor: not-allowed;
+}
+
+/* ─── Bare input (for compound field children) ─── */
+.inputBare {
+  border: none;
+  outline: none;
+  background: transparent;
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  color: var(--fui-neutral-12);
+  padding: var(--fui-current-text-padding);
+  min-width: 0;
+}
+
+.inputBare::placeholder {
+  color: var(--fui-neutral-a-9);
+}
+
+/* ─── Inline text (lead/trail value labels) ─── */
+.inlineText {
+  flex-shrink: 0;
+  white-space: nowrap;
+  color: var(--fui-neutral-9);
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* ─── Slots ─── */
+.slot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: var(--fui-neutral-a-11);
+  transition: color var(--fui-transition-fast);
+}
+
+.slotAction {
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  color: var(--fui-neutral-9);
+}
+
+.slotAction:hover {
+  color: var(--fui-neutral-12);
+}
+
+/* ─── Clear button ─── */
+.clearBtn {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--fui-transition-fast);
+}
+
+.clearBtnVisible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* When clear button is visible, add right padding to input to prevent text going under it */
+.inputClearShift {
+  padding-right: calc(var(--fui-current-icon-box) + var(--fui-current-gap));
+}
+
+/* ─── Error icon ─── */
+.errorIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: var(--fui-danger-9);
+}
+
+/* ─── Caption row ─── */
+.captionRow {
+  display: flex;
+  gap: 4px;
+  align-items: flex-start;
+}
+
+/* Inner variant caption wrapper — border-top goes edge to edge */
+.captionInner {
+  border-top: 1px solid rgba(208, 208, 208, 0.36);
+  padding: var(--fui-current-pad-v) calc(var(--fui-current-pad-h) - var(--fui-current-border-width));
+  padding-bottom: calc(var(--fui-current-pad-v) - var(--fui-current-border-width));
+}
+
+.captionInner .captionRow {
+  padding: 0 4px;
+}
+
+.caption {
+  flex: 1;
+  font-size: inherit;
+  font-weight: var(--fui-font-weight-normal);
+  line-height: inherit;
+  color: var(--fui-neutral-a-11);
+}
+
+.counter {
+  font-size: inherit;
+  font-weight: var(--fui-font-weight-normal);
+  line-height: inherit;
+  color: var(--fui-neutral-a-11);
+  text-align: right;
+  white-space: nowrap;
+}
+
+.counterOverflow {
+  color: var(--fui-danger-11);
+}
+
+.errorMessage {
+  flex: 1;
+  font-size: inherit;
+  font-weight: var(--fui-font-weight-normal);
+  line-height: inherit;
+  color: var(--fui-danger-11);
+}
+
+.successMessage {
+  flex: 1;
+  font-size: inherit;
+  font-weight: var(--fui-font-weight-normal);
+  line-height: inherit;
+  color: var(--fui-success-11);
+}
+
+.successIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: var(--fui-success-9);
+}
+
+/* ─── Overflow tooltip ─── */
+.tooltip {
+  position: fixed;
+  z-index: 9999;
+  transform: translate(0, -100%) translateY(-8px);
+  max-width: 320px;
+  padding: 4px 8px;
+  border-radius: var(--fui-radius-md);
+  background-color: var(--fui-neutral-12);
+  color: #fff;
+  font-size: var(--fui-font-size-14);
+  font-family: var(--fui-font-family);
+  line-height: 20px;
+  word-break: break-all;
+  pointer-events: none;
+}

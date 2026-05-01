@@ -1,0 +1,235 @@
+/* ─── Wrapper (label + field + caption) ─── */
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  position: relative;
+  width: 100%;
+  font-family: var(--fui-font-family);
+  font-size: var(--fui-current-font-size);
+  line-height: var(--fui-current-line-height);
+}
+
+/* ─── Label row ─── */
+.labelRow {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.label {
+  flex: 1;
+  font-size: inherit;
+  font-weight: var(--fui-font-weight-medium);
+  line-height: inherit;
+  color: var(--fui-neutral-a-11);
+}
+
+/* ─── Field container ─── */
+.field {
+  display: flex;
+  align-items: flex-start;
+  border-radius: min(var(--fui-radius-xl), var(--fui-current-half-height));
+  background-color: var(--fui-neutral-2);
+  border: var(--fui-current-border-width) solid transparent;
+  box-sizing: border-box;
+  cursor: text;
+  transition: background-color var(--fui-transition-fast),
+    border-color var(--fui-transition-fast);
+  font-size: var(--fui-current-font-size);
+  line-height: var(--fui-current-line-height);
+  gap: var(--fui-current-gap);
+  padding: calc(var(--fui-current-pad-v) + var(--fui-current-comp-half) - var(--fui-current-border-width)) calc(var(--fui-current-pad-h) - var(--fui-current-border-width));
+}
+
+/* Inner variant: vertical layout */
+.inner {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0;
+  padding: 0 !important;
+}
+
+.field:hover:not(.disabled):not(.error):not(.focused) {
+  background-color: var(--fui-neutral-2);
+  border-color: var(--fui-neutral-9);
+}
+
+.focused:not(.error) {
+  --fui-current-border-width: var(--fui-border-width-focus);
+  background-color: var(--fui-neutral-0);
+  border-color: var(--fui-brand-9);
+}
+
+.error {
+  background-color: var(--fui-danger-2);
+  border-color: var(--fui-danger-9);
+}
+
+.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ─── Inner variant: top group (label + body) ─── */
+.innerTop {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: stretch;
+  padding: calc(var(--fui-current-pad-v) + var(--fui-current-comp-half) - var(--fui-current-border-width)) calc(var(--fui-current-pad-h) - var(--fui-current-border-width));
+}
+
+/* When innerTop is not the last child, keep bottom padding at full value */
+.innerTop:not(:last-child) {
+  padding-bottom: var(--fui-current-pad-v);
+}
+
+.inner .labelRow {
+  padding: 0 4px;
+}
+
+/* ─── Body row (wraps slots + textarea) ─── */
+.bodyRow {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--fui-current-gap);
+  flex: 1;
+  min-width: 0;
+}
+
+/* ─── Native textarea ─── */
+.textarea {
+  flex: 1;
+  min-width: 0;
+  min-height: calc(var(--area-rows, 3) * 1lh);
+  border: none;
+  outline: none;
+  background: transparent;
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  color: var(--fui-neutral-12);
+  padding: var(--fui-current-text-padding);
+  resize: none;
+}
+
+.textarea::placeholder {
+  color: var(--fui-neutral-a-9);
+}
+
+.textarea:disabled {
+  cursor: not-allowed;
+}
+
+/* ─── Auto-height mode: hide overflow, textarea grows freely ─── */
+.autoHeight {
+  overflow: hidden;
+}
+
+/* ─── Fixed-height mode: clamp to rows, allow scroll ─── */
+.textarea:not(.autoHeight) {
+  height: calc(var(--area-rows, 3) * 1lh);
+  min-height: unset;
+}
+
+/* ─── Custom scrollbar ─── */
+.textarea {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.15) transparent;
+}
+
+.textarea::-webkit-scrollbar {
+  width: 4px;
+}
+
+.textarea::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.textarea::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.15);
+  border-radius: 2px;
+}
+
+.textarea::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(0, 0, 0, 0.3);
+}
+
+
+/* ─── Slots ─── */
+.slot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: var(--fui-neutral-a-11);
+  transition: color var(--fui-transition-fast);
+}
+
+.slotAction {
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  color: var(--fui-neutral-9);
+}
+
+.slotAction:hover {
+  color: var(--fui-neutral-12);
+}
+
+/* ─── Error icon ─── */
+.errorIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: var(--fui-danger-9);
+}
+
+/* ─── Caption row ─── */
+.captionRow {
+  display: flex;
+  gap: 4px;
+  align-items: flex-start;
+}
+
+/* Inner variant caption wrapper — border-top goes edge to edge */
+.captionInner {
+  border-top: 1px solid rgba(208, 208, 208, 0.36);
+  padding: var(--fui-current-pad-v) calc(var(--fui-current-pad-h) - var(--fui-current-border-width));
+  padding-bottom: calc(var(--fui-current-pad-v) - var(--fui-current-border-width));
+}
+
+.captionInner .captionRow {
+  padding: 0 4px;
+}
+
+.caption {
+  flex: 1;
+  font-size: inherit;
+  font-weight: var(--fui-font-weight-normal);
+  line-height: inherit;
+  color: var(--fui-neutral-a-11);
+}
+
+.counter {
+  font-size: inherit;
+  font-weight: var(--fui-font-weight-normal);
+  line-height: inherit;
+  color: var(--fui-neutral-a-11);
+  text-align: right;
+  white-space: nowrap;
+}
+
+.counterOverflow {
+  color: var(--fui-danger-11);
+}
+
+.errorMessage {
+  flex: 1;
+  font-size: inherit;
+  font-weight: var(--fui-font-weight-normal);
+  line-height: inherit;
+  color: var(--fui-danger-11);
+}

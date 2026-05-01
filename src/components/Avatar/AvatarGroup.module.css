@@ -1,0 +1,53 @@
+/* ─── AvatarGroup ─── */
+.group {
+  display: inline-flex;
+  align-items: center;
+  position: relative;
+}
+
+/* ─── Slot (hover slide-out) ─── */
+/* Slot stays in place; the avatar inside slides left on hover */
+.slot {
+  position: relative;
+}
+
+.slot > * {
+  transition: transform var(--fui-transition-fast);
+}
+
+/* Slide the avatar left by overlap + 4px to fully reveal it */
+.slot:hover > * {
+  transform: translateX(calc(-1 * var(--fui-avatar-overlap, 12px) - 4px));
+}
+
+/* Last element in the group — no shift (only when no counter follows) */
+.slot.last:hover > * {
+  transform: none;
+}
+
+/* ─── Counter bubble ─── */
+.counter {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border-radius: var(--fui-radius-full);
+  background-color: var(--fui-neutral-4);
+  color: var(--fui-neutral-11);
+  font-family: var(--fui-font-family);
+  font-weight: var(--fui-font-weight-medium);
+  box-sizing: border-box;
+  cursor: pointer;
+  user-select: none;
+  box-shadow: 0 0 0 2px var(--fui-avatar-outline-color, #fff);
+  transition: background-color var(--fui-transition-fast);
+}
+
+.counter:hover {
+  background-color: var(--fui-neutral-5);
+}
+
+.counter:focus-visible {
+  outline: 2px solid var(--fui-brand-9);
+  outline-offset: 2px;
+}

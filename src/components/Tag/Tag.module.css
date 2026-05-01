@@ -1,0 +1,287 @@
+/* ─── Tag base ─── */
+.tag {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--fui-font-family);
+  font-weight: var(--fui-font-weight-normal);
+  border-radius: var(--fui-radius-full);
+  cursor: default;
+  user-select: none;
+  box-sizing: border-box;
+  white-space: nowrap;
+  transition: background-color var(--fui-transition-fast),
+    color var(--fui-transition-fast),
+    border-color var(--fui-transition-fast);
+
+  font-size: var(--fui-current-font-size);
+  line-height: var(--fui-current-line-height);
+  border: var(--fui-border-width) solid transparent;
+  padding: calc(8px - var(--fui-border-width));
+  gap: 0;
+}
+
+/* ─── Tag padding sizes ─── */
+.tag:global(.fui-pad-xs) {
+  padding: calc(2px - var(--fui-border-width));
+}
+.tag:global(.fui-pad-sm) {
+  padding: calc(4px - var(--fui-border-width));
+}
+.tag:global(.fui-pad-md) {
+  padding: calc(8px - var(--fui-border-width));
+}
+.tag:global(.fui-pad-lg) {
+  padding: calc(12px - var(--fui-border-width));
+}
+
+.tag:focus-visible {
+  outline: 2px solid var(--fui-brand-9);
+  outline-offset: 2px;
+}
+
+.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* ─── Label padding ─── */
+.label {
+  padding: var(--fui-current-text-padding);
+}
+
+/* ─── Close button (uses IconBox behavior="highlight") ─── */
+.close {
+  opacity: 0.6;
+}
+
+.close:hover {
+  opacity: 1;
+}
+
+/* ─── Selectable ─── */
+.selectable {
+  cursor: pointer;
+}
+
+/* ─── Filled (alpha background) ─── */
+.filled.brand {
+  background-color: var(--fui-brand-a-3);
+  color: var(--fui-brand-11);
+}
+.filled.brand:hover {
+  background-color: var(--fui-brand-a-4);
+}
+.filled.brand.selected {
+  background-color: var(--fui-brand-9);
+  color: #ffffff;
+}
+.filled.brand.selected:hover {
+  background-color: var(--fui-brand-10);
+}
+
+.filled.neutral {
+  background-color: var(--fui-neutral-a-3);
+  color: var(--fui-neutral-11);
+}
+.filled.neutral:hover {
+  background-color: var(--fui-neutral-a-4);
+}
+.filled.neutral.selected {
+  background-color: var(--fui-neutral-9);
+  color: #ffffff;
+}
+.filled.neutral.selected:hover {
+  background-color: var(--fui-neutral-10);
+}
+
+.filled.danger {
+  background-color: var(--fui-danger-a-3);
+  color: var(--fui-danger-11);
+}
+.filled.danger:hover {
+  background-color: var(--fui-danger-a-4);
+}
+.filled.danger.selected {
+  background-color: var(--fui-danger-9);
+  color: #ffffff;
+}
+.filled.danger.selected:hover {
+  background-color: var(--fui-danger-10);
+}
+
+.filled.success {
+  background-color: var(--fui-success-a-3);
+  color: var(--fui-success-11);
+}
+.filled.success:hover {
+  background-color: var(--fui-success-a-4);
+}
+.filled.success.selected {
+  background-color: var(--fui-success-9);
+  color: #ffffff;
+}
+.filled.success.selected:hover {
+  background-color: var(--fui-success-10);
+}
+
+.filled.warning {
+  background-color: var(--fui-warning-a-3);
+  color: var(--fui-warning-11);
+}
+.filled.warning:hover {
+  background-color: var(--fui-warning-a-4);
+}
+.filled.warning.selected {
+  background-color: var(--fui-warning-9);
+  color: #ffffff;
+}
+.filled.warning.selected:hover {
+  background-color: var(--fui-warning-10);
+}
+
+/* ─── Outlined (border) ─── */
+.outlined.brand {
+  background-color: transparent;
+  color: var(--fui-brand-11);
+  border-color: var(--fui-brand-a-6);
+}
+.outlined.brand:hover {
+  background-color: var(--fui-brand-a-3);
+}
+.outlined.brand.selected {
+  background-color: var(--fui-brand-9);
+  border-color: var(--fui-brand-9);
+  color: #ffffff;
+}
+.outlined.brand.selected:hover {
+  background-color: var(--fui-brand-10);
+  border-color: var(--fui-brand-10);
+}
+
+.outlined.neutral {
+  background-color: transparent;
+  color: var(--fui-neutral-11);
+  border-color: var(--fui-neutral-a-6);
+}
+.outlined.neutral:hover {
+  background-color: var(--fui-neutral-a-3);
+}
+.outlined.neutral.selected {
+  background-color: var(--fui-neutral-9);
+  border-color: var(--fui-neutral-9);
+  color: #ffffff;
+}
+.outlined.neutral.selected:hover {
+  background-color: var(--fui-neutral-10);
+  border-color: var(--fui-neutral-10);
+}
+
+.outlined.danger {
+  background-color: transparent;
+  color: var(--fui-danger-11);
+  border-color: var(--fui-danger-a-6);
+}
+.outlined.danger:hover {
+  background-color: var(--fui-danger-a-3);
+}
+.outlined.danger.selected {
+  background-color: var(--fui-danger-9);
+  border-color: var(--fui-danger-9);
+  color: #ffffff;
+}
+.outlined.danger.selected:hover {
+  background-color: var(--fui-danger-10);
+  border-color: var(--fui-danger-10);
+}
+
+.outlined.success {
+  background-color: transparent;
+  color: var(--fui-success-11);
+  border-color: var(--fui-success-a-6);
+}
+.outlined.success:hover {
+  background-color: var(--fui-success-a-3);
+}
+.outlined.success.selected {
+  background-color: var(--fui-success-9);
+  border-color: var(--fui-success-9);
+  color: #ffffff;
+}
+.outlined.success.selected:hover {
+  background-color: var(--fui-success-10);
+  border-color: var(--fui-success-10);
+}
+
+.outlined.warning {
+  background-color: transparent;
+  color: var(--fui-warning-11);
+  border-color: var(--fui-warning-a-6);
+}
+.outlined.warning:hover {
+  background-color: var(--fui-warning-a-3);
+}
+.outlined.warning.selected {
+  background-color: var(--fui-warning-9);
+  border-color: var(--fui-warning-9);
+  color: #ffffff;
+}
+.outlined.warning.selected:hover {
+  background-color: var(--fui-warning-10);
+  border-color: var(--fui-warning-10);
+}
+
+/* ─── Inline (no padding, no hover, no border — just icon + label) ─── */
+.inline {
+  padding: 0;
+  border: none;
+  background-color: transparent;
+  cursor: default;
+}
+
+.inline.brand { color: var(--fui-brand-11); }
+.inline.neutral { color: var(--fui-neutral-11); }
+.inline.danger { color: var(--fui-danger-11); }
+.inline.success { color: var(--fui-success-11); }
+.inline.warning { color: var(--fui-warning-11); }
+
+/* ─── Ghost (no background, no border) ─── */
+.ghost.brand {
+  background-color: transparent;
+  color: var(--fui-brand-11);
+}
+.ghost.brand:hover {
+  background-color: var(--fui-brand-a-3);
+}
+
+.ghost.neutral {
+  background-color: transparent;
+  color: var(--fui-neutral-11);
+}
+.ghost.neutral:hover {
+  background-color: var(--fui-neutral-a-3);
+}
+
+.ghost.danger {
+  background-color: transparent;
+  color: var(--fui-danger-11);
+}
+.ghost.danger:hover {
+  background-color: var(--fui-danger-a-3);
+}
+
+.ghost.success {
+  background-color: transparent;
+  color: var(--fui-success-11);
+}
+.ghost.success:hover {
+  background-color: var(--fui-success-a-3);
+}
+
+.ghost.warning {
+  background-color: transparent;
+  color: var(--fui-warning-11);
+}
+.ghost.warning:hover {
+  background-color: var(--fui-warning-a-3);
+}

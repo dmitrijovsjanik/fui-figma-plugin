@@ -1,0 +1,111 @@
+/* ─── Interactive icon wrapper (shared reset) ─── */
+.interactive {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  appearance: none;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  background: transparent;
+  outline: none;
+  cursor: pointer;
+  color: inherit;
+  flex-shrink: 0;
+  font: inherit;
+  border-radius: var(--fui-radius-sm);
+  transition: background-color var(--fui-transition-fast),
+    color var(--fui-transition-fast),
+    box-shadow var(--fui-transition-fast);
+}
+
+.interactive:focus-visible {
+  outline: 2px solid var(--fui-brand-9);
+  outline-offset: 1px;
+}
+
+.interactive:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* ─── Ghost: background appears on hover (like tertiary/ghost button) ─── */
+.ghost {
+  color: var(--fui-neutral-11);
+}
+
+.ghost:hover {
+  background-color: var(--fui-neutral-a-4);
+  color: var(--fui-neutral-12);
+}
+
+.ghost:active {
+  background-color: var(--fui-neutral-a-3);
+  color: var(--fui-neutral-12);
+}
+
+/* ─── Highlight: icon color changes on hover/active ─── */
+.highlight {
+  color: var(--fui-neutral-9);
+}
+
+.highlight:hover {
+  color: var(--fui-neutral-12);
+}
+
+.highlight:active {
+  color: var(--fui-neutral-11);
+}
+
+/* ─── Functional: filled bg + outer ring on hover, fully rounded ───
+   Container stays its original size (20/24 etc).
+   ::before  — invisible expanded hit area
+   ::after   — visible hover bg + ring, drawn outside the box */
+.functional {
+  --_fn-extend: 2px;
+  position: relative;
+  overflow: visible;
+  isolation: isolate;
+  color: var(--fui-neutral-11);
+  border-radius: var(--fui-radius-full);
+}
+
+.functional:focus-visible {
+  outline-offset: 2px;
+}
+
+/* Expanded hit area */
+.functional::before {
+  content: '';
+  position: absolute;
+  inset: calc(-1 * var(--_fn-extend));
+  border-radius: var(--fui-radius-full);
+}
+
+/* Hover background + ring */
+.functional::after {
+  content: '';
+  position: absolute;
+  inset: calc(-1 * var(--_fn-extend));
+  border-radius: var(--fui-radius-full);
+  z-index: -1;
+  transition: background-color var(--fui-transition-fast);
+  pointer-events: none;
+}
+
+.functional:hover {
+  color: var(--fui-neutral-12);
+}
+
+.functional:hover::after {
+  background-color: var(--fui-neutral-a-4);
+}
+
+.functional:active {
+  color: var(--fui-neutral-12);
+}
+
+.functional:active::after {
+  background-color: var(--fui-neutral-a-3);
+}

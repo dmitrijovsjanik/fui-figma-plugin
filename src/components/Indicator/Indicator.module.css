@@ -1,0 +1,75 @@
+/* ─── Shared indicator base ─── */
+.base {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: var(--fui-current-icon-box);
+  height: var(--fui-current-icon-box);
+  border-radius: var(--fui-radius-full);
+  box-sizing: border-box;
+}
+
+/* ─── Dot inner element ─── */
+.dotInner {
+  width: var(--_dot-size);
+  height: var(--_dot-size);
+}
+
+/* ─── Dot shapes ─── */
+.circle .dotInner { border-radius: var(--fui-radius-full); }
+.square .dotInner { border-radius: 1px; }
+.triangle .dotInner {
+  --_tri-size: calc(var(--_dot-size) + 2px);
+  width: var(--_tri-size);
+  height: calc(var(--_tri-size) * 0.866);
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 87'%3E%3Cpath d='M44.7 3.4a6 6 0 0 1 10.6 0L97.5 78.6a6 6 0 0 1-5.3 8.9H7.8a6 6 0 0 1-5.3-8.9Z'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+/* Dot sizes: sm=6, md=8, lg=12 */
+.dot { --_dot-size: 8px; }
+:global(.fui-text-sm) > .dot,
+.dot:global(.fui-text-sm) { --_dot-size: 6px; }
+:global(.fui-text-lg) > .dot,
+.dot:global(.fui-text-lg) { --_dot-size: 12px; }
+
+/* ─── Counter text ─── */
+.counter {
+  font-family: var(--fui-font-family);
+  font-feature-settings: 'tnum' 0;
+  font-weight: var(--fui-font-weight-semibold);
+  font-size: var(--fui-current-font-size);
+  line-height: 1;
+  text-align: center;
+  white-space: nowrap;
+  min-width: var(--fui-current-icon-box);
+  width: auto;
+  padding: 0 4px;
+}
+
+/* ─── Dot colors (inner fill = *-9) ─── */
+.dot.brand .dotInner { background-color: var(--fui-brand-9); }
+.dot.secondary .dotInner { background-color: var(--fui-secondary-9); }
+.dot.success .dotInner { background-color: var(--fui-success-9); }
+.dot.warning .dotInner { background-color: var(--fui-warning-9); }
+.dot.danger .dotInner { background-color: var(--fui-danger-9); }
+.dot.info .dotInner { background-color: var(--fui-info-9); }
+.dot.neutral .dotInner { background-color: var(--fui-neutral-9); }
+
+/* ─── Counter solid (bg = *-9, text = white) ─── */
+.solid.brand { background-color: var(--fui-brand-9); color: #ffffff; }
+.solid.secondary { background-color: var(--fui-secondary-9); color: #ffffff; }
+.solid.success { background-color: var(--fui-success-9); color: #ffffff; }
+.solid.warning { background-color: var(--fui-warning-9); color: #ffffff; }
+.solid.danger { background-color: var(--fui-danger-9); color: #ffffff; }
+.solid.info { background-color: var(--fui-info-9); color: #ffffff; }
+.solid.neutral { background-color: var(--fui-neutral-9); color: #ffffff; }
+
+/* ─── Counter soft (bg = *-a-3, text = *-11) ─── */
+.soft.brand { background-color: var(--fui-brand-a-3); color: var(--fui-brand-11); }
+.soft.secondary { background-color: var(--fui-secondary-a-3); color: var(--fui-secondary-11); }
+.soft.success { background-color: var(--fui-success-a-3); color: var(--fui-success-11); }
+.soft.warning { background-color: var(--fui-warning-a-3); color: var(--fui-warning-11); }
+.soft.danger { background-color: var(--fui-danger-a-3); color: var(--fui-danger-11); }
+.soft.info { background-color: var(--fui-info-a-3); color: var(--fui-info-11); }
+.soft.neutral { background-color: var(--fui-neutral-a-3); color: var(--fui-neutral-11); }

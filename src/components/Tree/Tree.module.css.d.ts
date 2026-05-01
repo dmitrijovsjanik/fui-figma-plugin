@@ -1,0 +1,26 @@
+declare const styles: {
+  readonly tree: string;
+  readonly showLines: string;
+  readonly linesOutside: string;
+  readonly list: string;
+  readonly node: string;
+  readonly last: string;
+  readonly row: string;
+  readonly selected: string;
+  readonly disabled: string;
+  readonly connector: string;
+  readonly children: string;
+  readonly lined: string;
+  readonly chevron: string;
+  readonly hasChildren: string;
+  readonly expanded: string;
+  readonly chevronIcon: string;
+  readonly icon: string;
+  readonly label: string;
+  readonly stickyHeader: string;
+  readonly stickyRow: string;
+  readonly breadcrumbRow: string;
+  readonly breadcrumbSep: string;
+  readonly breadcrumbSegment: string;
+};
+export default styles;

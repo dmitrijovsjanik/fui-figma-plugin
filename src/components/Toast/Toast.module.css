@@ -1,0 +1,478 @@
+/* ─── Slide-up entrance ─── */
+@keyframes toastSlideUp {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* ─── Slide-down exit ─── */
+@keyframes toastSlideDown {
+  from {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+}
+
+/* ─── Expand entrance (for stack / expanded group) ─── */
+@keyframes toastExpand {
+  from {
+    max-height: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    margin-bottom: calc(var(--fui-space-2) * -1);
+    border-width: 0;
+    opacity: 0;
+  }
+  to {
+    max-height: 200px;
+    margin-bottom: 0;
+    opacity: 1;
+  }
+}
+
+/* ─── Promote (pile → top, scale up) ─── */
+@keyframes toastPromote {
+  from {
+    transform: scale(0.96);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+/* ─── Collapse exit (exact reverse of expand) ─── */
+@keyframes toastCollapse {
+  from {
+    max-height: 200px;
+    margin-bottom: 0;
+    opacity: 1;
+  }
+  to {
+    max-height: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    margin-bottom: calc(var(--fui-space-2) * -1);
+    border-width: 0;
+    opacity: 0;
+  }
+}
+
+/* ─── Toast (overlay notification) ─── */
+.toast {
+  display: flex;
+  align-items: flex-start;
+  font-family: var(--fui-font-family);
+  border-radius: var(--fui-radius-xl);
+  box-sizing: border-box;
+  background-color: #ffffff;
+  box-shadow: var(--fui-shadow-lg);
+  width: 360px;
+  pointer-events: auto;
+  animation: toastSlideUp var(--fui-transition-normal) both;
+  transition: transform var(--fui-transition-normal),
+    opacity var(--fui-transition-normal),
+    background-color var(--fui-transition-fast);
+}
+
+/* ─── Sizing (inherits from .fui-pad-* / .fui-text-* utility classes) ─── */
+.toast {
+  font-size: var(--fui-current-font-size);
+  line-height: var(--fui-current-line-height);
+  padding: calc(var(--fui-current-pad-v) + var(--fui-current-comp-half) - var(--fui-border-width)) calc(var(--fui-current-pad-h) - var(--fui-border-width));
+  gap: var(--fui-current-gap);
+}
+
+/* ─── Entered: stop entrance animation so CSS transitions can reposition ─── */
+.entered {
+  animation: none;
+}
+
+/* ─── Closing: slide-down (default for group collapsed) ─── */
+.closing {
+  animation: toastSlideDown var(--fui-transition-normal) forwards !important;
+  pointer-events: none;
+}
+
+/* ─── Entrance: expand (stack only — group uses grid transitions) ─── */
+.stack .toast {
+  animation: toastExpand var(--fui-transition-normal) both;
+  overflow: hidden;
+}
+
+/* ─── Closing: collapse (stack only) ─── */
+.stack .closing {
+  animation: toastCollapse var(--fui-transition-normal) forwards !important;
+  overflow: hidden;
+}
+
+/* ─── Group: hidden slots don't need entrance animation — grid transitions handle it ─── */
+.group:not(.groupExpanded) .toastSlot:not(:last-child) > .toast {
+  animation: none;
+}
+
+/* Expanded group: all toasts skip entrance animation (already visible via grid transition) */
+.groupExpanded .toastSlot > .toast {
+  animation: none;
+}
+
+/* ─── Neutral ─── */
+.neutral {
+  border: 1px solid var(--fui-neutral-a-6);
+  color: var(--fui-neutral-12);
+}
+
+.neutral .subtitle {
+  color: var(--fui-neutral-11);
+}
+
+/* ─── Success ─── */
+.success {
+  border: 1px solid var(--fui-success-a-6);
+  color: var(--fui-success-12);
+}
+
+.success .subtitle {
+  color: var(--fui-success-11);
+}
+
+.success .statusIcon {
+  color: var(--fui-success-11);
+}
+
+/* ─── Warning ─── */
+.warning {
+  border: 1px solid var(--fui-warning-a-6);
+  color: var(--fui-warning-12);
+}
+
+.warning .subtitle {
+  color: var(--fui-warning-11);
+}
+
+.warning .statusIcon {
+  color: var(--fui-warning-11);
+}
+
+/* ─── Danger ─── */
+.danger {
+  border: 1px solid var(--fui-danger-a-6);
+  color: var(--fui-danger-12);
+}
+
+.danger .subtitle {
+  color: var(--fui-danger-11);
+}
+
+.danger .statusIcon {
+  color: var(--fui-danger-11);
+}
+
+/* ─── Info ─── */
+.info {
+  border: 1px solid var(--fui-info-a-6);
+  color: var(--fui-info-12);
+}
+
+.info .subtitle {
+  color: var(--fui-info-11);
+}
+
+.info .statusIcon {
+  color: var(--fui-info-11);
+}
+
+/* ─── Icon ─── */
+.statusIcon {
+  flex-shrink: 0;
+}
+
+/* ─── Body ─── */
+.body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: var(--fui-current-text-padding);
+}
+
+.title {
+  font-weight: var(--fui-font-weight-medium);
+}
+
+.timestamp {
+  font-size: var(--fui-font-size-12);
+  font-weight: var(--fui-font-weight-normal);
+  color: var(--fui-neutral-9);
+}
+
+.subtitle {
+  font-weight: var(--fui-font-weight-normal);
+  font-size: var(--fui-current-font-size);
+  line-height: var(--fui-current-line-height);
+}
+
+.content {
+  margin-top: var(--fui-space-2);
+  margin-bottom: var(--fui-space-1);
+}
+
+/* ─── Close button (uses IconBox behavior="highlight") ─── */
+.closeBtn {
+  align-self: flex-start;
+}
+
+/* ═══════════════════════════════════════════════
+   Toast Container
+   ═══════════════════════════════════════════════ */
+
+.container {
+  position: fixed;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  width: 360px;
+  pointer-events: none;
+  margin: var(--fui-space-4);
+}
+
+/* ─── Positions ─── */
+.topright {
+  top: 0;
+  right: 0;
+}
+
+.topleft {
+  top: 0;
+  left: 0;
+}
+
+.topcenter {
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.bottomright {
+  bottom: 0;
+  right: 0;
+}
+
+.bottomleft {
+  bottom: 0;
+  left: 0;
+}
+
+.bottomcenter {
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+/* ─── Toast list (inner wrapper for toasts) ─── */
+.toastList {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ─── Stack layout ─── */
+.stack .toastList {
+  gap: var(--fui-space-2);
+}
+
+/* ─── Group layout (Apple-style pile) ─── */
+.group .toastList {
+  position: relative;
+  /* No gap — spacing via margin-top so collapsed slots take zero space */
+}
+
+/*
+ * Each toast is wrapped in a .toastSlot grid container.
+ * Collapsing works via grid-template-rows: 1fr → 0fr transition.
+ * The toast itself keeps display:flex for its internal layout.
+ */
+
+/* Toast slot: grid wrapper for height animation */
+.toastSlot {
+  display: grid;
+  grid-template-rows: 1fr;
+}
+
+/* Group slots always have transitions for smooth expand/collapse */
+.group .toastSlot {
+  transition: grid-template-rows var(--fui-transition-normal),
+    opacity var(--fui-transition-normal),
+    margin-top var(--fui-transition-normal);
+}
+
+/* Toast inside slot needs overflow hidden + min-height:0 for grid collapse */
+.toastSlot > .toast {
+  overflow: hidden;
+  min-height: 0;
+}
+
+/* Spacing between slots (replaces gap) */
+.group .toastList > .toastSlot + .toastSlot {
+  margin-top: var(--fui-space-2);
+}
+
+/* Collapsed: hide non-top slots */
+.group:not(.groupExpanded) .toastList > .toastSlot:not(:last-child) {
+  grid-template-rows: 0fr;
+  opacity: 0;
+  margin-top: 0 !important;
+  pointer-events: none;
+}
+
+/* Top slot: always fully visible */
+.group .toastList > .toastSlot:last-child {
+  pointer-events: auto;
+}
+
+/* ─── Pile decorative cards (pseudo-elements) ─── */
+/* Use the last toastSlot as position anchor via relative positioning */
+.group:not(.groupExpanded) .toastList > .toastSlot:last-child {
+  position: relative;
+  z-index: 3;
+}
+
+.group:not(.groupExpanded) .toastList > .toastSlot:last-child::before,
+.group:not(.groupExpanded) .toastList > .toastSlot:last-child::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  border-radius: var(--fui-radius-xl);
+  background: #ffffff;
+  border: 1px solid var(--fui-neutral-a-6);
+  pointer-events: none;
+}
+
+/* 2nd card behind */
+.group:not(.groupExpanded) .toastList > .toastSlot:last-child::before {
+  transform: translateY(-8px) scale(0.96);
+  opacity: 0.7;
+  z-index: -1;
+}
+
+/* 3rd card behind */
+.group:not(.groupExpanded) .toastList > .toastSlot:last-child::after {
+  transform: translateY(-14px) scale(0.92);
+  opacity: 0.4;
+  z-index: -2;
+}
+
+/* Only show pile cards when there are enough toasts */
+.group:not(.groupExpanded) .toastList:not(:has(> .toastSlot:nth-child(2))) > .toastSlot:last-child::before,
+.group:not(.groupExpanded) .toastList:not(:has(> .toastSlot:nth-child(3))) > .toastSlot:last-child::after {
+  opacity: 0;
+}
+
+/* Expanded group: all slots visible */
+.groupExpanded .toastList > .toastSlot {
+  grid-template-rows: 1fr;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Closing toast in collapsed group: slot goes absolute so next toast takes over flow */
+.group:not(.groupExpanded) .toastList > .toastSlot:last-child:has(> .toast.closing) {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 10;
+}
+
+.group:not(.groupExpanded) .toastList > .toastSlot:last-child > .toast.closing {
+  animation: toastSlideDown var(--fui-transition-normal) forwards !important;
+  pointer-events: none;
+}
+
+/* When top toast is closing, instantly promote the next slot */
+.group:not(.groupExpanded) .toastList:has(> .toastSlot:last-child > .toast.closing) > .toastSlot:nth-last-child(2) {
+  grid-template-rows: 1fr !important;
+  opacity: 1 !important;
+  margin-top: 0 !important;
+  pointer-events: auto;
+  position: relative;
+  z-index: 3;
+}
+
+/* Promoted toast scales up from pile size to full */
+.group:not(.groupExpanded) .toastList:has(> .toastSlot:last-child > .toast.closing) > .toastSlot:nth-last-child(2) > .toast {
+  animation: toastPromote var(--fui-transition-normal) both !important;
+}
+
+/* Show pile pseudo-elements on promoted slot */
+.group:not(.groupExpanded) .toastList:has(> .toastSlot:last-child > .toast.closing) > .toastSlot:nth-last-child(2)::before,
+.group:not(.groupExpanded) .toastList:has(> .toastSlot:last-child > .toast.closing) > .toastSlot:nth-last-child(2)::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  border-radius: var(--fui-radius-xl);
+  background: #ffffff;
+  border: 1px solid var(--fui-neutral-a-6);
+  pointer-events: none;
+}
+
+.group:not(.groupExpanded) .toastList:has(> .toastSlot:last-child > .toast.closing) > .toastSlot:nth-last-child(2)::before {
+  transform: translateY(-8px) scale(0.96);
+  opacity: 0.7;
+  z-index: -1;
+}
+
+.group:not(.groupExpanded) .toastList:has(> .toastSlot:last-child > .toast.closing) > .toastSlot:nth-last-child(2)::after {
+  transform: translateY(-14px) scale(0.92);
+  opacity: 0.4;
+  z-index: -2;
+}
+
+/* Closing toast in expanded group */
+.groupExpanded .toastList > .toastSlot > .toast.closing {
+  animation: toastCollapse var(--fui-transition-normal) forwards !important;
+  overflow: hidden;
+}
+
+/* ─── Toggle button slot (grid-collapse for smooth show/hide) ─── */
+.toggleSlot {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transition: grid-template-rows var(--fui-transition-normal),
+    opacity var(--fui-transition-normal);
+  justify-items: center;
+  pointer-events: none;
+}
+
+.toggleSlot > * {
+  overflow: hidden;
+  min-height: 0;
+}
+
+.toggleVisible {
+  grid-template-rows: 1fr;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* ─── Toggle button (expand / collapse group) ─── */
+.toggleBtn {
+  margin-top: var(--fui-space-2);
+  pointer-events: auto;
+  box-shadow: var(--fui-shadow-lg);
+}
