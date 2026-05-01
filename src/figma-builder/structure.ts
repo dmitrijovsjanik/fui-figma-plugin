@@ -84,8 +84,6 @@ const SEMANTIC_TOKENS: Record<SemanticSection, Record<string, SemRef>> = {
     'surface-4': { light: 'gray.0', dark: 'gray.4' },
     'neutral': 'gray.3',
     'neutral-hover': 'gray.4',
-    'selected': 'accent.a3',
-    'selected-hover': 'accent.a4',
     'accent': 'accent.9',
     'accent-hover': 'accent.10',
     'accent-subtle': 'accent.a3',
