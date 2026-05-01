@@ -78,9 +78,9 @@ type SemRef = string | { light: string; dark: string };
 const SEMANTIC_TOKENS: Record<SemanticSection, Record<string, SemRef>> = {
   bg: {
     'canvas': 'gray.0',
-    'primary': 'gray.0',
-    'secondary': 'gray.1',
-    'surface-0': 'gray.1',
+    'primary': { light: 'gray.0', dark: 'gray.1' },
+    'secondary': { light: 'gray.1', dark: 'gray.0' },
+    'surface-0': { light: 'gray.1', dark: 'gray.a1' },
     'surface-1': { light: 'gray.0', dark: 'gray.1' },
     'surface-2': { light: 'gray.0', dark: 'gray.2' },
     'surface-3': { light: 'gray.0', dark: 'gray.3' },
