@@ -15,10 +15,20 @@ const COLOR_TYPE = 'COLOR' as const;
 
 export type KeyToId = Record<string, string>;
 
+export interface Orphan {
+  id: string;
+  name: string;
+  collection: 'primitives' | 'semantics';
+}
+
 export interface ApplyResult {
   keyToId: KeyToId;
   created: number;
   updated: number;
+  // Variables that exist in our collections but are not produced by any current
+  // spec. Empty after createCollections (everything is fresh). Populated by
+  // updateCollections when the user has stale tokens from a prior version.
+  orphans: Orphan[];
 }
 
 function pathToName(path: string[]): string {
@@ -81,7 +91,7 @@ export async function createCollections(structure: VariableStructure): Promise<A
     }
   }
 
-  return { keyToId, created, updated: 0 };
+  return { keyToId, created, updated: 0, orphans: [] };
 }
 
 // === Update flow ===
@@ -211,7 +221,35 @@ export async function updateCollections(
     if (didCreate) created++; else updated++;
   }
 
-  return { keyToId, created, updated };
+  // Anything we never claimed = orphan. User-created variables in our collections
+  // get caught here too, but the modal makes deletion opt-in per row.
+  const orphans: Orphan[] = [];
+  for (const v of primVars) {
+    if (v && !claimedIds.has(v.id)) {
+      orphans.push({ id: v.id, name: v.name, collection: 'primitives' });
+    }
+  }
+  for (const v of semVars) {
+    if (v && !claimedIds.has(v.id)) {
+      orphans.push({ id: v.id, name: v.name, collection: 'semantics' });
+    }
+  }
+
+  return { keyToId, created, updated, orphans };
+}
+
+// Delete a set of variables by ID. Used by the post-sync orphan cleanup modal.
+// Returns the count of successful deletions.
+export async function deleteVariablesByIds(ids: string[]): Promise<number> {
+  let deleted = 0;
+  for (const id of ids) {
+    const v = await figma.variables.getVariableByIdAsync(id);
+    if (v) {
+      v.remove();
+      deleted++;
+    }
+  }
+  return deleted;
 }
 
 // Re-exports for ergonomic import

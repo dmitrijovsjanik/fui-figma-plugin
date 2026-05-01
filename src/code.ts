@@ -3,7 +3,7 @@
 
 import type { UIToSandbox, SandboxToUI } from './messages';
 import { detectExistingCollections } from './figma-builder/detect';
-import { createCollections, updateCollections, type KeyToId } from './figma-builder/apply';
+import { createCollections, updateCollections, deleteVariablesByIds, type KeyToId } from './figma-builder/apply';
 import type { VariableStructure } from './figma-builder/structure';
 
 const STATE_KEY = 'fui-plugin-state';
@@ -76,7 +76,7 @@ async function handleSync(payload: {
       const result = await createCollections(payload.structure);
       await saveKeyToId(result.keyToId);
       figma.notify('Variables created');
-      postToUI({ type: 'sync-result', status: 'created' });
+      postToUI({ type: 'sync-result', status: 'created', orphans: result.orphans });
       return;
     }
 
@@ -91,7 +91,7 @@ async function handleSync(payload: {
       const parts = [`${result.updated} updated`];
       if (result.created > 0) parts.push(`${result.created} created`);
       figma.notify(`Variables synced (${parts.join(', ')})`);
-      postToUI({ type: 'sync-result', status: 'updated' });
+      postToUI({ type: 'sync-result', status: 'updated', orphans: result.orphans });
       return;
     }
 
@@ -106,6 +106,12 @@ async function handleSync(payload: {
   }
 }
 
+async function handleDeleteOrphans(ids: string[]): Promise<void> {
+  const count = await deleteVariablesByIds(ids);
+  if (count > 0) figma.notify(`Removed ${count} unused variable${count === 1 ? '' : 's'}`);
+  postToUI({ type: 'orphans-deleted', count });
+}
+
 figma.ui.onmessage = (msg: UIToSandbox) => {
   switch (msg.type) {
     case 'state-load':
@@ -116,6 +122,9 @@ figma.ui.onmessage = (msg: UIToSandbox) => {
       break;
     case 'sync':
       void handleSync(msg);
+      break;
+    case 'delete-orphans':
+      void handleDeleteOrphans(msg.ids);
       break;
     case 'resize':
       figma.ui.resize(msg.width, msg.height);

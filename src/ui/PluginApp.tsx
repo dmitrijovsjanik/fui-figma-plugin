@@ -25,8 +25,11 @@ import {
   DEFAULT_WINDOW_SIZE,
 } from './persistence-types';
 import { ResizeHandle } from './components/ResizeHandle';
-import { loadStateAsync, saveStateDebounced } from './persistence';
+import { OrphansModal } from './components/OrphansModal';
+import { loadStateAsync, saveStateDebounced, postToSandbox } from './persistence';
 import type { StepPreset } from './preset-types';
+import type { SandboxToUI } from '../messages';
+import type { Orphan } from '../figma-builder/apply';
 
 import '../tokens/tokens.css';
 import '../tokens/tokens-dark.css';
@@ -100,6 +103,24 @@ export function PluginApp() {
   presetsRef.current = presets;
   const [activePresetName, setActivePresetName] = useState<string | null>('Standard');
   const [windowSize, setWindowSize] = useState<WindowSize>(DEFAULT_WINDOW_SIZE);
+  const [pendingOrphans, setPendingOrphans] = useState<Orphan[] | null>(null);
+
+  // Listen for sync-result with orphans → open modal.
+  useEffect(() => {
+    const handler = (event: MessageEvent) => {
+      const msg = event.data?.pluginMessage as SandboxToUI | undefined;
+      if (
+        msg?.type === 'sync-result' &&
+        (msg.status === 'created' || msg.status === 'updated') &&
+        msg.orphans &&
+        msg.orphans.length > 0
+      ) {
+        setPendingOrphans(msg.orphans);
+      }
+    };
+    window.addEventListener('message', handler);
+    return () => window.removeEventListener('message', handler);
+  }, []);
 
   // Hydrate state from clientStorage on mount
   useEffect(() => {
@@ -454,6 +475,16 @@ export function PluginApp() {
         )}
       </main>
       <ResizeHandle onResize={handleResize} />
+      {pendingOrphans && (
+        <OrphansModal
+          orphans={pendingOrphans}
+          onConfirm={(ids) => {
+            postToSandbox({ type: 'delete-orphans', ids });
+            setPendingOrphans(null);
+          }}
+          onClose={() => setPendingOrphans(null)}
+        />
+      )}
     </div>
   );
 }

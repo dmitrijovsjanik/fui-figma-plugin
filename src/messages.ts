@@ -3,6 +3,7 @@
 
 import type { PersistedState } from './ui/persistence-types';
 import type { VariableStructure } from './figma-builder/structure';
+import type { Orphan } from './figma-builder/apply';
 
 // UI → sandbox
 export type UIToSandbox =
@@ -12,6 +13,7 @@ export type UIToSandbox =
       type: 'sync';
       structure: VariableStructure;
     }
+  | { type: 'delete-orphans'; ids: string[] }
   | { type: 'resize'; width: number; height: number };
 
 // Sandbox → UI
@@ -21,4 +23,6 @@ export type SandboxToUI =
       type: 'sync-result';
       status: 'created' | 'updated' | 'inconsistent' | 'error';
       message?: string;
-    };
+      orphans?: Orphan[];
+    }
+  | { type: 'orphans-deleted'; count: number };
