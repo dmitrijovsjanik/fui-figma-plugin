@@ -122,11 +122,7 @@ const SEMANTIC_TOKENS: Record<string, Record<string, SemRef>> = {
     'danger-secondary': 'red.11',
     'info-primary': 'blue.12',
     'info-secondary': 'blue.11',
-    'on-accent': 'white-fixed',
-    'on-success': 'white-fixed',
-    'on-warning': 'amber.12',
-    'on-danger': 'white-fixed',
-    'on-info': 'white-fixed',
+    'on-background': 'white-fixed',
   },
   border: {
     'default': 'gray.a6',

@@ -30,6 +30,10 @@ const KEY_MIGRATIONS: Record<string, string> = {
   'sem:fg:warning': 'sem:fg:warning-secondary',
   'sem:fg:danger': 'sem:fg:danger-secondary',
   'sem:fg:info': 'sem:fg:info-secondary',
+  // on-* consolidation: a single fg/on-background replaces per-color on-*
+  // tokens. Pin the migration to on-accent so its variable becomes
+  // on-background; the other on-* variables surface as orphans for cleanup.
+  'sem:fg:on-accent': 'sem:fg:on-background',
 };
 
 function keymapStorageKey(): string {
