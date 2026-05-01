@@ -162,10 +162,6 @@ const SEMANTIC_TOKENS: Record<string, Record<string, SemRef>> = {
     'secondary-secondary-hover': 'secondary.a8',
     'secondary-tertiary': 'secondary.a6',
   },
-  ring: {
-    'focus': 'accent.a8',
-    'focus-error': 'red.a8',
-  },
   overlay: {
     'scrim': { light: 'black.a8', dark: 'black.a9' },
     'hover': 'gray.a3',

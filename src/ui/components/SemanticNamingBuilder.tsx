@@ -5,7 +5,7 @@ import {
   DEFAULT_SEMANTIC_NAMING,
 } from '../persistence-types';
 
-const SECTIONS: SemanticSection[] = ['bg', 'fg', 'border', 'ring', 'overlay'];
+const SECTIONS: SemanticSection[] = ['bg', 'fg', 'border', 'overlay'];
 
 interface SemanticNamingBuilderProps {
   config: SemanticNamingConfig;

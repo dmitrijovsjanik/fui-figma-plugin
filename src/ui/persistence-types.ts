@@ -5,7 +5,7 @@ import type { GenerationConfig, NamingConfig } from '../palette-core';
 import type { CurveDisplayMode } from './components/PaletteMatrix';
 import type { StepPreset } from './preset-types';
 
-export type SemanticSection = 'bg' | 'fg' | 'border' | 'ring' | 'overlay';
+export type SemanticSection = 'bg' | 'fg' | 'border' | 'overlay';
 
 export interface SemanticNamingConfig {
   sectionNames: Record<SemanticSection, string>;
@@ -13,7 +13,7 @@ export interface SemanticNamingConfig {
 }
 
 export const DEFAULT_SEMANTIC_NAMING: SemanticNamingConfig = {
-  sectionNames: { bg: 'bg', fg: 'fg', border: 'border', ring: 'ring', overlay: 'overlay' },
+  sectionNames: { bg: 'bg', fg: 'fg', border: 'border', overlay: 'overlay' },
   separator: '/',
 };
 
