@@ -99,9 +99,13 @@ async function handleSync(payload: {
         previousKeyToId,
       });
       await saveKeyToId(result.keyToId);
-      const parts = [`${result.updated} updated`];
-      if (result.created > 0) parts.push(`${result.created} created`);
-      figma.notify(`Variables synced (${parts.join(', ')})`);
+      if (result.updated === 0 && result.created === 0) {
+        figma.notify('Variables already up to date');
+      } else {
+        const parts = [`${result.updated} updated`];
+        if (result.created > 0) parts.push(`${result.created} created`);
+        figma.notify(`Variables synced (${parts.join(', ')})`);
+      }
       postToUI({ type: 'sync-result', status: 'updated', orphans: result.orphans });
       return;
     }

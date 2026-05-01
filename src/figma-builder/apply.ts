@@ -35,6 +35,28 @@ function pathToName(path: string[]): string {
   return path.join('/');
 }
 
+// True if Figma already stores `next` for this mode — used to skip redundant
+// setValueForMode calls and keep the "updated" counter honest.
+const FLOAT_EPS = 1e-6;
+function valuesEqual(current: VariableValue | undefined, next: RGBA | VariableAlias): boolean {
+  if (current === undefined) return false;
+  // Alias on both sides → compare target ids.
+  if (typeof current === 'object' && 'type' in current && current.type === 'VARIABLE_ALIAS') {
+    return 'type' in next && next.id === current.id;
+  }
+  // RGBA on both sides. Figma may drop alpha=1 to RGB shape — treat it as a=1.
+  if (typeof current === 'object' && 'r' in current && !('type' in next)) {
+    const cA = 'a' in current ? current.a : 1;
+    return (
+      Math.abs(current.r - next.r) < FLOAT_EPS &&
+      Math.abs(current.g - next.g) < FLOAT_EPS &&
+      Math.abs(current.b - next.b) < FLOAT_EPS &&
+      Math.abs(cA - next.a) < FLOAT_EPS
+    );
+  }
+  return false;
+}
+
 // === Create flow ===
 
 export async function createCollections(structure: VariableStructure): Promise<ApplyResult> {
@@ -160,20 +182,27 @@ export async function updateCollections(
     const targetName = pathToName(spec.path);
     let existing = await findExisting(spec, ctx.primitivesCollection, ctx.previousKeyToId, primByName, claimedIds);
     let didCreate = false;
+    let didChange = false;
     if (!existing) {
       existing = figma.variables.createVariable(targetName, ctx.primitivesCollection, COLOR_TYPE);
       claimedIds.add(existing.id);
       didCreate = true;
     } else if (existing.name !== targetName) {
       existing.name = targetName;
+      didChange = true;
     }
     keyToId[spec.key] = existing.id;
     primByCurrentPath.set(targetName, existing);
     const value = spec.valuesByMode[structure.primitives.modes[0]];
     if (value && !('aliasOf' in (value as object))) {
-      existing.setValueForMode(primModeId, value as RGBA);
-      if (didCreate) created++; else updated++;
+      const nextValue = value as RGBA;
+      if (didCreate || !valuesEqual(existing.valuesByMode[primModeId], nextValue)) {
+        existing.setValueForMode(primModeId, nextValue);
+        didChange = true;
+      }
     }
+    if (didCreate) created++;
+    else if (didChange) updated++;
   }
 
   // ---- Semantics ----
@@ -197,28 +226,35 @@ export async function updateCollections(
     const targetName = pathToName(spec.path);
     let existing = await findExisting(spec, ctx.semanticsCollection, ctx.previousKeyToId, semByName, claimedIds);
     let didCreate = false;
+    let didChange = false;
     if (!existing) {
       existing = figma.variables.createVariable(targetName, ctx.semanticsCollection, COLOR_TYPE);
       claimedIds.add(existing.id);
       didCreate = true;
     } else if (existing.name !== targetName) {
       existing.name = targetName;
+      didChange = true;
     }
     keyToId[spec.key] = existing.id;
     for (const [modeName, value] of Object.entries(spec.valuesByMode)) {
       const modeId = semModeMap[modeName];
       if (!modeId) continue;
+      let nextValue: RGBA | VariableAlias;
       if ('aliasOf' in (value as object)) {
         const ref = value as { aliasOf: { collection: string; path: string[] } };
         const target = primByCurrentPath.get(pathToName(ref.aliasOf.path));
-        if (target) {
-          existing.setValueForMode(modeId, figma.variables.createVariableAlias(target));
-        }
+        if (!target) continue;
+        nextValue = figma.variables.createVariableAlias(target);
       } else {
-        existing.setValueForMode(modeId, value as RGBA);
+        nextValue = value as RGBA;
+      }
+      if (didCreate || !valuesEqual(existing.valuesByMode[modeId], nextValue)) {
+        existing.setValueForMode(modeId, nextValue);
+        didChange = true;
       }
     }
-    if (didCreate) created++; else updated++;
+    if (didCreate) created++;
+    else if (didChange) updated++;
   }
 
   // Anything we never claimed = orphan. User-created variables in our collections
