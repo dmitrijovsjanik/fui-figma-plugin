@@ -113,7 +113,7 @@ const SEMANTIC_TOKENS: Record<string, Record<string, SemRef>> = {
   fg: {
     'neutral-primary': 'gray.12',
     'neutral-secondary': 'gray.11',
-    'neutral-tertiary': 'gray.a10',
+    'neutral-tertiary': 'gray.a8',
     'accent-primary': 'accent.12',
     'accent-secondary': 'accent.11',
     'success-primary': 'green.12',
