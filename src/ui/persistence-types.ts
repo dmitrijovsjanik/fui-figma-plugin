@@ -36,6 +36,10 @@ export interface PersistedState {
   namingConfig: NamingConfig;
   semanticNaming: SemanticNamingConfig;
   presets: StepPreset[];
+  // Name of the currently-selected preset, or null if user is on a custom
+  // (un-saved) configuration. Restored on plugin reload so the active
+  // preset highlight survives across sessions.
+  activePresetName: string | null;
   // Last naming successfully applied to Figma (for rename detection on Sync update).
   // null when no Sync has succeeded yet.
   previousAppliedNaming: {

@@ -83,6 +83,7 @@ function defaultPersistedState(): PersistedState {
     namingConfig: DEFAULT_NAMING_CONFIG,
     semanticNaming: DEFAULT_SEMANTIC_NAMING,
     presets: [DEFAULT_PRESET],
+    activePresetName: 'Standard',
     previousAppliedNaming: null,
     windowSize: DEFAULT_WINDOW_SIZE,
   };
@@ -135,12 +136,21 @@ export function PluginApp() {
         backgroundColor: themeSettings.backgroundColor,
       });
       perThemeRef.current = { ...DEFAULT_PER_THEME, ...state.perTheme };
-      setNamingConfig(state.namingConfig ?? DEFAULT_NAMING_CONFIG);
+      const loadedNaming = state.namingConfig ?? DEFAULT_NAMING_CONFIG;
+      // Migrate stale default: if the user never customised the secondary
+      // role name they're sitting on the old 'secondary' default, which
+      // clashes with the -secondary level suffix. Flip them to the new
+      // default 'subbrand' on first hydrate after upgrade.
+      if (loadedNaming.roleNames?.secondary === 'secondary') {
+        loadedNaming.roleNames = { ...loadedNaming.roleNames, secondary: 'subbrand' };
+      }
+      setNamingConfig(loadedNaming);
       setSemanticNaming(state.semanticNaming ?? DEFAULT_SEMANTIC_NAMING);
       setDisplayMode(state.displayMode ?? 'semantic');
       setColorFormat(state.colorFormat ?? 'alpha');
       setCurveDisplayMode(state.curveDisplayMode ?? 'position');
       setPresets(state.presets?.length ? state.presets : [DEFAULT_PRESET]);
+      setActivePresetName(state.activePresetName ?? 'Standard');
       setWindowSize(state.windowSize ?? DEFAULT_WINDOW_SIZE);
       setHydrated(true);
     });
@@ -167,10 +177,11 @@ export function PluginApp() {
       namingConfig,
       semanticNaming,
       presets,
+      activePresetName,
       previousAppliedNaming: null, // updated separately on Sync success
       windowSize,
     });
-  }, [config, displayMode, colorFormat, curveDisplayMode, namingConfig, semanticNaming, presets, windowSize, hydrated]);
+  }, [config, displayMode, colorFormat, curveDisplayMode, namingConfig, semanticNaming, presets, activePresetName, windowSize, hydrated]);
 
   // Default step positions for current theme
   const defaultPositions = useMemo(
