@@ -17,8 +17,35 @@ const FALLBACK_SIZE = { width: 560, height: 640 };
 // to the same Figma variable instead of triggering a fresh create + orphan.
 // Add an entry whenever a token is renamed in SEMANTIC_TOKENS.
 const KEY_MIGRATIONS: Record<string, string> = {
-  'sem:bg:component': 'sem:bg:neutral',
-  'sem:bg:component-hover': 'sem:bg:neutral-hover',
+  // bg/component → bg/neutral (legacy)
+  'sem:bg:component': 'sem:bg:neutral-primary',
+  'sem:bg:component-hover': 'sem:bg:neutral-primary-hover',
+  // bg restructure: <color>/<color>-hover/<color>-subtle/<color>-subtle-hover
+  // → <color>-primary/<color>-primary-hover/<color>-secondary/<color>-secondary-hover.
+  'sem:bg:neutral': 'sem:bg:neutral-primary',
+  'sem:bg:neutral-hover': 'sem:bg:neutral-primary-hover',
+  'sem:bg:neutral-subtle': 'sem:bg:neutral-secondary',
+  'sem:bg:neutral-subtle-hover': 'sem:bg:neutral-secondary-hover',
+  'sem:bg:accent': 'sem:bg:accent-primary',
+  'sem:bg:accent-hover': 'sem:bg:accent-primary-hover',
+  'sem:bg:accent-subtle': 'sem:bg:accent-secondary',
+  'sem:bg:accent-subtle-hover': 'sem:bg:accent-secondary-hover',
+  'sem:bg:success': 'sem:bg:success-primary',
+  'sem:bg:success-hover': 'sem:bg:success-primary-hover',
+  'sem:bg:success-subtle': 'sem:bg:success-secondary',
+  'sem:bg:success-subtle-hover': 'sem:bg:success-secondary-hover',
+  'sem:bg:warning': 'sem:bg:warning-primary',
+  'sem:bg:warning-hover': 'sem:bg:warning-primary-hover',
+  'sem:bg:warning-subtle': 'sem:bg:warning-secondary',
+  'sem:bg:warning-subtle-hover': 'sem:bg:warning-secondary-hover',
+  'sem:bg:danger': 'sem:bg:danger-primary',
+  'sem:bg:danger-hover': 'sem:bg:danger-primary-hover',
+  'sem:bg:danger-subtle': 'sem:bg:danger-secondary',
+  'sem:bg:danger-subtle-hover': 'sem:bg:danger-secondary-hover',
+  'sem:bg:info': 'sem:bg:info-primary',
+  'sem:bg:info-hover': 'sem:bg:info-primary-hover',
+  'sem:bg:info-subtle': 'sem:bg:info-secondary',
+  'sem:bg:info-subtle-hover': 'sem:bg:info-secondary-hover',
   // fg restructure: neutral text gets the neutral- prefix; per-color text
   // splits into primary (step 12) / secondary (step 11). Old single tokens
   // mapped to step 11, so they migrate to <color>-secondary.
@@ -34,6 +61,18 @@ const KEY_MIGRATIONS: Record<string, string> = {
   // tokens. Pin the migration to on-accent so its variable becomes
   // on-background; the other on-* variables surface as orphans for cleanup.
   'sem:fg:on-accent': 'sem:fg:on-background',
+  // border restructure: neutral default/strong/strong-hover get the neutral-
+  // prefix; colored borders gain a -strong/-strong-hover pair. Old colored
+  // singletons map to their nearest equivalent: accent (a8) → accent-strong-hover,
+  // others (a7) → <color>-strong.
+  'sem:border:default': 'sem:border:neutral',
+  'sem:border:strong': 'sem:border:neutral-strong',
+  'sem:border:strong-hover': 'sem:border:neutral-strong-hover',
+  'sem:border:accent': 'sem:border:accent-strong-hover',
+  'sem:border:success': 'sem:border:success-strong',
+  'sem:border:warning': 'sem:border:warning-strong',
+  'sem:border:danger': 'sem:border:danger-strong',
+  'sem:border:info': 'sem:border:info-strong',
 };
 
 function keymapStorageKey(): string {
