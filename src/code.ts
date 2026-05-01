@@ -61,18 +61,37 @@ const KEY_MIGRATIONS: Record<string, string> = {
   // tokens. Pin the migration to on-accent so its variable becomes
   // on-background; the other on-* variables surface as orphans for cleanup.
   'sem:fg:on-accent': 'sem:fg:on-background',
-  // border restructure: neutral default/strong/strong-hover get the neutral-
-  // prefix; colored borders gain a -strong/-strong-hover pair. Old colored
-  // singletons map to their nearest equivalent: accent (a8) → accent-strong-hover,
-  // others (a7) → <color>-strong.
-  'sem:border:default': 'sem:border:neutral',
-  'sem:border:strong': 'sem:border:neutral-strong',
-  'sem:border:strong-hover': 'sem:border:neutral-strong-hover',
-  'sem:border:accent': 'sem:border:accent-strong-hover',
-  'sem:border:success': 'sem:border:success-strong',
-  'sem:border:warning': 'sem:border:warning-strong',
-  'sem:border:danger': 'sem:border:danger-strong',
-  'sem:border:info': 'sem:border:info-strong',
+  // border restructure → primary/secondary/tertiary scheme.
+  //   primary = a9 (no hover)
+  //   secondary = a7 (default) + a8 (hover)
+  //   tertiary = a6 (no hover)
+  // Migrations cover both legacy keys (default/strong) and the brief
+  // <color>/<color>-strong era so existing variables get renamed in place.
+  // Pre-strong era (very old):
+  'sem:border:default': 'sem:border:neutral-tertiary',           // a6
+  'sem:border:strong': 'sem:border:neutral-secondary',           // a7
+  'sem:border:strong-hover': 'sem:border:neutral-secondary-hover', // a8
+  // Strong era — assumes the most recent state (post-81a2954) where bare
+  // <color> meant the static a6 base. Users who skipped that sync see a
+  // value shift on their colored borders; one extra resync settles it.
+  'sem:border:neutral': 'sem:border:neutral-tertiary',
+  'sem:border:neutral-strong': 'sem:border:neutral-secondary',
+  'sem:border:neutral-strong-hover': 'sem:border:neutral-secondary-hover',
+  'sem:border:accent': 'sem:border:accent-tertiary',
+  'sem:border:accent-strong': 'sem:border:accent-secondary',
+  'sem:border:accent-strong-hover': 'sem:border:accent-secondary-hover',
+  'sem:border:success': 'sem:border:success-tertiary',
+  'sem:border:success-strong': 'sem:border:success-secondary',
+  'sem:border:success-strong-hover': 'sem:border:success-secondary-hover',
+  'sem:border:warning': 'sem:border:warning-tertiary',
+  'sem:border:warning-strong': 'sem:border:warning-secondary',
+  'sem:border:warning-strong-hover': 'sem:border:warning-secondary-hover',
+  'sem:border:danger': 'sem:border:danger-tertiary',
+  'sem:border:danger-strong': 'sem:border:danger-secondary',
+  'sem:border:danger-strong-hover': 'sem:border:danger-secondary-hover',
+  'sem:border:info': 'sem:border:info-tertiary',
+  'sem:border:info-strong': 'sem:border:info-secondary',
+  'sem:border:info-strong-hover': 'sem:border:info-secondary-hover',
 };
 
 function keymapStorageKey(): string {
