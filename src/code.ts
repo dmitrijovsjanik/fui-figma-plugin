@@ -19,6 +19,17 @@ const FALLBACK_SIZE = { width: 560, height: 640 };
 const KEY_MIGRATIONS: Record<string, string> = {
   'sem:bg:component': 'sem:bg:neutral',
   'sem:bg:component-hover': 'sem:bg:neutral-hover',
+  // fg restructure: neutral text gets the neutral- prefix; per-color text
+  // splits into primary (step 12) / secondary (step 11). Old single tokens
+  // mapped to step 11, so they migrate to <color>-secondary.
+  'sem:fg:primary': 'sem:fg:neutral-primary',
+  'sem:fg:secondary': 'sem:fg:neutral-secondary',
+  'sem:fg:tertiary': 'sem:fg:neutral-tertiary',
+  'sem:fg:accent': 'sem:fg:accent-secondary',
+  'sem:fg:success': 'sem:fg:success-secondary',
+  'sem:fg:warning': 'sem:fg:warning-secondary',
+  'sem:fg:danger': 'sem:fg:danger-secondary',
+  'sem:fg:info': 'sem:fg:info-secondary',
 };
 
 function keymapStorageKey(): string {
