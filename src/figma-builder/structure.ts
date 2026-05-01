@@ -12,6 +12,7 @@ import type {
   SemanticRole,
   StepIndex,
   AlphaColor,
+  NamingConfig,
 } from '../palette-core';
 import { STEP_INDICES } from '../palette-core';
 import type { SemanticNamingConfig, SemanticSection } from '../ui/persistence-types';
@@ -19,6 +20,13 @@ import type { SemanticNamingConfig, SemanticSection } from '../ui/persistence-ty
 export type RGBA = { r: number; g: number; b: number; a: number };
 
 export interface VariableSpec {
+  // Stable identity that survives renames. Format:
+  //   primitives: 'prim:<theme>:<role>:<solid|alpha>:<step>'
+  //   primitives (special): 'prim:<theme>:gray-bg' / 'prim:black-a:<step>' / 'prim:white-fixed'
+  //   semantics:  'sem:<section>:<token-name>'
+  // Used to look up the corresponding Figma Variable by ID across syncs, so
+  // user-visible name changes don't cause spurious recreations.
+  key: string;
   // Path components, e.g. ['light', 'gray', '0'] or ['bg', 'canvas']
   path: string[];
   // Per-mode value: either a literal RGBA, or an alias to another variable.
@@ -166,11 +174,21 @@ function parseRef(ref: string): { scale: string; step: string; isAlpha: boolean;
   return { scale, step, isAlpha, themed };
 }
 
-function refToPath(ref: string, theme: 'light' | 'dark'): string[] {
+// Internal scale keys (gray/accent/green/...) → user-facing role names from NamingConfig.
+// SEMANTIC_TOKENS references stay stable; only the path written into Figma is renamed.
+function scaleToUserName(scale: string, namingConfig: NamingConfig): string {
+  const pair = ROLE_TO_SCALE.find(([, sn]) => sn === scale);
+  if (pair) return namingConfig.roleNames[pair[0]];
+  if (scale === 'secondary') return namingConfig.roleNames.secondary;
+  return scale;
+}
+
+function refToPath(ref: string, theme: 'light' | 'dark', namingConfig: NamingConfig): string[] {
   const { scale, step, isAlpha, themed } = parseRef(ref);
   if (scale === 'white-fixed') return ['white-fixed'];
   if (scale === 'black') return [`black-a`, step];
-  const scaleName = isAlpha ? `${scale}-a` : scale;
+  const userName = scaleToUserName(scale, namingConfig);
+  const scaleName = isAlpha ? `${userName}-a` : userName;
   return themed ? [theme, scaleName, step] : [scaleName, step];
 }
 
@@ -202,6 +220,7 @@ function refToFallback(
 export function buildVariableStructure(
   input: FigmaTokensInput,
   semanticNaming: SemanticNamingConfig,
+  namingConfig: NamingConfig,
 ): VariableStructure {
   const includeSecondary = input.secondary?.mode !== 'off';
   const roles: ReadonlyArray<[SemanticRole, string]> = includeSecondary
@@ -214,22 +233,26 @@ export function buildVariableStructure(
   for (const theme of ['light', 'dark'] as const) {
     const data = input[theme];
     for (const [role, scaleName] of roles) {
+      const userScaleName = scaleToUserName(scaleName, namingConfig);
       if (scaleName === 'gray') {
         primitiveVars.push({
-          path: [theme, scaleName, '0'],
+          key: `prim:${theme}:gray-bg`,
+          path: [theme, userScaleName, '0'],
           valuesByMode: { Default: hexToRgba(data.backgroundColor) },
         });
       }
       for (const step of STEP_INDICES) {
         primitiveVars.push({
-          path: [theme, scaleName, String(step)],
+          key: `prim:${theme}:${role}:solid:${step}`,
+          path: [theme, userScaleName, String(step)],
           valuesByMode: { Default: hexToRgba(data.palette[role][step]) },
         });
       }
       if (data.alphaPalette) {
         for (const step of STEP_INDICES) {
           primitiveVars.push({
-            path: [theme, `${scaleName}-a`, String(step)],
+            key: `prim:${theme}:${role}:alpha:${step}`,
+            path: [theme, `${userScaleName}-a`, String(step)],
             valuesByMode: { Default: alphaColorToRgba(data.alphaPalette[role][step]) },
           });
         }
@@ -239,11 +262,13 @@ export function buildVariableStructure(
 
   for (const step of STEP_INDICES) {
     primitiveVars.push({
+      key: `prim:black-a:${step}`,
       path: ['black-a', String(step)],
       valuesByMode: { Default: { r: 0, g: 0, b: 0, a: BLACK_ALPHA[step] } },
     });
   }
   primitiveVars.push({
+    key: 'prim:white-fixed',
     path: ['white-fixed'],
     valuesByMode: { Default: { r: 1, g: 1, b: 1, a: 1 } },
   });
@@ -259,10 +284,11 @@ export function buildVariableStructure(
       const lightRef = typeof ref === 'string' ? ref : ref.light;
       const darkRef = typeof ref === 'string' ? ref : ref.dark;
       semanticVars.push({
+        key: `sem:${section}:${name}`,
         path: [sectionLabel, name],
         valuesByMode: {
-          Light: { aliasOf: { collection: PRIMITIVES, path: refToPath(lightRef, 'light') } },
-          Dark: { aliasOf: { collection: PRIMITIVES, path: refToPath(darkRef, 'dark') } },
+          Light: { aliasOf: { collection: PRIMITIVES, path: refToPath(lightRef, 'light', namingConfig) } },
+          Dark: { aliasOf: { collection: PRIMITIVES, path: refToPath(darkRef, 'dark', namingConfig) } },
         },
       });
       // Note: we keep the alias-only form. apply.ts uses the alias path to find

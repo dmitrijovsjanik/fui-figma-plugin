@@ -1,12 +1,25 @@
 // Materialize a VariableStructure into Figma via the figma.variables.* API.
 // Two entry points:
 //   - createCollections: full creation when no existing collections match.
-//   - updateCollections: rename + value update when both collections already exist.
+//   - updateCollections: precise rename + value update when both collections already exist.
+//
+// Both flows return a KeyToId map (stable spec.key → Figma Variable.id) that the
+// caller persists in clientStorage. On the next sync this map lets us find the
+// exact existing Figma variable for each spec — independent of its current name —
+// so renames are exact and structural changes don't cause spurious recreations.
 
-import type { CollectionSpec, VariableSpec, VariableStructure, RGBA } from './structure';
+import type { VariableStructure, RGBA } from './structure';
 import { PRIMITIVES, SEMANTICS } from './structure';
 
 const COLOR_TYPE = 'COLOR' as const;
+
+export type KeyToId = Record<string, string>;
+
+export interface ApplyResult {
+  keyToId: KeyToId;
+  created: number;
+  updated: number;
+}
 
 function pathToName(path: string[]): string {
   return path.join('/');
@@ -14,11 +27,13 @@ function pathToName(path: string[]): string {
 
 // === Create flow ===
 
-export async function createCollections(structure: VariableStructure): Promise<void> {
-  // Phase 1 — primitives. Create all variables, build name → Variable map.
+export async function createCollections(structure: VariableStructure): Promise<ApplyResult> {
+  const keyToId: KeyToId = {};
+  let created = 0;
+
+  // Phase 1 — primitives.
   const primCollection = figma.variables.createVariableCollection(structure.primitives.name);
   const primDefaultModeId = primCollection.modes[0].modeId;
-  // Rename the auto-created mode to match the spec
   primCollection.renameMode(primDefaultModeId, structure.primitives.modes[0]);
   const primModeMap: Record<string, string> = { [structure.primitives.modes[0]]: primDefaultModeId };
 
@@ -26,6 +41,8 @@ export async function createCollections(structure: VariableStructure): Promise<v
   for (const spec of structure.primitives.variables) {
     const v = figma.variables.createVariable(pathToName(spec.path), primCollection, COLOR_TYPE);
     primVarsByPath.set(pathToName(spec.path), v);
+    keyToId[spec.key] = v.id;
+    created++;
     for (const [modeName, value] of Object.entries(spec.valuesByMode)) {
       const modeId = primModeMap[modeName];
       if (!modeId) continue;
@@ -35,7 +52,6 @@ export async function createCollections(structure: VariableStructure): Promise<v
 
   // Phase 2 — semantics. Two modes (Light, Dark). Aliases reference primitives.
   const semCollection = figma.variables.createVariableCollection(structure.semantics.name);
-  // Rename first auto-mode + add second
   const firstSemModeId = semCollection.modes[0].modeId;
   semCollection.renameMode(firstSemModeId, structure.semantics.modes[0]);
   const secondSemModeId = semCollection.addMode(structure.semantics.modes[1]);
@@ -46,6 +62,8 @@ export async function createCollections(structure: VariableStructure): Promise<v
 
   for (const spec of structure.semantics.variables) {
     const v = figma.variables.createVariable(pathToName(spec.path), semCollection, COLOR_TYPE);
+    keyToId[spec.key] = v.id;
+    created++;
     for (const [modeName, value] of Object.entries(spec.valuesByMode)) {
       const modeId = semModeMap[modeName];
       if (!modeId) continue;
@@ -55,13 +73,15 @@ export async function createCollections(structure: VariableStructure): Promise<v
         if (target) {
           v.setValueForMode(modeId, figma.variables.createVariableAlias(target));
         }
-        // If not found, leave the variable's value unset for that mode — Figma will
-        // show "—" in that cell. Should not happen if structure is consistent.
+        // If not found, leave the variable's value unset — Figma shows "—".
+        // Should not happen if structure is consistent.
       } else {
         v.setValueForMode(modeId, value as RGBA);
       }
     }
   }
+
+  return { keyToId, created, updated: 0 };
 }
 
 // === Update flow ===
@@ -69,17 +89,48 @@ export async function createCollections(structure: VariableStructure): Promise<v
 interface UpdateContext {
   primitivesCollection: VariableCollection;
   semanticsCollection: VariableCollection;
-  // Previously-applied structure (last successful sync). Used to find existing
-  // variables by their previous path so we can rename + update them.
-  previousStructure: VariableStructure | null;
+  // key → Figma Variable.id from the last successful sync. Empty on first sync
+  // after upgrade (we'll fall back to name-matching to adopt existing variables).
+  previousKeyToId: KeyToId;
+}
+
+// Find an existing Figma variable for a spec.
+// Priority: stable-key ID lookup → current-name lookup → null (caller creates).
+async function findExisting(
+  spec: { key: string; path: string[] },
+  collection: VariableCollection,
+  previousKeyToId: KeyToId,
+  byName: Map<string, Variable>,
+  claimedIds: Set<string>,
+): Promise<Variable | null> {
+  const previousId = previousKeyToId[spec.key];
+  if (previousId && !claimedIds.has(previousId)) {
+    const v = await figma.variables.getVariableByIdAsync(previousId);
+    // Verify it still belongs to the expected collection (user may have moved/deleted it).
+    if (v && v.variableCollectionId === collection.id) {
+      claimedIds.add(previousId);
+      return v;
+    }
+  }
+  // Fallback: name match. Useful for the first sync after upgrading to the
+  // key-based system, when previousKeyToId is empty but variables exist.
+  const targetName = pathToName(spec.path);
+  const byNameMatch = byName.get(targetName);
+  if (byNameMatch && !claimedIds.has(byNameMatch.id)) {
+    claimedIds.add(byNameMatch.id);
+    return byNameMatch;
+  }
+  return null;
 }
 
 export async function updateCollections(
   structure: VariableStructure,
   ctx: UpdateContext,
-): Promise<{ updated: number; missing: number }> {
+): Promise<ApplyResult> {
+  const keyToId: KeyToId = {};
   let updated = 0;
-  let missing = 0;
+  let created = 0;
+  const claimedIds = new Set<string>();
 
   // ---- Primitives ----
   const primVars = await Promise.all(
@@ -88,42 +139,32 @@ export async function updateCollections(
   const primByName = new Map<string, Variable>();
   for (const v of primVars) if (v) primByName.set(v.name, v);
 
-  // Map primary mode name → modeId (collections always have ≥1 mode)
   const primModeId = ctx.primitivesCollection.modes[0].modeId;
 
-  // Build previous-name → spec lookup (if previous structure provided)
-  const previousByCurrentIndex = new Map<number, VariableSpec>();
-  if (ctx.previousStructure) {
-    structure.primitives.variables.forEach((spec, i) => {
-      const prev = ctx.previousStructure!.primitives.variables[i];
-      if (prev) previousByCurrentIndex.set(i, prev);
-    });
-  }
+  // Built during the loop — current-path → variable. Used by semantic alias
+  // resolution below; includes newly-created primitives, unlike a map from
+  // pre-rename names.
+  const primByCurrentPath = new Map<string, Variable>();
 
-  for (let i = 0; i < structure.primitives.variables.length; i++) {
-    const spec = structure.primitives.variables[i];
+  for (const spec of structure.primitives.variables) {
     const targetName = pathToName(spec.path);
-    const previousName = previousByCurrentIndex.has(i)
-      ? pathToName(previousByCurrentIndex.get(i)!.path)
-      : targetName;
-    const existing = primByName.get(previousName) ?? primByName.get(targetName);
+    let existing = await findExisting(spec, ctx.primitivesCollection, ctx.previousKeyToId, primByName, claimedIds);
+    let didCreate = false;
     if (!existing) {
-      missing++;
-      continue;
-    }
-    if (existing.name !== targetName) {
+      existing = figma.variables.createVariable(targetName, ctx.primitivesCollection, COLOR_TYPE);
+      claimedIds.add(existing.id);
+      didCreate = true;
+    } else if (existing.name !== targetName) {
       existing.name = targetName;
     }
+    keyToId[spec.key] = existing.id;
+    primByCurrentPath.set(targetName, existing);
     const value = spec.valuesByMode[structure.primitives.modes[0]];
     if (value && !('aliasOf' in (value as object))) {
       existing.setValueForMode(primModeId, value as RGBA);
-      updated++;
+      if (didCreate) created++; else updated++;
     }
   }
-
-  // Refresh primitives map by name after rename (for alias lookups)
-  primByName.clear();
-  for (const v of primVars) if (v) primByName.set(v.name, v);
 
   // ---- Semantics ----
   const semVars = await Promise.all(
@@ -132,38 +173,34 @@ export async function updateCollections(
   const semByName = new Map<string, Variable>();
   for (const v of semVars) if (v) semByName.set(v.name, v);
 
-  // Build mode name → modeId for the existing semantics collection.
   const semModeMap: Record<string, string> = {};
   for (const m of ctx.semanticsCollection.modes) {
     semModeMap[m.name] = m.modeId;
   }
-  // Ensure both Light and Dark modes exist; create missing.
   for (const requiredMode of structure.semantics.modes) {
     if (!semModeMap[requiredMode]) {
       semModeMap[requiredMode] = ctx.semanticsCollection.addMode(requiredMode);
     }
   }
 
-  for (let i = 0; i < structure.semantics.variables.length; i++) {
-    const spec = structure.semantics.variables[i];
+  for (const spec of structure.semantics.variables) {
     const targetName = pathToName(spec.path);
-    const previousName = ctx.previousStructure?.semantics.variables[i]
-      ? pathToName(ctx.previousStructure.semantics.variables[i].path)
-      : targetName;
-    const existing = semByName.get(previousName) ?? semByName.get(targetName);
+    let existing = await findExisting(spec, ctx.semanticsCollection, ctx.previousKeyToId, semByName, claimedIds);
+    let didCreate = false;
     if (!existing) {
-      missing++;
-      continue;
-    }
-    if (existing.name !== targetName) {
+      existing = figma.variables.createVariable(targetName, ctx.semanticsCollection, COLOR_TYPE);
+      claimedIds.add(existing.id);
+      didCreate = true;
+    } else if (existing.name !== targetName) {
       existing.name = targetName;
     }
+    keyToId[spec.key] = existing.id;
     for (const [modeName, value] of Object.entries(spec.valuesByMode)) {
       const modeId = semModeMap[modeName];
       if (!modeId) continue;
       if ('aliasOf' in (value as object)) {
         const ref = value as { aliasOf: { collection: string; path: string[] } };
-        const target = primByName.get(pathToName(ref.aliasOf.path));
+        const target = primByCurrentPath.get(pathToName(ref.aliasOf.path));
         if (target) {
           existing.setValueForMode(modeId, figma.variables.createVariableAlias(target));
         }
@@ -171,12 +208,12 @@ export async function updateCollections(
         existing.setValueForMode(modeId, value as RGBA);
       }
     }
-    updated++;
+    if (didCreate) created++; else updated++;
   }
 
-  return { updated, missing };
+  return { keyToId, created, updated };
 }
 
 // Re-exports for ergonomic import
 export { PRIMITIVES, SEMANTICS };
-export type { CollectionSpec };
+export type { CollectionSpec } from './structure';

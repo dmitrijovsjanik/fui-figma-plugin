@@ -27,7 +27,6 @@ import {
 import { ResizeHandle } from './components/ResizeHandle';
 import { loadStateAsync, saveStateDebounced } from './persistence';
 import type { StepPreset } from './preset-types';
-import type { VariableStructure } from '../figma-builder/structure';
 
 import '../tokens/tokens.css';
 import '../tokens/tokens-dark.css';
@@ -100,7 +99,6 @@ export function PluginApp() {
   const presetsRef = useRef(presets);
   presetsRef.current = presets;
   const [activePresetName, setActivePresetName] = useState<string | null>('Standard');
-  const [previousStructure, setPreviousStructure] = useState<VariableStructure | null>(null);
   const [windowSize, setWindowSize] = useState<WindowSize>(DEFAULT_WINDOW_SIZE);
 
   // Hydrate state from clientStorage on mount
@@ -123,8 +121,6 @@ export function PluginApp() {
       setCurveDisplayMode(state.curveDisplayMode ?? 'position');
       setPresets(state.presets?.length ? state.presets : [DEFAULT_PRESET]);
       setWindowSize(state.windowSize ?? DEFAULT_WINDOW_SIZE);
-      // previousAppliedNaming is loaded but not held in state — only used at sync time;
-      // we store it as previousStructure (rebuilt on next sync if needed).
       setHydrated(true);
     });
   }, []);
@@ -453,8 +449,6 @@ export function PluginApp() {
               onSemanticNamingChange={setSemanticNaming}
               onGenerateBothThemes={generateBothThemes}
               secondary={config.secondary}
-              previousStructure={previousStructure}
-              onSyncSuccess={setPreviousStructure}
             />
           </>
         )}

@@ -7,7 +7,6 @@ import type { SemanticNamingConfig } from '../persistence-types';
 import { buildVariableStructure } from '../../figma-builder/structure';
 import { postToSandbox } from '../persistence';
 import type { SandboxToUI } from '../../messages';
-import type { VariableStructure } from '../../figma-builder/structure';
 
 interface SettingsSidebarProps {
   namingConfig: NamingConfig;
@@ -21,10 +20,6 @@ interface SettingsSidebarProps {
     darkBg?: string;
   };
   secondary?: SecondaryConfig;
-  // Last applied structure — sandbox uses it for rename detection.
-  // null when no successful sync yet; updated by parent on sync-result success.
-  previousStructure: VariableStructure | null;
-  onSyncSuccess: (appliedStructure: VariableStructure) => void;
 }
 
 type SyncStatus =
@@ -42,8 +37,6 @@ export function SettingsSidebar({
   onSemanticNamingChange,
   onGenerateBothThemes,
   secondary,
-  previousStructure,
-  onSyncSuccess,
 }: SettingsSidebarProps) {
   const [status, setStatus] = useState<SyncStatus>({ kind: 'idle' });
 
@@ -80,22 +73,10 @@ export function SettingsSidebar({
         secondary,
       },
       semanticNaming,
+      namingConfig,
     );
     setStatus({ kind: 'syncing' });
-    postToSandbox({ type: 'sync', structure, previousStructure });
-
-    // Persist applied structure on next successful result.
-    // Use a one-shot listener to capture the next sync-result.
-    const onceHandler = (event: MessageEvent) => {
-      const msg = event.data?.pluginMessage as SandboxToUI | undefined;
-      if (msg?.type === 'sync-result') {
-        if (msg.status === 'created' || msg.status === 'updated') {
-          onSyncSuccess(structure);
-        }
-        window.removeEventListener('message', onceHandler);
-      }
-    };
-    window.addEventListener('message', onceHandler);
+    postToSandbox({ type: 'sync', structure });
   };
 
   return (

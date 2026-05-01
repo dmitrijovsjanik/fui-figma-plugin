@@ -11,7 +11,6 @@ export type UIToSandbox =
   | {
       type: 'sync';
       structure: VariableStructure;
-      previousStructure: VariableStructure | null;
     }
   | { type: 'resize'; width: number; height: number };
 

@@ -3,11 +3,28 @@
 
 import type { UIToSandbox, SandboxToUI } from './messages';
 import { detectExistingCollections } from './figma-builder/detect';
-import { createCollections, updateCollections } from './figma-builder/apply';
+import { createCollections, updateCollections, type KeyToId } from './figma-builder/apply';
 import type { VariableStructure } from './figma-builder/structure';
 
 const STATE_KEY = 'fui-plugin-state';
+// Per-file map of stable spec key → Figma Variable.id. Lets us find existing
+// variables by ID across syncs so renames are precise. Keyed by document root
+// id (unique per file, stable across plugin runs).
+const KEYMAP_KEY_PREFIX = 'fui-plugin-keymap:';
 const FALLBACK_SIZE = { width: 560, height: 640 };
+
+function keymapStorageKey(): string {
+  return `${KEYMAP_KEY_PREFIX}${figma.root.id}`;
+}
+
+async function loadKeyToId(): Promise<KeyToId> {
+  const saved = await figma.clientStorage.getAsync(keymapStorageKey());
+  return saved && typeof saved === 'object' ? (saved as KeyToId) : {};
+}
+
+async function saveKeyToId(map: KeyToId): Promise<void> {
+  await figma.clientStorage.setAsync(keymapStorageKey(), map);
+}
 
 // Restore last saved size synchronously-ish: read clientStorage on boot, then
 // resize the window if a saved size exists. Until then, open with FALLBACK_SIZE.
@@ -35,7 +52,6 @@ async function handleStateSave(state: unknown): Promise<void> {
 
 async function handleSync(payload: {
   structure: VariableStructure;
-  previousStructure: VariableStructure | null;
 }): Promise<void> {
   try {
     const existing = await detectExistingCollections();
@@ -43,19 +59,24 @@ async function handleSync(payload: {
     const hasSem = existing.semantics !== null;
 
     if (!hasPrim && !hasSem) {
-      await createCollections(payload.structure);
+      const result = await createCollections(payload.structure);
+      await saveKeyToId(result.keyToId);
       figma.notify('Variables created');
       postToUI({ type: 'sync-result', status: 'created' });
       return;
     }
 
     if (hasPrim && hasSem) {
+      const previousKeyToId = await loadKeyToId();
       const result = await updateCollections(payload.structure, {
         primitivesCollection: existing.primitives!,
         semanticsCollection: existing.semantics!,
-        previousStructure: payload.previousStructure,
+        previousKeyToId,
       });
-      figma.notify(`Variables synced (${result.updated} updated, ${result.missing} missing)`);
+      await saveKeyToId(result.keyToId);
+      const parts = [`${result.updated} updated`];
+      if (result.created > 0) parts.push(`${result.created} created`);
+      figma.notify(`Variables synced (${parts.join(', ')})`);
       postToUI({ type: 'sync-result', status: 'updated' });
       return;
     }
