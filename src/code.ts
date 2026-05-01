@@ -13,13 +13,27 @@ const STATE_KEY = 'fui-plugin-state';
 const KEYMAP_KEY_PREFIX = 'fui-plugin-keymap:';
 const FALLBACK_SIZE = { width: 560, height: 640 };
 
+// Old → new spec keys. Applied on load so renamed semantic tokens still resolve
+// to the same Figma variable instead of triggering a fresh create + orphan.
+// Add an entry whenever a token is renamed in SEMANTIC_TOKENS.
+const KEY_MIGRATIONS: Record<string, string> = {
+  'sem:bg:component': 'sem:bg:neutral',
+  'sem:bg:component-hover': 'sem:bg:neutral-hover',
+};
+
 function keymapStorageKey(): string {
   return `${KEYMAP_KEY_PREFIX}${figma.root.id}`;
 }
 
 async function loadKeyToId(): Promise<KeyToId> {
   const saved = await figma.clientStorage.getAsync(keymapStorageKey());
-  return saved && typeof saved === 'object' ? (saved as KeyToId) : {};
+  if (!saved || typeof saved !== 'object') return {};
+  const raw = saved as KeyToId;
+  const migrated: KeyToId = {};
+  for (const [k, v] of Object.entries(raw)) {
+    migrated[KEY_MIGRATIONS[k] ?? k] = v;
+  }
+  return migrated;
 }
 
 async function saveKeyToId(map: KeyToId): Promise<void> {
