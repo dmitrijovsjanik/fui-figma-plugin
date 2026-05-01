@@ -201,12 +201,12 @@ export function BrandInput({
         )}
       </div>
 
-      {/* Secondary brand + display actions */}
+      {/* Subbrand + display actions */}
       <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'flex-end', gap: 24, marginTop: 20 }}>
         {secondaryConfig && onSecondaryConfigChange && (
           <>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              <span style={{ fontSize: 12, color: 'var(--fui-neutral-9)' }}>Secondary Brand</span>
+              <span style={{ fontSize: 12, color: 'var(--fui-neutral-9)' }}>Subbrand</span>
               <ContentSwitcher
                 items={[
                   { value: 'off', label: 'Off' },

@@ -105,6 +105,10 @@ const SEMANTIC_TOKENS: Record<string, Record<string, SemRef>> = {
     'info-primary-hover': 'blue.10',
     'info-secondary': 'blue.a3',
     'info-secondary-hover': 'blue.a4',
+    'secondary-primary': 'secondary.9',
+    'secondary-primary-hover': 'secondary.10',
+    'secondary-secondary': 'secondary.a3',
+    'secondary-secondary-hover': 'secondary.a4',
   },
   fg: {
     'neutral-primary': 'gray.12',
@@ -120,6 +124,8 @@ const SEMANTIC_TOKENS: Record<string, Record<string, SemRef>> = {
     'danger-secondary': 'red.11',
     'info-primary': 'blue.12',
     'info-secondary': 'blue.11',
+    'secondary-primary': 'secondary.12',
+    'secondary-secondary': 'secondary.11',
     'on-background': 'white-fixed',
   },
   border: {
@@ -150,6 +156,11 @@ const SEMANTIC_TOKENS: Record<string, Record<string, SemRef>> = {
     'warning-tertiary': 'amber.a6',
     'danger-tertiary': 'red.a6',
     'info-tertiary': 'blue.a6',
+    // subbrand
+    'secondary-primary': 'secondary.a9',
+    'secondary-secondary': 'secondary.a7',
+    'secondary-secondary-hover': 'secondary.a8',
+    'secondary-tertiary': 'secondary.a6',
   },
   ring: {
     'focus': 'accent.a8',

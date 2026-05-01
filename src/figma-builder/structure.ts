@@ -109,6 +109,10 @@ const SEMANTIC_TOKENS: Record<SemanticSection, Record<string, SemRef>> = {
     'info-primary-hover': 'blue.10',
     'info-secondary': 'blue.a3',
     'info-secondary-hover': 'blue.a4',
+    'secondary-primary': 'secondary.9',
+    'secondary-primary-hover': 'secondary.10',
+    'secondary-secondary': 'secondary.a3',
+    'secondary-secondary-hover': 'secondary.a4',
   },
   fg: {
     'neutral-primary': 'gray.12',
@@ -124,6 +128,8 @@ const SEMANTIC_TOKENS: Record<SemanticSection, Record<string, SemRef>> = {
     'danger-secondary': 'red.11',
     'info-primary': 'blue.12',
     'info-secondary': 'blue.11',
+    'secondary-primary': 'secondary.12',
+    'secondary-secondary': 'secondary.11',
     'on-background': 'white-fixed',
   },
   border: {
@@ -154,6 +160,11 @@ const SEMANTIC_TOKENS: Record<SemanticSection, Record<string, SemRef>> = {
     'warning-tertiary': 'amber.a6',
     'danger-tertiary': 'red.a6',
     'info-tertiary': 'blue.a6',
+    // subbrand (only emitted when secondary mode != off)
+    'secondary-primary': 'secondary.a9',
+    'secondary-secondary': 'secondary.a7',
+    'secondary-secondary-hover': 'secondary.a8',
+    'secondary-tertiary': 'secondary.a6',
   },
   ring: {
     'focus': 'accent.a8',
@@ -207,10 +218,16 @@ function describeSemanticToken(
 
   // Recognised colored-role prefix? Match `<role>-rest` against known roles.
   const colored = (() => {
-    for (const role of ['neutral', 'brand', 'success', 'warning', 'danger', 'info'] as const) {
-      const internalRole: SemanticRole = role === 'brand' ? 'brand' : role;
-      // Map internal role names to their token-key prefix (brand → 'accent').
-      const prefix = role === 'brand' ? 'accent' : role;
+    const candidates: Array<[string, SemanticRole]> = [
+      ['neutral', 'neutral'],
+      ['accent', 'brand'],         // 'accent' → brand role
+      ['secondary', 'secondary'],  // 'secondary' → subbrand role (only when enabled)
+      ['success', 'success'],
+      ['warning', 'warning'],
+      ['danger', 'danger'],
+      ['info', 'info'],
+    ];
+    for (const [prefix, internalRole] of candidates) {
       if (name === prefix || name.startsWith(`${prefix}-`)) {
         return {
           rolePrefix: prefix,
@@ -418,6 +435,8 @@ export function buildVariableStructure(
   ]>) {
     const sectionLabel = semanticNaming.sectionNames[section];
     for (const [name, ref] of Object.entries(tokens)) {
+      // Subbrand semantic tokens only emit when the secondary scale exists.
+      if (!includeSecondary && name.startsWith('secondary-')) continue;
       const lightRef = typeof ref === 'string' ? ref : ref.light;
       const darkRef = typeof ref === 'string' ? ref : ref.dark;
       semanticVars.push({

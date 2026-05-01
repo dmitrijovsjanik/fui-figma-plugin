@@ -97,7 +97,7 @@ export const DEFAULT_NAMING_CONFIG: NamingConfig = {
     { type: 'separator', value: '/' },
     { type: 'variable', value: 'step' },
   ],
-  roleNames: { brand: 'brand', secondary: 'secondary', success: 'success', warning: 'warning', danger: 'danger', info: 'info', neutral: 'neutral' },
+  roleNames: { brand: 'brand', secondary: 'subbrand', success: 'success', warning: 'warning', danger: 'danger', info: 'info', neutral: 'neutral' },
   themeNames: { light: 'light', dark: 'dark' },
   modeNames: { solid: 'solid', alpha: 'alpha' },
 };
