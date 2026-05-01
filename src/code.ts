@@ -61,6 +61,9 @@ const KEY_MIGRATIONS: Record<string, string> = {
   // tokens. Pin the migration to on-accent so its variable becomes
   // on-background; the other on-* variables surface as orphans for cleanup.
   'sem:fg:on-accent': 'sem:fg:on-background',
+  // fg/link and fg/link-hover removed (duplicate of info-secondary/info-primary).
+  // No migration: info-* already exist with the same values, so link variables
+  // surface as orphans for the cleanup modal.
   // border restructure → primary/secondary/tertiary scheme.
   //   primary = a9 (no hover)
   //   secondary = a7 (default) + a8 (hover)

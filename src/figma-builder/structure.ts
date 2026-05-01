@@ -29,6 +29,9 @@ export interface VariableSpec {
   key: string;
   // Path components, e.g. ['light', 'gray', '0'] or ['bg', 'canvas']
   path: string[];
+  // Native Figma variable description. Populated for semantic tokens only;
+  // primitives leave it empty (their meaning is encoded by step + role).
+  description?: string;
   // Per-mode value: either a literal RGBA, or an alias to another variable.
   // Alias is expressed as { aliasOf: { collection, path } } — collection is the
   // human-readable collection name (e.g. 'primitives'), path is the target var path.
@@ -111,8 +114,6 @@ const SEMANTIC_TOKENS: Record<SemanticSection, Record<string, SemRef>> = {
     'neutral-primary': 'gray.12',
     'neutral-secondary': 'gray.11',
     'neutral-tertiary': 'gray.a10',
-    'link': 'blue.11',
-    'link-hover': 'blue.12',
     'accent-primary': 'accent.12',
     'accent-secondary': 'accent.11',
     'success-primary': 'green.12',
@@ -192,6 +193,91 @@ function parseRef(ref: string): { scale: string; step: string; isAlpha: boolean;
   const step = isAlpha ? stepRaw.slice(1) : stepRaw;
   const themed = scale !== 'black';
   return { scale, step, isAlpha, themed };
+}
+
+// Generates the native Figma description for a semantic token. Token names
+// follow the regular <role>-<level>[-hover] schema; special cases get explicit
+// descriptions. Re-set on every sync so names stay current with NamingConfig.
+function describeSemanticToken(
+  section: SemanticSection,
+  name: string,
+  namingConfig: NamingConfig,
+): string {
+  const roleLabel = (role: SemanticRole) => namingConfig.roleNames[role];
+
+  // Recognised colored-role prefix? Match `<role>-rest` against known roles.
+  const colored = (() => {
+    for (const role of ['neutral', 'brand', 'success', 'warning', 'danger', 'info'] as const) {
+      const internalRole: SemanticRole = role === 'brand' ? 'brand' : role;
+      // Map internal role names to their token-key prefix (brand → 'accent').
+      const prefix = role === 'brand' ? 'accent' : role;
+      if (name === prefix || name.startsWith(`${prefix}-`)) {
+        return { rolePrefix: prefix, role: internalRole, label: roleLabel(internalRole), rest: name === prefix ? '' : name.slice(prefix.length + 1) };
+      }
+    }
+    return null;
+  })();
+
+  if (section === 'bg') {
+    if (name === 'canvas') return 'Page canvas — topmost surface, behind everything else.';
+    if (name === 'primary') return 'Primary surface for cards, panels, and other content containers.';
+    if (name === 'secondary') return 'Recessed surface — sits below bg/primary for visual layering.';
+    if (/^surface-\d$/.test(name)) {
+      const lvl = name.slice('surface-'.length);
+      return `Elevation level ${lvl} — for stacked panels, menus, and popovers.`;
+    }
+    if (colored) {
+      const { rest, label } = colored;
+      const map: Record<string, string> = {
+        'primary': `Solid ${label} surface — buttons, badges, active states.`,
+        'primary-hover': `Hover state of bg/${colored.rolePrefix}-primary.`,
+        'secondary': `Subtle ${label} surface — selected rows, ghost buttons, soft fills.`,
+        'secondary-hover': `Hover state of bg/${colored.rolePrefix}-secondary.`,
+      };
+      return map[rest] ?? '';
+    }
+  }
+
+  if (section === 'fg') {
+    if (name === 'on-background') {
+      return 'White text on saturated colored backgrounds (bg/*-primary).';
+    }
+    if (colored) {
+      const { rest, label } = colored;
+      const map: Record<string, string> = {
+        'primary': colored.role === 'neutral' ? 'Primary text color — body, headings.' : `Primary ${label} text — emphasis.`,
+        'secondary': colored.role === 'neutral' ? 'Secondary text — labels, supporting copy.' : `Secondary (muted) ${label} text.`,
+        'tertiary': 'Tertiary text — placeholders, disabled, deeply muted copy.',
+      };
+      return map[rest] ?? '';
+    }
+  }
+
+  if (section === 'border') {
+    if (colored) {
+      const { rest, label } = colored;
+      const map: Record<string, string> = {
+        'primary': `Strongest ${label} border — focus emphasis, key outlines.`,
+        'secondary': `Default interactive ${label} border — inputs, buttons.`,
+        'secondary-hover': `Hover state of border/${colored.rolePrefix}-secondary.`,
+        'tertiary': `Subtle ${label} border — dividers, decorative separators.`,
+      };
+      return map[rest] ?? '';
+    }
+  }
+
+  if (section === 'ring') {
+    if (name === 'focus') return 'Focus ring on interactive elements.';
+    if (name === 'focus-error') return 'Focus ring when the element is in error state.';
+  }
+
+  if (section === 'overlay') {
+    if (name === 'scrim') return 'Backdrop behind modals and dialogs.';
+    if (name === 'hover') return 'Translucent hover overlay on interactive elements.';
+    if (name === 'active') return 'Translucent pressed/active overlay on interactive elements.';
+  }
+
+  return '';
 }
 
 // Internal scale keys (gray/accent/green/...) → user-facing role names from NamingConfig.
@@ -306,6 +392,7 @@ export function buildVariableStructure(
       semanticVars.push({
         key: `sem:${section}:${name}`,
         path: [sectionLabel, name],
+        description: describeSemanticToken(section, name, namingConfig),
         valuesByMode: {
           Light: { aliasOf: { collection: PRIMITIVES, path: refToPath(lightRef, 'light', namingConfig) } },
           Dark: { aliasOf: { collection: PRIMITIVES, path: refToPath(darkRef, 'dark', namingConfig) } },

@@ -74,6 +74,7 @@ export async function createCollections(structure: VariableStructure): Promise<A
     const v = figma.variables.createVariable(pathToName(spec.path), primCollection, COLOR_TYPE);
     primVarsByPath.set(pathToName(spec.path), v);
     keyToId[spec.key] = v.id;
+    if (spec.description) v.description = spec.description;
     created++;
     for (const [modeName, value] of Object.entries(spec.valuesByMode)) {
       const modeId = primModeMap[modeName];
@@ -95,6 +96,7 @@ export async function createCollections(structure: VariableStructure): Promise<A
   for (const spec of structure.semantics.variables) {
     const v = figma.variables.createVariable(pathToName(spec.path), semCollection, COLOR_TYPE);
     keyToId[spec.key] = v.id;
+    if (spec.description) v.description = spec.description;
     created++;
     for (const [modeName, value] of Object.entries(spec.valuesByMode)) {
       const modeId = semModeMap[modeName];
@@ -193,6 +195,11 @@ export async function updateCollections(
     }
     keyToId[spec.key] = existing.id;
     primByCurrentPath.set(targetName, existing);
+    const nextDescription = spec.description ?? '';
+    if (existing.description !== nextDescription) {
+      existing.description = nextDescription;
+      if (!didCreate) didChange = true;
+    }
     const value = spec.valuesByMode[structure.primitives.modes[0]];
     if (value && !('aliasOf' in (value as object))) {
       const nextValue = value as RGBA;
@@ -236,6 +243,11 @@ export async function updateCollections(
       didChange = true;
     }
     keyToId[spec.key] = existing.id;
+    const nextDescription = spec.description ?? '';
+    if (existing.description !== nextDescription) {
+      existing.description = nextDescription;
+      if (!didCreate) didChange = true;
+    }
     for (const [modeName, value] of Object.entries(spec.valuesByMode)) {
       const modeId = semModeMap[modeName];
       if (!modeId) continue;
