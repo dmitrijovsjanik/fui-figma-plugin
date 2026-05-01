@@ -212,7 +212,13 @@ function describeSemanticToken(
       // Map internal role names to their token-key prefix (brand → 'accent').
       const prefix = role === 'brand' ? 'accent' : role;
       if (name === prefix || name.startsWith(`${prefix}-`)) {
-        return { rolePrefix: prefix, role: internalRole, label: roleLabel(internalRole), rest: name === prefix ? '' : name.slice(prefix.length + 1) };
+        return {
+          rolePrefix: prefix,
+          userPrefix: roleLabel(internalRole),
+          role: internalRole,
+          label: roleLabel(internalRole),
+          rest: name === prefix ? '' : name.slice(prefix.length + 1),
+        };
       }
     }
     return null;
@@ -227,12 +233,12 @@ function describeSemanticToken(
       return `Elevation level ${lvl} — for stacked panels, menus, and popovers.`;
     }
     if (colored) {
-      const { rest, label } = colored;
+      const { rest, label, userPrefix } = colored;
       const map: Record<string, string> = {
         'primary': `Solid ${label} surface — buttons, badges, active states.`,
-        'primary-hover': `Hover state of bg/${colored.rolePrefix}-primary.`,
+        'primary-hover': `Hover state of bg/${userPrefix}-primary.`,
         'secondary': `Subtle ${label} surface — selected rows, ghost buttons, soft fills.`,
-        'secondary-hover': `Hover state of bg/${colored.rolePrefix}-secondary.`,
+        'secondary-hover': `Hover state of bg/${userPrefix}-secondary.`,
       };
       return map[rest] ?? '';
     }
@@ -255,11 +261,11 @@ function describeSemanticToken(
 
   if (section === 'border') {
     if (colored) {
-      const { rest, label } = colored;
+      const { rest, label, userPrefix } = colored;
       const map: Record<string, string> = {
         'primary': `Strongest ${label} border — focus emphasis, key outlines.`,
         'secondary': `Default interactive ${label} border — inputs, buttons.`,
-        'secondary-hover': `Hover state of border/${colored.rolePrefix}-secondary.`,
+        'secondary-hover': `Hover state of border/${userPrefix}-secondary.`,
         'tertiary': `Subtle ${label} border — dividers, decorative separators.`,
       };
       return map[rest] ?? '';
@@ -287,6 +293,31 @@ function scaleToUserName(scale: string, namingConfig: NamingConfig): string {
   if (pair) return namingConfig.roleNames[pair[0]];
   if (scale === 'secondary') return namingConfig.roleNames.secondary;
   return scale;
+}
+
+// Token names in SEMANTIC_TOKENS keep stable internal prefixes (e.g. 'accent-primary').
+// At write time we swap the prefix for the user-facing role name from NamingConfig
+// so 'accent-primary' becomes 'brand-primary' when roleNames.brand = 'brand'.
+const TOKEN_PREFIX_TO_ROLE: ReadonlyArray<[string, SemanticRole]> = [
+  ['accent', 'brand'],
+  ['neutral', 'neutral'],
+  ['success', 'success'],
+  ['warning', 'warning'],
+  ['danger', 'danger'],
+  ['info', 'info'],
+  ['secondary', 'secondary'],
+];
+
+function translateTokenName(name: string, namingConfig: NamingConfig): string {
+  // Only translate compound names (<role>-rest). Standalone names like
+  // 'secondary' (bg/secondary = the page-level secondary surface) are
+  // special semantic concepts unrelated to the secondary brand role.
+  for (const [internalPrefix, role] of TOKEN_PREFIX_TO_ROLE) {
+    if (name.startsWith(`${internalPrefix}-`)) {
+      return `${namingConfig.roleNames[role]}-${name.slice(internalPrefix.length + 1)}`;
+    }
+  }
+  return name;
 }
 
 function refToPath(ref: string, theme: 'light' | 'dark', namingConfig: NamingConfig): string[] {
@@ -391,7 +422,7 @@ export function buildVariableStructure(
       const darkRef = typeof ref === 'string' ? ref : ref.dark;
       semanticVars.push({
         key: `sem:${section}:${name}`,
-        path: [sectionLabel, name],
+        path: [sectionLabel, translateTokenName(name, namingConfig)],
         description: describeSemanticToken(section, name, namingConfig),
         valuesByMode: {
           Light: { aliasOf: { collection: PRIMITIVES, path: refToPath(lightRef, 'light', namingConfig) } },
