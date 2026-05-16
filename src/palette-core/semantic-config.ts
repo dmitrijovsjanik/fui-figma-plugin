@@ -23,7 +23,13 @@
 
 import type { SemanticRole } from './types';
 
-export type PrimitiveRef = string | { light: string; dark: string };
+// Every semantic token always has both light & dark refs — dark mode is
+// global, so there is no "single-theme" semantic concept. If both refs happen
+// to point at the same primitive, the user just sets them to the same value.
+export interface PrimitiveRef {
+  light: string;
+  dark: string;
+}
 
 export interface StandaloneToken {
   id: string;
@@ -53,7 +59,7 @@ export interface SemanticConfig {
 // Substitutes {role} into a role-slot ref. Used by structure.ts at expansion time.
 export function applyRoleToRef(ref: PrimitiveRef, scaleName: string): PrimitiveRef {
   const sub = (s: string) => s.replace(/\{role\}/g, scaleName);
-  return typeof ref === 'string' ? sub(ref) : { light: sub(ref.light), dark: sub(ref.dark) };
+  return { light: sub(ref.light), dark: sub(ref.dark) };
 }
 
 // Stable-but-deterministic IDs for the defaults. Real UUIDs are used at runtime
@@ -92,7 +98,7 @@ export const DEFAULT_SEMANTIC_CONFIG: SemanticConfig = {
         {
           id: did('bg-canvas'),
           name: 'canvas',
-          ref: 'gray.0',
+          ref: { light: 'gray.0', dark: 'gray.0' },
           description: 'Page canvas — topmost surface, behind everything else.',
         },
         {
@@ -139,10 +145,10 @@ export const DEFAULT_SEMANTIC_CONFIG: SemanticConfig = {
         },
       ],
       roleSlots: [
-        { id: did('bg-slot-primary'),         suffix: 'primary',         ref: '{role}.9',  description: 'Solid {roleLabel} surface — buttons, badges, active states.' },
-        { id: did('bg-slot-primary-hover'),   suffix: 'primary-hover',   ref: '{role}.10', description: 'Hover state of bg/{roleLabel}-primary.' },
-        { id: did('bg-slot-secondary'),       suffix: 'secondary',       ref: '{role}.a3', description: 'Subtle {roleLabel} surface — selected rows, ghost buttons, soft fills.' },
-        { id: did('bg-slot-secondary-hover'), suffix: 'secondary-hover', ref: '{role}.a4', description: 'Hover state of bg/{roleLabel}-secondary.' },
+        { id: did('bg-slot-primary'),         suffix: 'primary',         ref: { light: '{role}.9',  dark: '{role}.9'  }, description: 'Solid {roleLabel} surface — buttons, badges, active states.' },
+        { id: did('bg-slot-primary-hover'),   suffix: 'primary-hover',   ref: { light: '{role}.10', dark: '{role}.10' }, description: 'Hover state of bg/{roleLabel}-primary.' },
+        { id: did('bg-slot-secondary'),       suffix: 'secondary',       ref: { light: '{role}.a3', dark: '{role}.a3' }, description: 'Subtle {roleLabel} surface — selected rows, ghost buttons, soft fills.' },
+        { id: did('bg-slot-secondary-hover'), suffix: 'secondary-hover', ref: { light: '{role}.a4', dark: '{role}.a4' }, description: 'Hover state of bg/{roleLabel}-secondary.' },
       ],
     },
     {
@@ -152,19 +158,19 @@ export const DEFAULT_SEMANTIC_CONFIG: SemanticConfig = {
         {
           id: did('fg-on-background'),
           name: 'on-background',
-          ref: 'white-fixed',
+          ref: { light: 'white-fixed', dark: 'white-fixed' },
           description: 'White text on saturated colored backgrounds (bg/*-primary).',
         },
         {
           id: did('fg-neutral-tertiary'),
           name: 'neutral-tertiary',
-          ref: 'gray.a8',
+          ref: { light: 'gray.a8', dark: 'gray.a8' },
           description: 'Tertiary text — placeholders, disabled, deeply muted copy.',
         },
       ],
       roleSlots: [
-        { id: did('fg-slot-primary'),   suffix: 'primary',   ref: '{role}.12', description: 'Primary {roleLabel} text — emphasis.' },
-        { id: did('fg-slot-secondary'), suffix: 'secondary', ref: '{role}.11', description: 'Secondary (muted) {roleLabel} text.' },
+        { id: did('fg-slot-primary'),   suffix: 'primary',   ref: { light: '{role}.12', dark: '{role}.12' }, description: 'Primary {roleLabel} text — emphasis.' },
+        { id: did('fg-slot-secondary'), suffix: 'secondary', ref: { light: '{role}.11', dark: '{role}.11' }, description: 'Secondary (muted) {roleLabel} text.' },
       ],
     },
     {
@@ -172,10 +178,10 @@ export const DEFAULT_SEMANTIC_CONFIG: SemanticConfig = {
       name: 'border',
       standalone: [],
       roleSlots: [
-        { id: did('border-slot-primary'),         suffix: 'primary',         ref: '{role}.a9', description: 'Strongest {roleLabel} border — focus emphasis, key outlines.' },
-        { id: did('border-slot-secondary'),       suffix: 'secondary',       ref: '{role}.a7', description: 'Default interactive {roleLabel} border — inputs, buttons.' },
-        { id: did('border-slot-secondary-hover'), suffix: 'secondary-hover', ref: '{role}.a8', description: 'Hover state of border/{roleLabel}-secondary.' },
-        { id: did('border-slot-tertiary'),        suffix: 'tertiary',        ref: '{role}.a6', description: 'Subtle {roleLabel} border — dividers, decorative separators.' },
+        { id: did('border-slot-primary'),         suffix: 'primary',         ref: { light: '{role}.a9', dark: '{role}.a9' }, description: 'Strongest {roleLabel} border — focus emphasis, key outlines.' },
+        { id: did('border-slot-secondary'),       suffix: 'secondary',       ref: { light: '{role}.a7', dark: '{role}.a7' }, description: 'Default interactive {roleLabel} border — inputs, buttons.' },
+        { id: did('border-slot-secondary-hover'), suffix: 'secondary-hover', ref: { light: '{role}.a8', dark: '{role}.a8' }, description: 'Hover state of border/{roleLabel}-secondary.' },
+        { id: did('border-slot-tertiary'),        suffix: 'tertiary',        ref: { light: '{role}.a6', dark: '{role}.a6' }, description: 'Subtle {roleLabel} border — dividers, decorative separators.' },
       ],
     },
     {
@@ -191,13 +197,13 @@ export const DEFAULT_SEMANTIC_CONFIG: SemanticConfig = {
         {
           id: did('overlay-hover'),
           name: 'hover',
-          ref: 'gray.a3',
+          ref: { light: 'gray.a3', dark: 'gray.a3' },
           description: 'Translucent hover overlay on interactive elements.',
         },
         {
           id: did('overlay-active'),
           name: 'active',
-          ref: 'gray.a4',
+          ref: { light: 'gray.a4', dark: 'gray.a4' },
           description: 'Translucent pressed/active overlay on interactive elements.',
         },
       ],

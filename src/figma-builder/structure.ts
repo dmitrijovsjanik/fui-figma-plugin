@@ -189,17 +189,11 @@ function refToFallback(
   return hexToRgba(data.palette[role][stepNum]);
 }
 
-// Resolves the two refs (light + dark) for any PrimitiveRef.
-function splitRef(ref: PrimitiveRef): { light: string; dark: string } {
-  return typeof ref === 'string' ? { light: ref, dark: ref } : ref;
-}
-
 // True if the ref ultimately points at the `secondary` primitive scale. Used to
 // skip role slots / standalone tokens when secondary brand is disabled.
 function refTargetsSecondary(ref: PrimitiveRef): boolean {
-  const { light, dark } = splitRef(ref);
   const isSec = (r: string) => parseRef(r).scale === 'secondary';
-  return isSec(light) || isSec(dark);
+  return isSec(ref.light) || isSec(ref.dark);
 }
 
 // Builds the materialized list of semantic VariableSpecs from a SemanticConfig.
@@ -223,7 +217,7 @@ export function expandSemanticConfig(
     // Standalone tokens
     for (const tok of section.standalone) {
       if (!includeSecondary && refTargetsSecondary(tok.ref)) continue;
-      const { light, dark } = splitRef(tok.ref);
+      const { light, dark } = tok.ref;
       const displayName = translateStandaloneName(tok.name, namingConfig);
       out.push({
         key: `sem:${tok.id}`,
@@ -244,7 +238,7 @@ export function expandSemanticConfig(
         // The slot ref uses '{role}' as placeholder; substitute the scale name.
         const expandedRef = applyRoleToRef(slot.ref, scaleName);
         if (!includeSecondary && refTargetsSecondary(expandedRef)) continue;
-        const { light, dark } = splitRef(expandedRef);
+        const { light, dark } = expandedRef;
         const roleLabel = namingConfig.roleNames[role];
         const tokenName = `${roleLabel}-${slot.suffix}`;
         out.push({

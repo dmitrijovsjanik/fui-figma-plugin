@@ -134,7 +134,7 @@ function SectionEditor({ section, onChange, onRemove, namingConfig, previewResul
     onChange({
       standalone: [
         ...section.standalone,
-        { id: newId(), name: 'new-token', ref: 'gray.9' as PrimitiveRef },
+        { id: newId(), name: 'new-token', ref: { light: 'gray.9', dark: 'gray.9' } },
       ],
     });
   };
@@ -149,7 +149,7 @@ function SectionEditor({ section, onChange, onRemove, namingConfig, previewResul
     onChange({
       roleSlots: [
         ...section.roleSlots,
-        { id: newId(), suffix: 'new', ref: '{role}.9' as PrimitiveRef },
+        { id: newId(), suffix: 'new', ref: { light: '{role}.9', dark: '{role}.9' } },
       ],
     });
   };
@@ -284,20 +284,8 @@ interface StandaloneRowProps {
 }
 
 function StandaloneRow({ sectionName, token, onChange, onRemove, previewResult, includeSecondary }: StandaloneRowProps) {
-  const isPerTheme = typeof token.ref !== 'string';
-  const refLight = typeof token.ref === 'string' ? token.ref : token.ref.light;
-  const refDark = typeof token.ref === 'string' ? token.ref : token.ref.dark;
-
+  const { light, dark } = token.ref;
   const setRef = (ref: PrimitiveRef) => onChange({ ref });
-
-  const togglePerTheme = () => {
-    if (isPerTheme) {
-      // collapse → keep light
-      setRef(refLight);
-    } else {
-      setRef({ light: refLight, dark: refLight });
-    }
-  };
 
   return (
     <TokenRow
@@ -307,23 +295,21 @@ function StandaloneRow({ sectionName, token, onChange, onRemove, previewResult, 
       lightPicker={
         <PrimitiveRefPicker
           mode="standalone"
-          value={refLight}
-          onChange={(v) => isPerTheme ? setRef({ light: v, dark: refDark }) : setRef(v)}
+          value={light}
+          onChange={(v) => setRef({ light: v, dark })}
           previewResult={previewResult}
           includeSecondary={includeSecondary}
         />
       }
-      darkPicker={isPerTheme ? (
+      darkPicker={
         <PrimitiveRefPicker
           mode="standalone"
-          value={refDark}
-          onChange={(v) => setRef({ light: refLight, dark: v })}
+          value={dark}
+          onChange={(v) => setRef({ light, dark: v })}
           previewResult={previewResult}
           includeSecondary={includeSecondary}
         />
-      ) : null}
-      isPerTheme={isPerTheme}
-      onTogglePerTheme={togglePerTheme}
+      }
       onRemove={onRemove}
     />
   );
@@ -337,7 +323,7 @@ const COL = {
   prefix: 90,        // 'bg/' or 'bg/{role}-'
   name: 200,         // name / suffix input
   ref: 230,          // single Light or Dark picker
-  actions: 88,       // L/D toggle + delete button
+  actions: 40,       // delete button
   gap: 8,
 } as const;
 
@@ -394,13 +380,11 @@ function TokenRow(props: {
   nameValue: string;
   onNameChange: (v: string) => void;
   lightPicker: React.ReactNode;
-  darkPicker: React.ReactNode | null;
-  isPerTheme: boolean;
-  onTogglePerTheme: () => void;
+  darkPicker: React.ReactNode;
   onRemove: () => void;
   trailing?: React.ReactNode;
 }) {
-  const { prefix, nameValue, onNameChange, lightPicker, darkPicker, isPerTheme, onTogglePerTheme, onRemove, trailing } = props;
+  const { prefix, nameValue, onNameChange, lightPicker, darkPicker, onRemove, trailing } = props;
   return (
     <div style={{
       display: 'flex',
@@ -431,23 +415,9 @@ function TokenRow(props: {
         </div>
       </Cell>
       <Cell width={COL.ref}>{lightPicker}</Cell>
-      <Cell width={COL.ref}>{darkPicker /* may be null — empty cell preserves alignment */}</Cell>
+      <Cell width={COL.ref}>{darkPicker}</Cell>
       <Cell width={COL.actions} align="flex-end">
-        <div style={{ display: 'flex', gap: 4 }}>
-          <button
-            type="button"
-            onClick={onTogglePerTheme}
-            title={isPerTheme ? 'Same ref for light & dark' : 'Different refs per theme'}
-            style={{
-              height: 24, padding: '0 8px', borderRadius: 4,
-              border: '1px solid var(--fui-border-neutral-secondary, rgba(0,0,0,0.15))',
-              background: isPerTheme ? 'var(--fui-bg-accent-secondary, rgba(99,102,241,0.1))' : 'transparent',
-              fontSize: 11, cursor: 'pointer',
-              color: 'var(--fui-fg-neutral-primary)',
-            }}
-          >L/D</button>
-          <Button buttonType="tertiary" status="error" padSize="sm" textSize={12} onClick={onRemove}>×</Button>
-        </div>
+        <Button buttonType="tertiary" status="error" padSize="sm" textSize={12} onClick={onRemove}>×</Button>
       </Cell>
       {trailing}
     </div>
@@ -496,15 +466,8 @@ interface RoleSlotRowProps {
 }
 
 function RoleSlotRow({ sectionName, slot, onChange, onRemove, namingConfig, previewResult, includeSecondary }: RoleSlotRowProps) {
-  const isPerTheme = typeof slot.ref !== 'string';
-  const refLight = typeof slot.ref === 'string' ? slot.ref : slot.ref.light;
-  const refDark = typeof slot.ref === 'string' ? slot.ref : slot.ref.dark;
+  const { light, dark } = slot.ref;
   const setRef = (ref: PrimitiveRef) => onChange({ ref });
-
-  const togglePerTheme = () => {
-    if (isPerTheme) setRef(refLight);
-    else setRef({ light: refLight, dark: refLight });
-  };
 
   const roles: SemanticRole[] = SEMANTIC_ROLES.filter(r => r !== 'secondary' || includeSecondary);
 
@@ -516,25 +479,23 @@ function RoleSlotRow({ sectionName, slot, onChange, onRemove, namingConfig, prev
       lightPicker={
         <PrimitiveRefPicker
           mode="slot"
-          value={refLight}
-          onChange={(v) => isPerTheme ? setRef({ light: v, dark: refDark }) : setRef(v)}
+          value={light}
+          onChange={(v) => setRef({ light: v, dark })}
           previewResult={previewResult}
           previewRole="brand"
           includeSecondary={includeSecondary}
         />
       }
-      darkPicker={isPerTheme ? (
+      darkPicker={
         <PrimitiveRefPicker
           mode="slot"
-          value={refDark}
-          onChange={(v) => setRef({ light: refLight, dark: v })}
+          value={dark}
+          onChange={(v) => setRef({ light, dark: v })}
           previewResult={previewResult}
           previewRole="brand"
           includeSecondary={includeSecondary}
         />
-      ) : null}
-      isPerTheme={isPerTheme}
-      onTogglePerTheme={togglePerTheme}
+      }
       onRemove={onRemove}
       trailing={
         <div style={{ display: 'flex', gap: 2, paddingLeft: COL.gap }}>
@@ -559,7 +520,7 @@ function SlotPreviewSwatch({ role, slot, previewResult, namingConfig }: {
   previewResult: GenerationResult | null;
   namingConfig: NamingConfig;
 }) {
-  const refStr = typeof slot.ref === 'string' ? slot.ref : slot.ref.light;
+  const refStr = slot.ref.light;
   // Substitute {role} with the internal scale name for this role.
   const scaleToRole: Record<string, SemanticRole> = {
     gray: 'neutral', accent: 'brand', secondary: 'secondary',
