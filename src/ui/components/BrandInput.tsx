@@ -92,10 +92,8 @@ function SettingsDropdown({ config, onConfigChange }: { config: GenerationConfig
         </div>
         <MenuItem
           toggle
-          checked={config.neutralStyle === 'contrast'}
-          onCheckedChange={() => onConfigChange({
-            neutralStyle: config.neutralStyle === 'contrast' ? 'pure-gray' : 'contrast',
-          })}
+          checked={config.contrastNeutral === true}
+          onCheckedChange={() => onConfigChange({ contrastNeutral: !config.contrastNeutral })}
           padSize="md"
           textSize={14}
         >

@@ -32,13 +32,12 @@ export type ChromaEqualization = 'independent' | 'equal';
 // Theme
 export type ThemeMode = 'light' | 'dark';
 
-// Neutral style
+// Neutral style — controls the *hue/chroma* curve of the neutral scale.
 //  'tinted'    — neutral hue follows brand, slight chroma (default)
 //  'pure-gray' — chromaless neutral
-//  'contrast'  — step 9 forced to extreme (pure black in light theme, pure
-//                white in dark theme); step 10 is 30% of step 9's L; rest of
-//                the scale unchanged.
-export type NeutralStyle = 'tinted' | 'pure-gray' | 'contrast';
+// Note: contrast-neutral mode is an independent boolean (config.contrastNeutral)
+// that only overrides steps 9 + 10 and is compatible with either style above.
+export type NeutralStyle = 'tinted' | 'pure-gray';
 
 // Secondary brand color harmony
 export type HarmonyType = 'complementary' | 'analogous' | 'triadic' | 'split-complementary' | 'tetradic';
@@ -140,6 +139,8 @@ export interface GenerationConfig {
   semanticHarmony?: SemanticHarmonyConfig;
   stepPositions?: Record<number, number>; // Custom step 1-8 position fractions (overrides defaults)
   equalizeLightness?: boolean; // Force all roles to use same lightness per step (brand's L)
+  /** Force neutral steps 9 (pure black/white) and 10 (L 0.3 / 0.7) to extremes. Independent of neutralStyle — steps 1-8 / 11-12 still follow tinted/pure-gray. */
+  contrastNeutral?: boolean;
 }
 
 // Semantic hues result

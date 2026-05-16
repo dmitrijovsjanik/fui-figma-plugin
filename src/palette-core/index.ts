@@ -110,7 +110,7 @@ export function generatePalette(config: GenerationConfig): GenerationResult {
       peakChroma: chromas[role],
       gamut: config.gamut,
       isNeutral,
-      contrastNeutral: isNeutral && config.neutralStyle === 'contrast',
+      contrastNeutral: isNeutral && config.contrastNeutral === true,
       brandLightness: isNeutral ? undefined : brandStep9L,
       backgroundLightness: bgL,
       stepPositions: config.stepPositions,
