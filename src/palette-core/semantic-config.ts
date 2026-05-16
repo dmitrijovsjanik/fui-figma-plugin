@@ -26,9 +26,17 @@ import type { SemanticRole } from './types';
 // Every semantic token always has both light & dark refs — dark mode is
 // global, so there is no "single-theme" semantic concept. If both refs happen
 // to point at the same primitive, the user just sets them to the same value.
+//
+// `lightInvert` / `darkInvert` flip the *primitive's* theme: when true, a
+// themed ref like 'gray.9' resolves to the dark-mode gray.9 even though the
+// surrounding semantic mode is Light (and vice versa). Used for "static
+// inverted neutral" tokens (e.g. always-white fg/on-image regardless of UI
+// theme). No effect on theme-invariant scales (black, white, white-fixed).
 export interface PrimitiveRef {
   light: string;
   dark: string;
+  lightInvert?: boolean;
+  darkInvert?: boolean;
 }
 
 export interface StandaloneToken {
@@ -59,7 +67,12 @@ export interface SemanticConfig {
 // Substitutes {role} into a role-slot ref. Used by structure.ts at expansion time.
 export function applyRoleToRef(ref: PrimitiveRef, scaleName: string): PrimitiveRef {
   const sub = (s: string) => s.replace(/\{role\}/g, scaleName);
-  return { light: sub(ref.light), dark: sub(ref.dark) };
+  return {
+    light: sub(ref.light),
+    dark: sub(ref.dark),
+    lightInvert: ref.lightInvert,
+    darkInvert: ref.darkInvert,
+  };
 }
 
 // Normalises a value loaded from clientStorage that may have been written by
@@ -68,9 +81,14 @@ export function applyRoleToRef(ref: PrimitiveRef, scaleName: string): PrimitiveR
 function normalizeRef(ref: unknown): PrimitiveRef {
   if (typeof ref === 'string') return { light: ref, dark: ref };
   if (ref && typeof ref === 'object' && 'light' in ref && 'dark' in ref) {
-    const r = ref as { light: unknown; dark: unknown };
+    const r = ref as { light: unknown; dark: unknown; lightInvert?: unknown; darkInvert?: unknown };
     if (typeof r.light === 'string' && typeof r.dark === 'string') {
-      return { light: r.light, dark: r.dark };
+      return {
+        light: r.light,
+        dark: r.dark,
+        lightInvert: r.lightInvert === true ? true : undefined,
+        darkInvert: r.darkInvert === true ? true : undefined,
+      };
     }
   }
   // Safe fallback so the editor doesn't crash on malformed data.

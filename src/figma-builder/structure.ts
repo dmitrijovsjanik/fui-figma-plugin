@@ -230,7 +230,7 @@ export function expandSemanticConfig(
     // Standalone tokens
     for (const tok of section.standalone) {
       if (!includeSecondary && refTargetsSecondary(tok.ref)) continue;
-      const { light, dark } = tok.ref;
+      const { light, dark, lightInvert, darkInvert } = tok.ref;
       const displayName = translateStandaloneName(tok.name, namingConfig);
       const path = [sectionLabel, displayName];
       const pathKey = path.join('/');
@@ -239,13 +239,17 @@ export function expandSemanticConfig(
         continue;
       }
       seenPaths.add(pathKey);
+      // invert flips which primitive-theme the alias points at, regardless of
+      // the surrounding semantic mode.
+      const lightTheme: 'light' | 'dark' = lightInvert ? 'dark' : 'light';
+      const darkTheme: 'light' | 'dark' = darkInvert ? 'light' : 'dark';
       out.push({
         key: `sem:${tok.id}`,
         path,
         description: tok.description ?? '',
         valuesByMode: {
-          Light: { aliasOf: { collection: PRIMITIVES, path: refToPath(light, 'light', namingConfig) } },
-          Dark: { aliasOf: { collection: PRIMITIVES, path: refToPath(dark, 'dark', namingConfig) } },
+          Light: { aliasOf: { collection: PRIMITIVES, path: refToPath(light, lightTheme, namingConfig) } },
+          Dark: { aliasOf: { collection: PRIMITIVES, path: refToPath(dark, darkTheme, namingConfig) } },
         },
       });
     }
@@ -258,7 +262,7 @@ export function expandSemanticConfig(
         // The slot ref uses '{role}' as placeholder; substitute the scale name.
         const expandedRef = applyRoleToRef(slot.ref, scaleName);
         if (!includeSecondary && refTargetsSecondary(expandedRef)) continue;
-        const { light, dark } = expandedRef;
+        const { light, dark, lightInvert, darkInvert } = expandedRef;
         const roleLabel = namingConfig.roleNames[role];
         const tokenName = `${roleLabel}-${slot.suffix}`;
         const path = [sectionLabel, tokenName];
@@ -268,13 +272,15 @@ export function expandSemanticConfig(
           continue;
         }
         seenPaths.add(pathKey);
+        const lightTheme: 'light' | 'dark' = lightInvert ? 'dark' : 'light';
+        const darkTheme: 'light' | 'dark' = darkInvert ? 'light' : 'dark';
         out.push({
           key: `sem:${slot.id}:${role}`,
           path,
           description: slot.description ? applyRoleToDescription(slot.description, role, namingConfig) : '',
           valuesByMode: {
-            Light: { aliasOf: { collection: PRIMITIVES, path: refToPath(light, 'light', namingConfig) } },
-            Dark: { aliasOf: { collection: PRIMITIVES, path: refToPath(dark, 'dark', namingConfig) } },
+            Light: { aliasOf: { collection: PRIMITIVES, path: refToPath(light, lightTheme, namingConfig) } },
+            Dark: { aliasOf: { collection: PRIMITIVES, path: refToPath(dark, darkTheme, namingConfig) } },
           },
         });
       }

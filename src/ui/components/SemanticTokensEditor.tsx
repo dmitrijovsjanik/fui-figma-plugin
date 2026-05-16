@@ -291,8 +291,8 @@ interface StandaloneRowProps {
 }
 
 function StandaloneRow({ sectionName, token, onChange, onRemove, lightResult, darkResult, includeSecondary }: StandaloneRowProps) {
-  const { light, dark } = token.ref;
-  const setRef = (ref: PrimitiveRef) => onChange({ ref });
+  const { light, dark, lightInvert, darkInvert } = token.ref;
+  const setRef = (patch: Partial<PrimitiveRef>) => onChange({ ref: { ...token.ref, ...patch } });
 
   return (
     <TokenRow
@@ -303,18 +303,22 @@ function StandaloneRow({ sectionName, token, onChange, onRemove, lightResult, da
         <PrimitiveRefPicker
           mode="standalone"
           value={light}
-          onChange={(v) => setRef({ light: v, dark })}
+          onChange={(v) => setRef({ light: v })}
           previewResult={lightResult}
           includeSecondary={includeSecondary}
+          invert={lightInvert === true}
+          onInvertChange={(v) => setRef({ lightInvert: v ? true : undefined })}
         />
       }
       darkPicker={
         <PrimitiveRefPicker
           mode="standalone"
           value={dark}
-          onChange={(v) => setRef({ light, dark: v })}
+          onChange={(v) => setRef({ dark: v })}
           previewResult={darkResult}
           includeSecondary={includeSecondary}
+          invert={darkInvert === true}
+          onInvertChange={(v) => setRef({ darkInvert: v ? true : undefined })}
         />
       }
       onRemove={onRemove}
@@ -485,8 +489,8 @@ interface RoleSlotRowProps {
 }
 
 function RoleSlotRow({ sectionName, slot, onChange, onRemove, namingConfig, lightResult, darkResult, includeSecondary }: RoleSlotRowProps) {
-  const { light, dark } = slot.ref;
-  const setRef = (ref: PrimitiveRef) => onChange({ ref });
+  const { light, dark, lightInvert, darkInvert } = slot.ref;
+  const setRef = (patch: Partial<PrimitiveRef>) => onChange({ ref: { ...slot.ref, ...patch } });
 
   const roles: SemanticRole[] = SEMANTIC_ROLES.filter(r => r !== 'secondary' || includeSecondary);
 
@@ -499,20 +503,24 @@ function RoleSlotRow({ sectionName, slot, onChange, onRemove, namingConfig, ligh
         <PrimitiveRefPicker
           mode="slot"
           value={light}
-          onChange={(v) => setRef({ light: v, dark })}
+          onChange={(v) => setRef({ light: v })}
           previewResult={lightResult}
           previewRole="brand"
           includeSecondary={includeSecondary}
+          invert={lightInvert === true}
+          onInvertChange={(v) => setRef({ lightInvert: v ? true : undefined })}
         />
       }
       darkPicker={
         <PrimitiveRefPicker
           mode="slot"
           value={dark}
-          onChange={(v) => setRef({ light, dark: v })}
+          onChange={(v) => setRef({ dark: v })}
           previewResult={darkResult}
           previewRole="brand"
           includeSecondary={includeSecondary}
+          invert={darkInvert === true}
+          onInvertChange={(v) => setRef({ darkInvert: v ? true : undefined })}
         />
       }
       onRemove={onRemove}

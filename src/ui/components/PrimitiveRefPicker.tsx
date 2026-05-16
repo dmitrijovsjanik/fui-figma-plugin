@@ -33,6 +33,10 @@ export interface PrimitiveRefPickerProps {
   includeSecondary?: boolean;     // hide 'secondary' scale option if false
   previewRole?: SemanticRole;     // used to render swatch for {role}-based refs
   previewResult?: GenerationResult | null;
+  // Theme-invert toggle: when true, this ref is resolved against the OPPOSITE
+  // primitive theme. Only meaningful for themed scales (not black/white/white-fixed).
+  invert?: boolean;
+  onInvertChange?: (next: boolean) => void;
 }
 
 interface ParsedRef {
@@ -99,7 +103,7 @@ interface ScaleOption {
 }
 
 export function PrimitiveRefPicker(props: PrimitiveRefPickerProps) {
-  const { mode, value, onChange, includeSecondary = true, previewRole, previewResult } = props;
+  const { mode, value, onChange, includeSecondary = true, previewRole, previewResult, invert = false, onInvertChange } = props;
   const parsed = parseRefValue(value);
   const isWhiteFixed = parsed.scale === 'white-fixed';
   const isBlack = parsed.scale === 'black';
@@ -217,6 +221,23 @@ export function PrimitiveRefPicker(props: PrimitiveRefPickerProps) {
         title={parsed.isAlpha ? 'Alpha scale — click to use solid' : 'Solid scale — click to use alpha'}
       >
         α
+      </Button>
+
+      {/* Theme-invert toggle. Only useful on themed scales; disabled for
+          black/white α and white-fixed where the primitive is theme-invariant. */}
+      <Button
+        kind="text"
+        buttonType="tertiary"
+        status="neutral"
+        padSize="sm"
+        textSize={12}
+        toggleable
+        pressed={invert}
+        onClick={() => onInvertChange?.(!invert)}
+        disabled={isWhiteFixed || isFixedAlpha || !onInvertChange}
+        title={invert ? 'Inverted: this ref resolves against the opposite primitive theme' : 'Use the opposite primitive theme (e.g. dark gray.9 inside a Light mode token)'}
+      >
+        inv
       </Button>
     </div>
   );
