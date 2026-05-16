@@ -331,8 +331,15 @@ const COL = {
   name: 200,         // name / suffix input
   ref: 230,          // single Light or Dark picker
   actions: 40,       // delete button
-  gap: 8,
+  gap: 8,            // gap inside a column (e.g. between scale + step picker)
+  colGap: 24,        // gap between distinct columns — emphasises Light vs Dark
 } as const;
+
+// Spacer placed between two visually-separate columns. Wider than the inner
+// gap so the user can immediately tell Light ends and Dark begins.
+function ColGap() {
+  return <div style={{ width: COL.colGap - COL.gap, flexShrink: 0 }} />;
+}
 
 function Cell({ width, children, align = 'flex-start' }: {
   width: number;
@@ -373,7 +380,9 @@ function ColumnHeaders({ nameLabel }: { nameLabel: string }) {
     }}>
       <Cell width={COL.prefix}><span style={labelStyle}>Path</span></Cell>
       <Cell width={COL.name}><span style={labelStyle}>{nameLabel}</span></Cell>
+      <ColGap />
       <Cell width={COL.ref}><span style={labelStyle}>Light</span></Cell>
+      <ColGap />
       <Cell width={COL.ref}><span style={labelStyle}>Dark</span></Cell>
       <Cell width={COL.actions} align="flex-end"><span style={labelStyle}>&nbsp;</span></Cell>
     </div>
@@ -421,7 +430,9 @@ function TokenRow(props: {
           />
         </div>
       </Cell>
+      <ColGap />
       <Cell width={COL.ref}>{lightPicker}</Cell>
+      <ColGap />
       <Cell width={COL.ref}>{darkPicker}</Cell>
       <Cell width={COL.actions} align="flex-end">
         <Button buttonType="tertiary" status="error" padSize="sm" textSize={12} onClick={onRemove}>×</Button>
