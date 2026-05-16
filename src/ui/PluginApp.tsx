@@ -4,6 +4,7 @@ import {
   checkBackgroundCompression,
   hexToOklch,
   DEFAULT_NAMING_CONFIG,
+  DEFAULT_SEMANTIC_CONFIG,
   DARK_STEP_POSITIONS,
   LIGHT_STEP_POSITIONS,
   SEMANTIC_ROLES,
@@ -11,6 +12,7 @@ import {
   type GenerationResult,
   type NamingConfig,
   type SecondaryConfig,
+  type SemanticConfig,
   type SemanticRole,
 } from '../palette-core';
 import { BrandInput } from './components/BrandInput';
@@ -26,6 +28,7 @@ import {
 } from './persistence-types';
 import { ResizeHandle } from './components/ResizeHandle';
 import { OrphansModal } from './components/OrphansModal';
+import { SemanticTokensEditor } from './components/SemanticTokensEditor';
 import { loadStateAsync, saveStateDebounced, postToSandbox } from './persistence';
 import type { StepPreset } from './preset-types';
 import type { SandboxToUI } from '../messages';
@@ -82,6 +85,7 @@ function defaultPersistedState(): PersistedState {
     curveDisplayMode: 'position',
     namingConfig: DEFAULT_NAMING_CONFIG,
     semanticNaming: DEFAULT_SEMANTIC_NAMING,
+    semanticConfig: DEFAULT_SEMANTIC_CONFIG,
     presets: [DEFAULT_PRESET],
     activePresetName: 'Standard',
     previousAppliedNaming: null,
@@ -95,6 +99,7 @@ export function PluginApp() {
   const [result, setResult] = useState<GenerationResult | null>(null);
   const [namingConfig, setNamingConfig] = useState<NamingConfig>(DEFAULT_NAMING_CONFIG);
   const [semanticNaming, setSemanticNaming] = useState<SemanticNamingConfig>(DEFAULT_SEMANTIC_NAMING);
+  const [semanticConfig, setSemanticConfig] = useState<SemanticConfig>(DEFAULT_SEMANTIC_CONFIG);
   const [displayMode, setDisplayMode] = useState<'semantic' | 'fill'>('semantic');
   const [colorFormat, setColorFormat] = useState<'alpha' | 'solid'>('alpha');
   const [curveDisplayMode, setCurveDisplayMode] = useState<CurveDisplayMode>('position');
@@ -105,6 +110,7 @@ export function PluginApp() {
   const [activePresetName, setActivePresetName] = useState<string | null>('Standard');
   const [windowSize, setWindowSize] = useState<WindowSize>(DEFAULT_WINDOW_SIZE);
   const [pendingOrphans, setPendingOrphans] = useState<Orphan[] | null>(null);
+  const [tokensEditorOpen, setTokensEditorOpen] = useState(false);
 
   // Listen for sync-result with orphans → open modal.
   useEffect(() => {
@@ -146,6 +152,7 @@ export function PluginApp() {
       }
       setNamingConfig(loadedNaming);
       setSemanticNaming(state.semanticNaming ?? DEFAULT_SEMANTIC_NAMING);
+      setSemanticConfig(state.semanticConfig ?? DEFAULT_SEMANTIC_CONFIG);
       setDisplayMode(state.displayMode ?? 'semantic');
       setColorFormat(state.colorFormat ?? 'alpha');
       setCurveDisplayMode(state.curveDisplayMode ?? 'position');
@@ -176,12 +183,13 @@ export function PluginApp() {
       curveDisplayMode,
       namingConfig,
       semanticNaming,
+      semanticConfig,
       presets,
       activePresetName,
       previousAppliedNaming: null, // updated separately on Sync success
       windowSize,
     });
-  }, [config, displayMode, colorFormat, curveDisplayMode, namingConfig, semanticNaming, presets, activePresetName, windowSize, hydrated]);
+  }, [config, displayMode, colorFormat, curveDisplayMode, namingConfig, semanticNaming, semanticConfig, presets, activePresetName, windowSize, hydrated]);
 
   // Default step positions for current theme
   const defaultPositions = useMemo(
@@ -418,6 +426,30 @@ export function PluginApp() {
     );
   }
 
+  if (tokensEditorOpen) {
+    return (
+      <div
+        style={{
+          minHeight: '100vh',
+          backgroundColor: 'var(--fui-neutral-2)',
+          fontFamily: 'var(--fui-font-family)',
+        }}
+      >
+        <main style={{ paddingInline: 16, paddingBlock: 16, paddingBottom: 24 }}>
+          <SemanticTokensEditor
+            config={semanticConfig}
+            onChange={setSemanticConfig}
+            namingConfig={namingConfig}
+            previewResult={result}
+            includeSecondary={config.secondary?.mode !== 'off'}
+            onExit={() => setTokensEditorOpen(false)}
+          />
+        </main>
+        <ResizeHandle onResize={handleResize} />
+      </div>
+    );
+  }
+
   return (
     <div
       style={{
@@ -479,6 +511,8 @@ export function PluginApp() {
               onNamingConfigChange={setNamingConfig}
               semanticNaming={semanticNaming}
               onSemanticNamingChange={setSemanticNaming}
+              semanticConfig={semanticConfig}
+              onOpenTokensEditor={() => setTokensEditorOpen(true)}
               onGenerateBothThemes={generateBothThemes}
               secondary={config.secondary}
             />

@@ -1,7 +1,7 @@
 // Shape of the state persisted to figma.clientStorage.
 // Mirrors the original theme-builder's PersistedState plus naming + previousAppliedNaming.
 
-import type { GenerationConfig, NamingConfig } from '../palette-core';
+import type { GenerationConfig, NamingConfig, SemanticConfig } from '../palette-core';
 import type { CurveDisplayMode } from './components/PaletteMatrix';
 import type { StepPreset } from './preset-types';
 
@@ -35,6 +35,10 @@ export interface PersistedState {
   curveDisplayMode: CurveDisplayMode;
   namingConfig: NamingConfig;
   semanticNaming: SemanticNamingConfig;
+  // Editable semantic-token graph. Optional during migration — undefined means
+  // the user is on the pre-CRUD-editor build and should be seeded with
+  // DEFAULT_SEMANTIC_CONFIG on hydration.
+  semanticConfig?: SemanticConfig;
   presets: StepPreset[];
   // Name of the currently-selected preset, or null if user is on a custom
   // (un-saved) configuration. Restored on plugin reload so the active
@@ -45,6 +49,7 @@ export interface PersistedState {
   previousAppliedNaming: {
     namingConfig: NamingConfig;
     semanticNaming: SemanticNamingConfig;
+    semanticConfig?: SemanticConfig;
   } | null;
   windowSize: WindowSize;
 }

@@ -3,7 +3,8 @@
 //   - DTCG JSON serialization (legacy / future)
 //   - Direct figma.variables.* materialization (apply.ts)
 //
-// Build it once via buildVariableStructure(input, semanticNaming), then consume.
+// Build it once via buildVariableStructure(input, semanticNaming, namingConfig, semanticConfig),
+// then consume.
 
 import type {
   Palette,
@@ -13,9 +14,16 @@ import type {
   StepIndex,
   AlphaColor,
   NamingConfig,
+  SemanticConfig,
+  PrimitiveRef,
 } from '../palette-core';
-import { STEP_INDICES } from '../palette-core';
-import type { SemanticNamingConfig, SemanticSection } from '../ui/persistence-types';
+import {
+  STEP_INDICES,
+  SEMANTIC_ROLES,
+  applyRoleToRef,
+  roleScaleName,
+} from '../palette-core';
+import type { SemanticNamingConfig } from '../ui/persistence-types';
 
 export type RGBA = { r: number; g: number; b: number; a: number };
 
@@ -23,7 +31,8 @@ export interface VariableSpec {
   // Stable identity that survives renames. Format:
   //   primitives: 'prim:<theme>:<role>:<solid|alpha>:<step>'
   //   primitives (special): 'prim:<theme>:gray-bg' / 'prim:black-a:<step>' / 'prim:white-fixed'
-  //   semantics:  'sem:<section>:<token-name>'
+  //   semantics:  'sem:<token-id>' where token-id is the StandaloneToken/RoleSlot UUID
+  //               (slots additionally suffix ':<role>' so each expansion is distinct)
   // Used to look up the corresponding Figma Variable by ID across syncs, so
   // user-visible name changes don't cause spurious recreations.
   key: string;
@@ -73,106 +82,6 @@ const BLACK_ALPHA: Record<StepIndex, number> = {
   7: 0.17, 8: 0.24, 9: 0.43, 10: 0.50, 11: 0.62, 12: 0.92,
 };
 
-type SemRef = string | { light: string; dark: string };
-
-const SEMANTIC_TOKENS: Record<SemanticSection, Record<string, SemRef>> = {
-  bg: {
-    'canvas': 'gray.0',
-    'primary': { light: 'gray.0', dark: 'gray.1' },
-    'secondary': { light: 'gray.1', dark: 'gray.0' },
-    'surface-0': { light: 'gray.1', dark: 'gray.a1' },
-    'surface-1': { light: 'gray.0', dark: 'gray.1' },
-    'surface-2': { light: 'gray.0', dark: 'gray.2' },
-    'surface-3': { light: 'gray.0', dark: 'gray.3' },
-    'surface-4': { light: 'gray.0', dark: 'gray.4' },
-    'neutral-primary': 'gray.9',
-    'neutral-primary-hover': 'gray.10',
-    'neutral-secondary': 'gray.a3',
-    'neutral-secondary-hover': 'gray.a4',
-    'accent-primary': 'accent.9',
-    'accent-primary-hover': 'accent.10',
-    'accent-secondary': 'accent.a3',
-    'accent-secondary-hover': 'accent.a4',
-    'success-primary': 'green.9',
-    'success-primary-hover': 'green.10',
-    'success-secondary': 'green.a3',
-    'success-secondary-hover': 'green.a4',
-    'warning-primary': 'amber.9',
-    'warning-primary-hover': 'amber.10',
-    'warning-secondary': 'amber.a3',
-    'warning-secondary-hover': 'amber.a4',
-    'danger-primary': 'red.9',
-    'danger-primary-hover': 'red.10',
-    'danger-secondary': 'red.a3',
-    'danger-secondary-hover': 'red.a4',
-    'info-primary': 'blue.9',
-    'info-primary-hover': 'blue.10',
-    'info-secondary': 'blue.a3',
-    'info-secondary-hover': 'blue.a4',
-    'secondary-primary': 'secondary.9',
-    'secondary-primary-hover': 'secondary.10',
-    'secondary-secondary': 'secondary.a3',
-    'secondary-secondary-hover': 'secondary.a4',
-  },
-  fg: {
-    'neutral-primary': 'gray.12',
-    'neutral-secondary': 'gray.11',
-    'neutral-tertiary': 'gray.a8',
-    'accent-primary': 'accent.12',
-    'accent-secondary': 'accent.11',
-    'success-primary': 'green.12',
-    'success-secondary': 'green.11',
-    'warning-primary': 'amber.12',
-    'warning-secondary': 'amber.11',
-    'danger-primary': 'red.12',
-    'danger-secondary': 'red.11',
-    'info-primary': 'blue.12',
-    'info-secondary': 'blue.11',
-    'secondary-primary': 'secondary.12',
-    'secondary-secondary': 'secondary.11',
-    'on-background': 'white-fixed',
-  },
-  border: {
-    // primary (step a9, no hover) — strongest outline / focus emphasis
-    'neutral-primary': 'gray.a9',
-    'accent-primary': 'accent.a9',
-    'success-primary': 'green.a9',
-    'warning-primary': 'amber.a9',
-    'danger-primary': 'red.a9',
-    'info-primary': 'blue.a9',
-    // secondary (a7 default + a8 hover) — interactive borders
-    'neutral-secondary': 'gray.a7',
-    'neutral-secondary-hover': 'gray.a8',
-    'accent-secondary': 'accent.a7',
-    'accent-secondary-hover': 'accent.a8',
-    'success-secondary': 'green.a7',
-    'success-secondary-hover': 'green.a8',
-    'warning-secondary': 'amber.a7',
-    'warning-secondary-hover': 'amber.a8',
-    'danger-secondary': 'red.a7',
-    'danger-secondary-hover': 'red.a8',
-    'info-secondary': 'blue.a7',
-    'info-secondary-hover': 'blue.a8',
-    // tertiary (a6, no hover) — subtle decorative lines, separators
-    'neutral-tertiary': 'gray.a6',
-    'accent-tertiary': 'accent.a6',
-    'success-tertiary': 'green.a6',
-    'warning-tertiary': 'amber.a6',
-    'danger-tertiary': 'red.a6',
-    'info-tertiary': 'blue.a6',
-    // subbrand (only emitted when secondary mode != off)
-    'secondary-primary': 'secondary.a9',
-    'secondary-secondary': 'secondary.a7',
-    'secondary-secondary-hover': 'secondary.a8',
-    'secondary-tertiary': 'secondary.a6',
-  },
-  overlay: {
-    'scrim': { light: 'black.a8', dark: 'black.a9' },
-    'hover': 'gray.a3',
-    'active': 'gray.a4',
-  },
-};
-
 function hexToRgba(hex: string): RGBA {
   const h = hex.replace('#', '');
   return {
@@ -202,100 +111,15 @@ function parseRef(ref: string): { scale: string; step: string; isAlpha: boolean;
   return { scale, step, isAlpha, themed };
 }
 
-// Generates the native Figma description for a semantic token. Token names
-// follow the regular <role>-<level>[-hover] schema; special cases get explicit
-// descriptions. Re-set on every sync so names stay current with NamingConfig.
-function describeSemanticToken(
-  section: SemanticSection,
-  name: string,
-  namingConfig: NamingConfig,
-): string {
-  const roleLabel = (role: SemanticRole) => namingConfig.roleNames[role];
-
-  // Recognised colored-role prefix? Match `<role>-rest` against known roles.
-  const colored = (() => {
-    const candidates: Array<[string, SemanticRole]> = [
-      ['neutral', 'neutral'],
-      ['accent', 'brand'],         // 'accent' → brand role
-      ['secondary', 'secondary'],  // 'secondary' → subbrand role (only when enabled)
-      ['success', 'success'],
-      ['warning', 'warning'],
-      ['danger', 'danger'],
-      ['info', 'info'],
-    ];
-    for (const [prefix, internalRole] of candidates) {
-      if (name === prefix || name.startsWith(`${prefix}-`)) {
-        return {
-          rolePrefix: prefix,
-          userPrefix: roleLabel(internalRole),
-          role: internalRole,
-          label: roleLabel(internalRole),
-          rest: name === prefix ? '' : name.slice(prefix.length + 1),
-        };
-      }
-    }
-    return null;
-  })();
-
-  if (section === 'bg') {
-    if (name === 'canvas') return 'Page canvas — topmost surface, behind everything else.';
-    if (name === 'primary') return 'Primary surface for cards, panels, and other content containers.';
-    if (name === 'secondary') return 'Recessed surface — sits below bg/primary for visual layering.';
-    if (/^surface-\d$/.test(name)) {
-      const lvl = name.slice('surface-'.length);
-      return `Elevation level ${lvl} — for stacked panels, menus, and popovers.`;
-    }
-    if (colored) {
-      const { rest, label, userPrefix } = colored;
-      const map: Record<string, string> = {
-        'primary': `Solid ${label} surface — buttons, badges, active states.`,
-        'primary-hover': `Hover state of bg/${userPrefix}-primary.`,
-        'secondary': `Subtle ${label} surface — selected rows, ghost buttons, soft fills.`,
-        'secondary-hover': `Hover state of bg/${userPrefix}-secondary.`,
-      };
-      return map[rest] ?? '';
-    }
-  }
-
-  if (section === 'fg') {
-    if (name === 'on-background') {
-      return 'White text on saturated colored backgrounds (bg/*-primary).';
-    }
-    if (colored) {
-      const { rest, label } = colored;
-      const map: Record<string, string> = {
-        'primary': colored.role === 'neutral' ? 'Primary text color — body, headings.' : `Primary ${label} text — emphasis.`,
-        'secondary': colored.role === 'neutral' ? 'Secondary text — labels, supporting copy.' : `Secondary (muted) ${label} text.`,
-        'tertiary': 'Tertiary text — placeholders, disabled, deeply muted copy.',
-      };
-      return map[rest] ?? '';
-    }
-  }
-
-  if (section === 'border') {
-    if (colored) {
-      const { rest, label, userPrefix } = colored;
-      const map: Record<string, string> = {
-        'primary': `Strongest ${label} border — focus emphasis, key outlines.`,
-        'secondary': `Default interactive ${label} border — inputs, buttons.`,
-        'secondary-hover': `Hover state of border/${userPrefix}-secondary.`,
-        'tertiary': `Subtle ${label} border — dividers, decorative separators.`,
-      };
-      return map[rest] ?? '';
-    }
-  }
-
-  if (section === 'overlay') {
-    if (name === 'scrim') return 'Backdrop behind modals and dialogs.';
-    if (name === 'hover') return 'Translucent hover overlay on interactive elements.';
-    if (name === 'active') return 'Translucent pressed/active overlay on interactive elements.';
-  }
-
-  return '';
+// Substitutes {role} / {roleLabel} placeholders inside a description string.
+function applyRoleToDescription(desc: string, role: SemanticRole, namingConfig: NamingConfig): string {
+  if (!desc) return desc;
+  const label = namingConfig.roleNames[role];
+  return desc.replace(/\{role\}/g, label).replace(/\{roleLabel\}/g, label);
 }
 
 // Internal scale keys (gray/accent/green/...) → user-facing role names from NamingConfig.
-// SEMANTIC_TOKENS references stay stable; only the path written into Figma is renamed.
+// References stay stable; only the path written into Figma is renamed.
 function scaleToUserName(scale: string, namingConfig: NamingConfig): string {
   const pair = ROLE_TO_SCALE.find(([, sn]) => sn === scale);
   if (pair) return namingConfig.roleNames[pair[0]];
@@ -303,26 +127,29 @@ function scaleToUserName(scale: string, namingConfig: NamingConfig): string {
   return scale;
 }
 
-// Token names in SEMANTIC_TOKENS keep stable internal prefixes (e.g. 'accent-primary').
-// At write time we swap the prefix for the user-facing role name from NamingConfig
-// so 'accent-primary' becomes 'brand-primary' when roleNames.brand = 'brand'.
-const TOKEN_PREFIX_TO_ROLE: ReadonlyArray<[string, SemanticRole]> = [
+// Maps an internal token-name prefix (used in role slot suffixes / standalone names
+// like 'accent-primary') to the role whose label should replace it. For role-slot
+// expansion the prefix is the literal scale name, so this is a 1:1 lookup.
+const SCALE_TO_ROLE: ReadonlyArray<[string, SemanticRole]> = [
   ['accent', 'brand'],
-  ['neutral', 'neutral'],
-  ['success', 'success'],
-  ['warning', 'warning'],
-  ['danger', 'danger'],
-  ['info', 'info'],
+  ['gray', 'neutral'],
+  ['green', 'success'],
+  ['amber', 'warning'],
+  ['red', 'danger'],
+  ['blue', 'info'],
   ['secondary', 'secondary'],
 ];
 
-function translateTokenName(name: string, namingConfig: NamingConfig): string {
-  // Only translate compound names (<role>-rest). Standalone names like
-  // 'secondary' (bg/secondary = the page-level secondary surface) are
-  // special semantic concepts unrelated to the secondary brand role.
-  for (const [internalPrefix, role] of TOKEN_PREFIX_TO_ROLE) {
-    if (name.startsWith(`${internalPrefix}-`)) {
-      return `${namingConfig.roleNames[role]}-${name.slice(internalPrefix.length + 1)}`;
+// Translates user-typed standalone token names like 'neutral-tertiary' so that the
+// 'neutral' prefix becomes whatever roleNames.neutral resolves to. Bare names
+// without a known role prefix pass through untouched.
+function translateStandaloneName(name: string, namingConfig: NamingConfig): string {
+  for (const [, role] of SCALE_TO_ROLE) {
+    const internal = role === 'brand' ? 'accent' : role;
+    if (name === internal || name.startsWith(`${internal}-`)) {
+      const rest = name === internal ? '' : name.slice(internal.length + 1);
+      const label = namingConfig.roleNames[role];
+      return rest ? `${label}-${rest}` : label;
     }
   }
   return name;
@@ -362,10 +189,85 @@ function refToFallback(
   return hexToRgba(data.palette[role][stepNum]);
 }
 
+// Resolves the two refs (light + dark) for any PrimitiveRef.
+function splitRef(ref: PrimitiveRef): { light: string; dark: string } {
+  return typeof ref === 'string' ? { light: ref, dark: ref } : ref;
+}
+
+// True if the ref ultimately points at the `secondary` primitive scale. Used to
+// skip role slots / standalone tokens when secondary brand is disabled.
+function refTargetsSecondary(ref: PrimitiveRef): boolean {
+  const { light, dark } = splitRef(ref);
+  const isSec = (r: string) => parseRef(r).scale === 'secondary';
+  return isSec(light) || isSec(dark);
+}
+
+// Builds the materialized list of semantic VariableSpecs from a SemanticConfig.
+// Exported so the UI can preview names / count without going through the full
+// buildVariableStructure pipeline.
+export function expandSemanticConfig(
+  config: SemanticConfig,
+  semanticNaming: SemanticNamingConfig,
+  namingConfig: NamingConfig,
+  includeSecondary: boolean,
+): VariableSpec[] {
+  const out: VariableSpec[] = [];
+
+  for (const section of config.sections) {
+    // Section name passes through SemanticNamingConfig overrides if present;
+    // for sections without an override (user-added sections in the future) we
+    // fall back to the section's own `name`.
+    const overrides = (semanticNaming.sectionNames as unknown) as Record<string, string | undefined>;
+    const sectionLabel = overrides[section.name] ?? section.name;
+
+    // Standalone tokens
+    for (const tok of section.standalone) {
+      if (!includeSecondary && refTargetsSecondary(tok.ref)) continue;
+      const { light, dark } = splitRef(tok.ref);
+      const displayName = translateStandaloneName(tok.name, namingConfig);
+      out.push({
+        key: `sem:${tok.id}`,
+        path: [sectionLabel, displayName],
+        description: tok.description ?? '',
+        valuesByMode: {
+          Light: { aliasOf: { collection: PRIMITIVES, path: refToPath(light, 'light', namingConfig) } },
+          Dark: { aliasOf: { collection: PRIMITIVES, path: refToPath(dark, 'dark', namingConfig) } },
+        },
+      });
+    }
+
+    // Role slots — expanded across every role (incl. secondary when enabled)
+    const roles: SemanticRole[] = SEMANTIC_ROLES.filter(r => r !== 'secondary' || includeSecondary);
+    for (const slot of section.roleSlots) {
+      for (const role of roles) {
+        const scaleName = roleScaleName(role);
+        // The slot ref uses '{role}' as placeholder; substitute the scale name.
+        const expandedRef = applyRoleToRef(slot.ref, scaleName);
+        if (!includeSecondary && refTargetsSecondary(expandedRef)) continue;
+        const { light, dark } = splitRef(expandedRef);
+        const roleLabel = namingConfig.roleNames[role];
+        const tokenName = `${roleLabel}-${slot.suffix}`;
+        out.push({
+          key: `sem:${slot.id}:${role}`,
+          path: [sectionLabel, tokenName],
+          description: slot.description ? applyRoleToDescription(slot.description, role, namingConfig) : '',
+          valuesByMode: {
+            Light: { aliasOf: { collection: PRIMITIVES, path: refToPath(light, 'light', namingConfig) } },
+            Dark: { aliasOf: { collection: PRIMITIVES, path: refToPath(dark, 'dark', namingConfig) } },
+          },
+        });
+      }
+    }
+  }
+
+  return out;
+}
+
 export function buildVariableStructure(
   input: FigmaTokensInput,
   semanticNaming: SemanticNamingConfig,
   namingConfig: NamingConfig,
+  semanticConfig: SemanticConfig,
 ): VariableStructure {
   const includeSecondary = input.secondary?.mode !== 'off';
   const roles: ReadonlyArray<[SemanticRole, string]> = includeSecondary
@@ -419,32 +321,11 @@ export function buildVariableStructure(
   });
 
   // ---- Semantics ----
-  const semanticVars: VariableSpec[] = [];
-  for (const [section, tokens] of Object.entries(SEMANTIC_TOKENS) as Array<[
-    SemanticSection,
-    Record<string, SemRef>,
-  ]>) {
-    const sectionLabel = semanticNaming.sectionNames[section];
-    for (const [name, ref] of Object.entries(tokens)) {
-      // Subbrand semantic tokens only emit when the secondary scale exists.
-      if (!includeSecondary && name.startsWith('secondary-')) continue;
-      const lightRef = typeof ref === 'string' ? ref : ref.light;
-      const darkRef = typeof ref === 'string' ? ref : ref.dark;
-      semanticVars.push({
-        key: `sem:${section}:${name}`,
-        path: [sectionLabel, translateTokenName(name, namingConfig)],
-        description: describeSemanticToken(section, name, namingConfig),
-        valuesByMode: {
-          Light: { aliasOf: { collection: PRIMITIVES, path: refToPath(lightRef, 'light', namingConfig) } },
-          Dark: { aliasOf: { collection: PRIMITIVES, path: refToPath(darkRef, 'dark', namingConfig) } },
-        },
-      });
-      // Note: we keep the alias-only form. apply.ts uses the alias path to find
-      // the target variable; if it exists, creates a Figma alias. If not, falls
-      // back to the literal RGBA computed from refToFallback (computed lazily there).
-      void refToFallback;
-    }
-  }
+  const semanticVars = expandSemanticConfig(semanticConfig, semanticNaming, namingConfig, includeSecondary);
+
+  // apply.ts uses the alias path to find the target variable; if it doesn't
+  // exist yet it falls back to the literal RGBA via fallbackForAlias.
+  void refToFallback;
 
   return {
     primitives: { name: PRIMITIVES, modes: ['Default'], variables: primitiveVars },

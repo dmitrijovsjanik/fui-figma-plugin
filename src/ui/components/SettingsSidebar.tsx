@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import type { GenerationResult, NamingConfig, SecondaryConfig } from '../../palette-core';
+import type { GenerationResult, NamingConfig, SecondaryConfig, SemanticConfig } from '../../palette-core';
 import { Button } from '../../components/Button/Button';
 import { NamingTemplateBuilder } from './NamingTemplateBuilder';
 import { SemanticNamingBuilder } from './SemanticNamingBuilder';
@@ -13,6 +13,8 @@ interface SettingsSidebarProps {
   onNamingConfigChange: (config: NamingConfig) => void;
   semanticNaming: SemanticNamingConfig;
   onSemanticNamingChange: (config: SemanticNamingConfig) => void;
+  semanticConfig: SemanticConfig;
+  onOpenTokensEditor: () => void;
   onGenerateBothThemes: () => {
     lightResult: GenerationResult;
     darkResult: GenerationResult;
@@ -35,6 +37,8 @@ export function SettingsSidebar({
   onNamingConfigChange,
   semanticNaming,
   onSemanticNamingChange,
+  semanticConfig,
+  onOpenTokensEditor,
   onGenerateBothThemes,
   secondary,
 }: SettingsSidebarProps) {
@@ -74,6 +78,7 @@ export function SettingsSidebar({
       },
       semanticNaming,
       namingConfig,
+      semanticConfig,
     );
     setStatus({ kind: 'syncing' });
     postToSandbox({ type: 'sync', structure });
@@ -93,6 +98,16 @@ export function SettingsSidebar({
     >
       <NamingTemplateBuilder config={namingConfig} onChange={onNamingConfigChange} />
       <SemanticNamingBuilder config={semanticNaming} onChange={onSemanticNamingChange} />
+
+      <Button
+        buttonType="secondary"
+        status="neutral"
+        padSize="md"
+        textSize={14}
+        onClick={onOpenTokensEditor}
+      >
+        Edit semantic tokens…
+      </Button>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
         <Button

@@ -15,7 +15,10 @@ const FALLBACK_SIZE = { width: 560, height: 640 };
 
 // Old → new spec keys. Applied on load so renamed semantic tokens still resolve
 // to the same Figma variable instead of triggering a fresh create + orphan.
-// Add an entry whenever a token is renamed in SEMANTIC_TOKENS.
+// Two waves of migrations:
+//  - Pre-CRUD-editor renames: old token names (component → neutral-primary, etc.)
+//  - UUID switchover: every default token's key moved from sem:<section>:<name>
+//    to sem:<uuid>. Generated at the bottom of this object.
 const KEY_MIGRATIONS: Record<string, string> = {
   // bg/component → bg/neutral (legacy)
   'sem:bg:component': 'sem:bg:neutral-primary',
@@ -95,10 +98,113 @@ const KEY_MIGRATIONS: Record<string, string> = {
   'sem:border:info': 'sem:border:info-tertiary',
   'sem:border:info-strong': 'sem:border:info-secondary',
   'sem:border:info-strong-hover': 'sem:border:info-secondary-hover',
+
+  // === UUID switchover ===
+  // Standalone tokens: sem:<section>:<name> → sem:def_<section>-<name>
+  'sem:bg:canvas':    'sem:def_bg-canvas',
+  'sem:bg:primary':   'sem:def_bg-primary',
+  'sem:bg:secondary': 'sem:def_bg-secondary',
+  'sem:bg:surface-0': 'sem:def_bg-surface-0',
+  'sem:bg:surface-1': 'sem:def_bg-surface-1',
+  'sem:bg:surface-2': 'sem:def_bg-surface-2',
+  'sem:bg:surface-3': 'sem:def_bg-surface-3',
+  'sem:bg:surface-4': 'sem:def_bg-surface-4',
+  'sem:fg:on-background':   'sem:def_fg-on-background',
+  'sem:fg:neutral-tertiary': 'sem:def_fg-neutral-tertiary',
+  'sem:overlay:scrim':  'sem:def_overlay-scrim',
+  'sem:overlay:hover':  'sem:def_overlay-hover',
+  'sem:overlay:active': 'sem:def_overlay-active',
+
+  // Role-slot tokens: sem:<section>:<role-name>-<suffix> → sem:<slot-id>:<role>
+  // bg slots
+  'sem:bg:neutral-primary':         'sem:def_bg-slot-primary:neutral',
+  'sem:bg:neutral-primary-hover':   'sem:def_bg-slot-primary-hover:neutral',
+  'sem:bg:neutral-secondary':       'sem:def_bg-slot-secondary:neutral',
+  'sem:bg:neutral-secondary-hover': 'sem:def_bg-slot-secondary-hover:neutral',
+  'sem:bg:accent-primary':          'sem:def_bg-slot-primary:brand',
+  'sem:bg:accent-primary-hover':    'sem:def_bg-slot-primary-hover:brand',
+  'sem:bg:accent-secondary':        'sem:def_bg-slot-secondary:brand',
+  'sem:bg:accent-secondary-hover':  'sem:def_bg-slot-secondary-hover:brand',
+  'sem:bg:secondary-primary':         'sem:def_bg-slot-primary:secondary',
+  'sem:bg:secondary-primary-hover':   'sem:def_bg-slot-primary-hover:secondary',
+  'sem:bg:secondary-secondary':       'sem:def_bg-slot-secondary:secondary',
+  'sem:bg:secondary-secondary-hover': 'sem:def_bg-slot-secondary-hover:secondary',
+  'sem:bg:success-primary':         'sem:def_bg-slot-primary:success',
+  'sem:bg:success-primary-hover':   'sem:def_bg-slot-primary-hover:success',
+  'sem:bg:success-secondary':       'sem:def_bg-slot-secondary:success',
+  'sem:bg:success-secondary-hover': 'sem:def_bg-slot-secondary-hover:success',
+  'sem:bg:warning-primary':         'sem:def_bg-slot-primary:warning',
+  'sem:bg:warning-primary-hover':   'sem:def_bg-slot-primary-hover:warning',
+  'sem:bg:warning-secondary':       'sem:def_bg-slot-secondary:warning',
+  'sem:bg:warning-secondary-hover': 'sem:def_bg-slot-secondary-hover:warning',
+  'sem:bg:danger-primary':         'sem:def_bg-slot-primary:danger',
+  'sem:bg:danger-primary-hover':   'sem:def_bg-slot-primary-hover:danger',
+  'sem:bg:danger-secondary':       'sem:def_bg-slot-secondary:danger',
+  'sem:bg:danger-secondary-hover': 'sem:def_bg-slot-secondary-hover:danger',
+  'sem:bg:info-primary':         'sem:def_bg-slot-primary:info',
+  'sem:bg:info-primary-hover':   'sem:def_bg-slot-primary-hover:info',
+  'sem:bg:info-secondary':       'sem:def_bg-slot-secondary:info',
+  'sem:bg:info-secondary-hover': 'sem:def_bg-slot-secondary-hover:info',
+  // fg slots
+  'sem:fg:neutral-primary':   'sem:def_fg-slot-primary:neutral',
+  'sem:fg:neutral-secondary': 'sem:def_fg-slot-secondary:neutral',
+  'sem:fg:accent-primary':    'sem:def_fg-slot-primary:brand',
+  'sem:fg:accent-secondary':  'sem:def_fg-slot-secondary:brand',
+  'sem:fg:secondary-primary':   'sem:def_fg-slot-primary:secondary',
+  'sem:fg:secondary-secondary': 'sem:def_fg-slot-secondary:secondary',
+  'sem:fg:success-primary':   'sem:def_fg-slot-primary:success',
+  'sem:fg:success-secondary': 'sem:def_fg-slot-secondary:success',
+  'sem:fg:warning-primary':   'sem:def_fg-slot-primary:warning',
+  'sem:fg:warning-secondary': 'sem:def_fg-slot-secondary:warning',
+  'sem:fg:danger-primary':    'sem:def_fg-slot-primary:danger',
+  'sem:fg:danger-secondary':  'sem:def_fg-slot-secondary:danger',
+  'sem:fg:info-primary':      'sem:def_fg-slot-primary:info',
+  'sem:fg:info-secondary':    'sem:def_fg-slot-secondary:info',
+  // border slots
+  'sem:border:neutral-primary':         'sem:def_border-slot-primary:neutral',
+  'sem:border:neutral-secondary':       'sem:def_border-slot-secondary:neutral',
+  'sem:border:neutral-secondary-hover': 'sem:def_border-slot-secondary-hover:neutral',
+  'sem:border:neutral-tertiary':        'sem:def_border-slot-tertiary:neutral',
+  'sem:border:accent-primary':         'sem:def_border-slot-primary:brand',
+  'sem:border:accent-secondary':       'sem:def_border-slot-secondary:brand',
+  'sem:border:accent-secondary-hover': 'sem:def_border-slot-secondary-hover:brand',
+  'sem:border:accent-tertiary':        'sem:def_border-slot-tertiary:brand',
+  'sem:border:secondary-primary':         'sem:def_border-slot-primary:secondary',
+  'sem:border:secondary-secondary':       'sem:def_border-slot-secondary:secondary',
+  'sem:border:secondary-secondary-hover': 'sem:def_border-slot-secondary-hover:secondary',
+  'sem:border:secondary-tertiary':        'sem:def_border-slot-tertiary:secondary',
+  'sem:border:success-primary':         'sem:def_border-slot-primary:success',
+  'sem:border:success-secondary':       'sem:def_border-slot-secondary:success',
+  'sem:border:success-secondary-hover': 'sem:def_border-slot-secondary-hover:success',
+  'sem:border:success-tertiary':        'sem:def_border-slot-tertiary:success',
+  'sem:border:warning-primary':         'sem:def_border-slot-primary:warning',
+  'sem:border:warning-secondary':       'sem:def_border-slot-secondary:warning',
+  'sem:border:warning-secondary-hover': 'sem:def_border-slot-secondary-hover:warning',
+  'sem:border:warning-tertiary':        'sem:def_border-slot-tertiary:warning',
+  'sem:border:danger-primary':         'sem:def_border-slot-primary:danger',
+  'sem:border:danger-secondary':       'sem:def_border-slot-secondary:danger',
+  'sem:border:danger-secondary-hover': 'sem:def_border-slot-secondary-hover:danger',
+  'sem:border:danger-tertiary':        'sem:def_border-slot-tertiary:danger',
+  'sem:border:info-primary':         'sem:def_border-slot-primary:info',
+  'sem:border:info-secondary':       'sem:def_border-slot-secondary:info',
+  'sem:border:info-secondary-hover': 'sem:def_border-slot-secondary-hover:info',
+  'sem:border:info-tertiary':        'sem:def_border-slot-tertiary:info',
 };
 
 function keymapStorageKey(): string {
   return `${KEYMAP_KEY_PREFIX}${figma.root.id}`;
+}
+
+// Walks KEY_MIGRATIONS until no further rename exists, so chained renames
+// (e.g. legacy → strong-era → primary-era → UUID) resolve in one load.
+function migrateKey(k: string): string {
+  let current = k;
+  const seen = new Set<string>();
+  while (KEY_MIGRATIONS[current] && !seen.has(current)) {
+    seen.add(current);
+    current = KEY_MIGRATIONS[current];
+  }
+  return current;
 }
 
 async function loadKeyToId(): Promise<KeyToId> {
@@ -107,7 +213,7 @@ async function loadKeyToId(): Promise<KeyToId> {
   const raw = saved as KeyToId;
   const migrated: KeyToId = {};
   for (const [k, v] of Object.entries(raw)) {
-    migrated[KEY_MIGRATIONS[k] ?? k] = v;
+    migrated[migrateKey(k)] = v;
   }
   return migrated;
 }

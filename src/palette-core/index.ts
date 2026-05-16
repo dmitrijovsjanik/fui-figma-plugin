@@ -152,4 +152,5 @@ export * from './chroma-strategy';
 export * from './contrast-checker';
 export * from './alpha-colors';
 export * from './color-harmony';
+export * from './semantic-config';
 export * from './export';
