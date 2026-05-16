@@ -428,10 +428,6 @@ export function PaletteMatrix({ palette, oklchPalette, alphaPalette, onCopy, sec
         </div>
       ))}
 
-      {/* Fixed alpha scales (theme-invariant) */}
-      <FixedAlphaRow label="black α" color="black" />
-      <FixedAlphaRow label="white α" color="white" />
-
       {/* Step position / APCA contrast inputs */}
       <div style={{ ...gridStyle, marginTop: 4 }}>
         <ContentSwitcher
@@ -571,12 +567,34 @@ export function PaletteMatrix({ palette, oklchPalette, alphaPalette, onCopy, sec
 }
 
 // Pure-black / pure-white alpha scale shown under the role matrix. Values are
-// fixed (Radix blackA opacities), so this row doesn't react to theme or
-// display-mode changes. Hover shows hex/rgba.
+// fixed (Radix blackA opacities), so this scale never reacts to theme or
+// display-mode changes. Rendered in its OWN grid (not subgrid) so the
+// step-position inputs in the main matrix can't reflow these cells.
 const FIXED_ALPHA: Record<number, number> = {
   1: 0.012, 2: 0.024, 3: 0.05, 4: 0.075, 5: 0.10, 6: 0.13,
   7: 0.17, 8: 0.24, 9: 0.43, 10: 0.50, 11: 0.62, 12: 0.92,
 };
+
+// Visual twin of the role <Dot> used in the main matrix: 14×14 container with
+// an 8×8 inner circle. We don't reuse <Dot> because its inner color is fixed
+// to role tokens; here we need pure black / pure white.
+function FixedAlphaDot({ color }: { color: 'black' | 'white' }) {
+  return (
+    <span style={{
+      display: 'inline-flex',
+      width: 14, height: 14,
+      alignItems: 'center',
+      justifyContent: 'center',
+    }}>
+      <span style={{
+        width: 8, height: 8,
+        borderRadius: '50%',
+        background: color === 'black' ? '#000' : '#fff',
+        boxShadow: color === 'white' ? 'inset 0 0 0 1px rgba(0,0,0,0.2)' : undefined,
+      }} />
+    </span>
+  );
+}
 
 function FixedAlphaRow({ label, color }: { label: string; color: 'black' | 'white' }) {
   const [hover, setHover] = useState<number | null>(null);
@@ -584,18 +602,13 @@ function FixedAlphaRow({ label, color }: { label: string; color: 'black' | 'whit
   return (
     <div style={{
       display: 'grid',
-      gridTemplateColumns: 'subgrid',
-      gridColumn: '1 / -1',
+      gridTemplateColumns: 'auto repeat(12, 1fr)',
       gap: 4,
       alignItems: 'center',
       marginBottom: 2,
     }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 0 }}>
-        <span style={{
-          width: 14, height: 14, borderRadius: '50%',
-          background: color === 'black' ? '#000' : '#fff',
-          boxShadow: 'inset 0 0 0 1px rgba(0,0,0,0.15)',
-        }} />
+        <FixedAlphaDot color={color} />
         <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--fui-neutral-9)', paddingInline: 4 }}>{label}</span>
       </div>
       {([1,2,3,4,5,6,7,8,9,10,11,12] as const).map(step => {
@@ -607,7 +620,7 @@ function FixedAlphaRow({ label, color }: { label: string; color: 'black' | 'whit
             key={step}
             style={{
               position: 'relative',
-              height: 28,
+              height: 40,
               borderRadius: 'var(--fui-radius-xl)',
               backgroundColor: rgba,
               cursor: 'default',
@@ -615,8 +628,6 @@ function FixedAlphaRow({ label, color }: { label: string; color: 'black' | 'whit
               transform: isHovered ? 'scale(1.1)' : undefined,
               zIndex: isHovered ? 10 : undefined,
               boxSizing: 'border-box',
-              // Subtle outline so very-light white-α steps stay visible.
-              boxShadow: 'inset 0 0 0 1px rgba(0,0,0,0.06)',
             }}
             onMouseEnter={() => setHover(step)}
             onMouseLeave={() => setHover(null)}
@@ -644,6 +655,17 @@ function FixedAlphaRow({ label, color }: { label: string; color: 'black' | 'whit
           </div>
         );
       })}
+    </div>
+  );
+}
+
+// Standalone block — its own grid, completely detached from PaletteMatrix's
+// step-position controls. Drop it next to <PaletteMatrix /> in the page.
+export function FixedAlphaScales() {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', marginBottom: 24 }}>
+      <FixedAlphaRow label="black α" color="black" />
+      <FixedAlphaRow label="white α" color="white" />
     </div>
   );
 }

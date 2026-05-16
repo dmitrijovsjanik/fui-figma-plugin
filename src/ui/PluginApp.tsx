@@ -17,7 +17,7 @@ import {
   type SemanticRole,
 } from '../palette-core';
 import { BrandInput } from './components/BrandInput';
-import { PaletteMatrix, type CurveDisplayMode } from './components/PaletteMatrix';
+import { PaletteMatrix, FixedAlphaScales, type CurveDisplayMode } from './components/PaletteMatrix';
 import { SettingsSidebar } from './components/SettingsSidebar';
 import {
   type PersistedState,
@@ -509,6 +509,7 @@ export function PluginApp() {
               onLoadPreset={handleLoadPreset}
               onDeletePreset={handleDeletePreset}
             />
+            <FixedAlphaScales />
             <SettingsSidebar
               namingConfig={namingConfig}
               onNamingConfigChange={setNamingConfig}
