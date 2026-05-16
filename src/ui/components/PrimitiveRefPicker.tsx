@@ -15,6 +15,7 @@ import { Dropdown } from '../../components/Dropdown/Dropdown';
 import { MenuItem } from '../../components/Menu/MenuItem';
 import { Button } from '../../components/Button/Button';
 import { ChevronDownIcon } from '../../components/Button/ChevronDownIcon';
+import { TextSizeProvider } from '../../components/Icon/IconBox';
 import { PAD_CLASS, TEXT_CLASS, MENU_ITEM_HEIGHT } from '../../tokens/size';
 import selectStyles from '../../components/Input/Select.module.css';
 import {
@@ -227,7 +228,7 @@ function SwatchPicker(props: {
   renderOptions: () => React.ReactNode;
 }) {
   const { widthPx, currentLabel, currentSwatch, disabled, renderOptions } = props;
-  const triggerRef = useRef<HTMLButtonElement>(null);
+  const triggerRef = useRef<HTMLDivElement>(null);
   const anchorRef = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(false);
 
@@ -242,46 +243,65 @@ function SwatchPicker(props: {
   }, [open, close]);
 
   // Reuse the Select component's field classes so the trigger inherits the
-  // same background/border/hover treatment as every other Select in the app.
+  // same background/border/hover/focus treatment as every other Select in
+  // the app. Rendered as a <div role="combobox"> to match Select exactly —
+  // a native <button> applies its own browser baseline (padding, font)
+  // which fights with the .field class.
+  const sizeCls = `${PAD_CLASS.sm} ${TEXT_CLASS[12]}`;
   const fieldCls = [
     selectStyles.field,
-    PAD_CLASS.sm,
-    TEXT_CLASS[12],
+    sizeCls,
     open && selectStyles.focused,
     disabled && selectStyles.disabled,
   ].filter(Boolean).join(' ');
 
   return (
-    <div ref={anchorRef} style={{ position: 'relative', minWidth: widthPx }}>
-      <button
-        type="button"
-        ref={triggerRef}
-        disabled={disabled}
-        onClick={() => !disabled && setOpen(o => !o)}
-        className={fieldCls}
-        style={{
-          width: '100%',
-          cursor: disabled ? 'not-allowed' : 'pointer',
-          textAlign: 'left',
-          font: 'inherit',
-        }}
+    <TextSizeProvider size={12}>
+      <div
+        ref={anchorRef}
+        className={[selectStyles.wrapper, sizeCls].join(' ')}
+        style={{ minWidth: widthPx }}
       >
-        {currentSwatch !== undefined && <SwatchTile color={currentSwatch} size={14} />}
-        <span className={selectStyles.value}>{currentLabel}</span>
-        <ChevronDownIcon className={[selectStyles.chevron, open && selectStyles.chevronOpen].filter(Boolean).join(' ')} />
-      </button>
-      <Dropdown
-        anchorRef={anchorRef}
-        open={open}
-        onClose={close}
-        itemHeight={MENU_ITEM_HEIGHT.sm}
-        maxVisible={8}
-        matchWidth={8}
-        offsetX={-4}
-      >
-        {renderOptions()}
-      </Dropdown>
-    </div>
+        <div
+          ref={triggerRef}
+          className={fieldCls}
+          role="combobox"
+          tabIndex={disabled ? -1 : 0}
+          aria-expanded={open}
+          aria-haspopup="listbox"
+          aria-disabled={disabled || undefined}
+          onClick={() => !disabled && setOpen(o => !o)}
+          onKeyDown={(e) => {
+            if (disabled) return;
+            if (e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowDown') {
+              e.preventDefault();
+              setOpen(o => !o);
+            }
+          }}
+        >
+          <div className={selectStyles.bodyRow}>
+            {currentSwatch !== undefined && (
+              <div className={selectStyles.slot}>
+                <SwatchTile color={currentSwatch} size={14} />
+              </div>
+            )}
+            <span className={selectStyles.value}>{currentLabel}</span>
+            <ChevronDownIcon className={[selectStyles.chevron, open && selectStyles.chevronOpen].filter(Boolean).join(' ')} />
+          </div>
+        </div>
+        <Dropdown
+          anchorRef={anchorRef}
+          open={open}
+          onClose={close}
+          itemHeight={MENU_ITEM_HEIGHT.sm}
+          maxVisible={8}
+          matchWidth={8}
+          offsetX={-4}
+        >
+          {renderOptions()}
+        </Dropdown>
+      </div>
+    </TextSizeProvider>
   );
 }
 
