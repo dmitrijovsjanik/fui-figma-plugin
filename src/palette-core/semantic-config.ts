@@ -62,6 +62,32 @@ export function applyRoleToRef(ref: PrimitiveRef, scaleName: string): PrimitiveR
   return { light: sub(ref.light), dark: sub(ref.dark) };
 }
 
+// Normalises a value loaded from clientStorage that may have been written by
+// an earlier version where PrimitiveRef was `string | { light, dark }`. Any
+// string ref is expanded to { light: s, dark: s }; objects pass through.
+function normalizeRef(ref: unknown): PrimitiveRef {
+  if (typeof ref === 'string') return { light: ref, dark: ref };
+  if (ref && typeof ref === 'object' && 'light' in ref && 'dark' in ref) {
+    const r = ref as { light: unknown; dark: unknown };
+    if (typeof r.light === 'string' && typeof r.dark === 'string') {
+      return { light: r.light, dark: r.dark };
+    }
+  }
+  // Safe fallback so the editor doesn't crash on malformed data.
+  return { light: 'gray.9', dark: 'gray.9' };
+}
+
+// Run this on any SemanticConfig loaded from persistence. Cheap, idempotent.
+export function migrateSemanticConfig(config: SemanticConfig): SemanticConfig {
+  return {
+    sections: config.sections.map(section => ({
+      ...section,
+      standalone: section.standalone.map(tok => ({ ...tok, ref: normalizeRef(tok.ref) })),
+      roleSlots: section.roleSlots.map(slot => ({ ...slot, ref: normalizeRef(slot.ref) })),
+    })),
+  };
+}
+
 // Stable-but-deterministic IDs for the defaults. Real UUIDs are used at runtime
 // when the user adds new tokens; here we hand-pick readable IDs so the default
 // config diffs cleanly and round-trips through persistence without churn.

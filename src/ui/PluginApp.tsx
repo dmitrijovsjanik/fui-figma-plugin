@@ -5,6 +5,7 @@ import {
   hexToOklch,
   DEFAULT_NAMING_CONFIG,
   DEFAULT_SEMANTIC_CONFIG,
+  migrateSemanticConfig,
   DARK_STEP_POSITIONS,
   LIGHT_STEP_POSITIONS,
   SEMANTIC_ROLES,
@@ -152,7 +153,7 @@ export function PluginApp() {
       }
       setNamingConfig(loadedNaming);
       setSemanticNaming(state.semanticNaming ?? DEFAULT_SEMANTIC_NAMING);
-      setSemanticConfig(state.semanticConfig ?? DEFAULT_SEMANTIC_CONFIG);
+      setSemanticConfig(state.semanticConfig ? migrateSemanticConfig(state.semanticConfig) : DEFAULT_SEMANTIC_CONFIG);
       setDisplayMode(state.displayMode ?? 'semantic');
       setColorFormat(state.colorFormat ?? 'alpha');
       setCurveDisplayMode(state.curveDisplayMode ?? 'position');
