@@ -370,6 +370,16 @@ export function PaletteMatrix({ palette, oklchPalette, alphaPalette, onCopy, sec
             const isBorder = !isFill && step >= 6 && step <= 8;
             const isTextOnly = !isFill && (step === 11 || step === 12);
 
+            // Stack a translucent color layer over a checkerboard so any alpha
+            // in the swatch reveals the pattern. Only shown on hover for the
+            // main matrix; FixedAlphaScales below shows it permanently.
+            const swatchBg: React.CSSProperties = isTextOnly
+              ? { color }
+              : isBorder
+                ? { boxShadow: `inset 0 0 0 2px ${color}` }
+                : isHovered
+                  ? checkerboardWithOverlay(color)
+                  : { backgroundColor: color };
             return (
               <div
                 key={step}
@@ -385,11 +395,7 @@ export function PaletteMatrix({ palette, oklchPalette, alphaPalette, onCopy, sec
                   boxSizing: 'border-box',
                   transform: isHovered ? 'scale(1.1)' : undefined,
                   zIndex: isHovered ? 10 : undefined,
-                  ...(isTextOnly
-                    ? { color }
-                    : isBorder
-                      ? { boxShadow: `inset 0 0 0 2px ${color}` }
-                      : { backgroundColor: color }),
+                  ...swatchBg,
                 }}
                 onMouseEnter={() => setHoveredCell(cellId)}
                 onMouseLeave={() => setHoveredCell(null)}
@@ -566,6 +572,27 @@ export function PaletteMatrix({ palette, oklchPalette, alphaPalette, onCopy, sec
   );
 }
 
+// Standard 6×6 checkerboard pattern used to reveal alpha in swatches.
+// Two stacked linear gradients build the chequer; tile size 12px (two 6px
+// squares per row). Layered under a solid-color overlay via background-image.
+const CHECKER_TILE = 12;
+const CHECKER_LIGHT = '#fff';
+const CHECKER_DARK = '#d4d4d4';
+const CHECKER_BG =
+  `linear-gradient(45deg, ${CHECKER_DARK} 25%, transparent 25%, transparent 75%, ${CHECKER_DARK} 75%), ` +
+  `linear-gradient(45deg, ${CHECKER_DARK} 25%, transparent 25%, transparent 75%, ${CHECKER_DARK} 75%)`;
+
+// Stacks a solid color overlay on top of the checkerboard so any alpha in the
+// color reveals the pattern through it.
+function checkerboardWithOverlay(color: string): React.CSSProperties {
+  return {
+    backgroundImage: `linear-gradient(${color}, ${color}), ${CHECKER_BG}`,
+    backgroundSize: `auto, ${CHECKER_TILE}px ${CHECKER_TILE}px, ${CHECKER_TILE}px ${CHECKER_TILE}px`,
+    backgroundPosition: `0 0, 0 0, ${CHECKER_TILE / 2}px ${CHECKER_TILE / 2}px`,
+    backgroundColor: CHECKER_LIGHT,
+  };
+}
+
 // Pure-black / pure-white alpha scale shown under the role matrix. Values are
 // fixed (Radix blackA opacities), so this scale never reacts to theme or
 // display-mode changes. Rendered in its OWN grid (not subgrid) so the
@@ -622,12 +649,12 @@ function FixedAlphaRow({ label, color }: { label: string; color: 'black' | 'whit
               position: 'relative',
               height: 40,
               borderRadius: 'var(--fui-radius-xl)',
-              backgroundColor: rgba,
               cursor: 'default',
               transition: 'transform 0.15s, z-index 0.15s',
               transform: isHovered ? 'scale(1.1)' : undefined,
               zIndex: isHovered ? 10 : undefined,
               boxSizing: 'border-box',
+              ...checkerboardWithOverlay(rgba),
             }}
             onMouseEnter={() => setHover(step)}
             onMouseLeave={() => setHover(null)}
