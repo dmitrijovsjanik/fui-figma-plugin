@@ -33,7 +33,12 @@ export type ChromaEqualization = 'independent' | 'equal';
 export type ThemeMode = 'light' | 'dark';
 
 // Neutral style
-export type NeutralStyle = 'tinted' | 'pure-gray';
+//  'tinted'    — neutral hue follows brand, slight chroma (default)
+//  'pure-gray' — chromaless neutral
+//  'contrast'  — step 9 forced to extreme (pure black in light theme, pure
+//                white in dark theme); step 10 is 30% of step 9's L; rest of
+//                the scale unchanged.
+export type NeutralStyle = 'tinted' | 'pure-gray' | 'contrast';
 
 // Secondary brand color harmony
 export type HarmonyType = 'complementary' | 'analogous' | 'triadic' | 'split-complementary' | 'tetradic';

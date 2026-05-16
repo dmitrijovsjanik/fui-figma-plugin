@@ -90,6 +90,17 @@ function SettingsDropdown({ config, onConfigChange }: { config: GenerationConfig
             </div>
           )}
         </div>
+        <MenuItem
+          toggle
+          checked={config.neutralStyle === 'contrast'}
+          onCheckedChange={() => onConfigChange({
+            neutralStyle: config.neutralStyle === 'contrast' ? 'pure-gray' : 'contrast',
+          })}
+          padSize="md"
+          textSize={14}
+        >
+          Contrast Neutral
+        </MenuItem>
         <MenuItem toggle checked={config.brandMode === 'fixed'} onCheckedChange={() => onConfigChange({ brandMode: config.brandMode === 'fixed' ? 'auto' : 'fixed' })} padSize="md" textSize={14}>
           Fixed Brand
         </MenuItem>
