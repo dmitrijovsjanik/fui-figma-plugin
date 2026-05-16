@@ -278,6 +278,10 @@ function SwatchPicker(props: {
               setOpen(o => !o);
             }
           }}
+          // Match TextInline's translucent neutral fill so pickers sit on
+          // any container background (GroupPanel, surface-2, …) without
+          // looking like a solid plate.
+          style={{ backgroundColor: open ? 'var(--fui-neutral-0)' : 'var(--fui-neutral-a-2)' }}
         >
           <div className={selectStyles.bodyRow}>
             {currentSwatch !== undefined && (
