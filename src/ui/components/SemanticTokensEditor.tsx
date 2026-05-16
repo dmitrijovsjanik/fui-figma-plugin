@@ -320,8 +320,8 @@ function StandaloneRow({ sectionName, token, onChange, onRemove, previewResult, 
       </div>
 
       {isPerTheme ? (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-          <RefRow label="L" >
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <RefCol label="Light">
             <PrimitiveRefPicker
               mode="standalone"
               value={refLight}
@@ -329,8 +329,8 @@ function StandaloneRow({ sectionName, token, onChange, onRemove, previewResult, 
               previewResult={previewResult}
               includeSecondary={includeSecondary}
             />
-          </RefRow>
-          <RefRow label="D">
+          </RefCol>
+          <RefCol label="Dark">
             <PrimitiveRefPicker
               mode="standalone"
               value={refDark}
@@ -338,7 +338,7 @@ function StandaloneRow({ sectionName, token, onChange, onRemove, previewResult, 
               previewResult={previewResult}
               includeSecondary={includeSecondary}
             />
-          </RefRow>
+          </RefCol>
         </div>
       ) : (
         <PrimitiveRefPicker
@@ -372,10 +372,16 @@ function StandaloneRow({ sectionName, token, onChange, onRemove, previewResult, 
   );
 }
 
-function RefRow({ label, children }: { label: string; children: React.ReactNode }) {
+function RefCol({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-      <span style={{ fontSize: 10, fontWeight: 600, color: 'var(--fui-fg-neutral-tertiary)', width: 12 }}>{label}</span>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+      <span style={{
+        fontSize: 10,
+        fontWeight: 600,
+        textTransform: 'uppercase',
+        letterSpacing: 0.5,
+        color: 'var(--fui-fg-neutral-tertiary, var(--fui-neutral-8))',
+      }}>{label}</span>
       {children}
     </div>
   );
@@ -430,8 +436,8 @@ function RoleSlotRow({ sectionName, slot, onChange, onRemove, namingConfig, prev
       </div>
 
       {isPerTheme ? (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-          <RefRow label="L">
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <RefCol label="Light">
             <PrimitiveRefPicker
               mode="slot"
               value={refLight}
@@ -440,8 +446,8 @@ function RoleSlotRow({ sectionName, slot, onChange, onRemove, namingConfig, prev
               previewRole="brand"
               includeSecondary={includeSecondary}
             />
-          </RefRow>
-          <RefRow label="D">
+          </RefCol>
+          <RefCol label="Dark">
             <PrimitiveRefPicker
               mode="slot"
               value={refDark}
@@ -450,7 +456,7 @@ function RoleSlotRow({ sectionName, slot, onChange, onRemove, namingConfig, prev
               previewRole="brand"
               includeSecondary={includeSecondary}
             />
-          </RefRow>
+          </RefCol>
         </div>
       ) : (
         <PrimitiveRefPicker
