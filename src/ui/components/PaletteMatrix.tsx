@@ -428,6 +428,10 @@ export function PaletteMatrix({ palette, oklchPalette, alphaPalette, onCopy, sec
         </div>
       ))}
 
+      {/* Fixed alpha scales (theme-invariant) */}
+      <FixedAlphaRow label="black α" color="black" />
+      <FixedAlphaRow label="white α" color="white" />
+
       {/* Step position / APCA contrast inputs */}
       <div style={{ ...gridStyle, marginTop: 4 }}>
         <ContentSwitcher
@@ -562,6 +566,84 @@ export function PaletteMatrix({ palette, oklchPalette, alphaPalette, onCopy, sec
       <p style={{ fontSize: 12, color: 'var(--fui-neutral-9)', marginTop: 16, gridColumn: '1 / -1' }}>
         Click any swatch to copy {useAlpha ? 'RGBA' : 'HEX'} value. Step 9 = primary color.
       </p>
+    </div>
+  );
+}
+
+// Pure-black / pure-white alpha scale shown under the role matrix. Values are
+// fixed (Radix blackA opacities), so this row doesn't react to theme or
+// display-mode changes. Hover shows hex/rgba.
+const FIXED_ALPHA: Record<number, number> = {
+  1: 0.012, 2: 0.024, 3: 0.05, 4: 0.075, 5: 0.10, 6: 0.13,
+  7: 0.17, 8: 0.24, 9: 0.43, 10: 0.50, 11: 0.62, 12: 0.92,
+};
+
+function FixedAlphaRow({ label, color }: { label: string; color: 'black' | 'white' }) {
+  const [hover, setHover] = useState<number | null>(null);
+  const rgb = color === 'black' ? '0, 0, 0' : '255, 255, 255';
+  return (
+    <div style={{
+      display: 'grid',
+      gridTemplateColumns: 'subgrid',
+      gridColumn: '1 / -1',
+      gap: 4,
+      alignItems: 'center',
+      marginBottom: 2,
+    }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 0 }}>
+        <span style={{
+          width: 14, height: 14, borderRadius: '50%',
+          background: color === 'black' ? '#000' : '#fff',
+          boxShadow: 'inset 0 0 0 1px rgba(0,0,0,0.15)',
+        }} />
+        <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--fui-neutral-9)', paddingInline: 4 }}>{label}</span>
+      </div>
+      {([1,2,3,4,5,6,7,8,9,10,11,12] as const).map(step => {
+        const a = FIXED_ALPHA[step];
+        const rgba = `rgba(${rgb}, ${a})`;
+        const isHovered = hover === step;
+        return (
+          <div
+            key={step}
+            style={{
+              position: 'relative',
+              height: 28,
+              borderRadius: 'var(--fui-radius-xl)',
+              backgroundColor: rgba,
+              cursor: 'default',
+              transition: 'transform 0.15s, z-index 0.15s',
+              transform: isHovered ? 'scale(1.1)' : undefined,
+              zIndex: isHovered ? 10 : undefined,
+              boxSizing: 'border-box',
+              // Subtle outline so very-light white-α steps stay visible.
+              boxShadow: 'inset 0 0 0 1px rgba(0,0,0,0.06)',
+            }}
+            onMouseEnter={() => setHover(step)}
+            onMouseLeave={() => setHover(null)}
+            title={`${color}.a${step}: ${rgba}`}
+          >
+            {isHovered && (
+              <div style={{
+                position: 'absolute',
+                bottom: -28,
+                left: '50%',
+                transform: 'translateX(-50%)',
+                fontSize: 10,
+                fontFamily: 'monospace',
+                whiteSpace: 'nowrap',
+                paddingInline: 6,
+                paddingBlock: 2,
+                borderRadius: 'var(--fui-radius-md)',
+                backgroundColor: 'var(--fui-neutral-12)',
+                color: 'var(--fui-neutral-1)',
+                zIndex: 20,
+              }}>
+                {rgba}
+              </div>
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 }

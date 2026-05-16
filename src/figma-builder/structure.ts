@@ -30,7 +30,7 @@ export type RGBA = { r: number; g: number; b: number; a: number };
 export interface VariableSpec {
   // Stable identity that survives renames. Format:
   //   primitives: 'prim:<theme>:<role>:<solid|alpha>:<step>'
-  //   primitives (special): 'prim:<theme>:gray-bg' / 'prim:black-a:<step>' / 'prim:white-fixed'
+  //   primitives (special): 'prim:<theme>:gray-bg' / 'prim:black-a:<step>' / 'prim:white-a:<step>' / 'prim:white-fixed'
   //   semantics:  'sem:<token-id>' where token-id is the StandaloneToken/RoleSlot UUID
   //               (slots additionally suffix ':<role>' so each expansion is distinct)
   // Used to look up the corresponding Figma Variable by ID across syncs, so
@@ -77,10 +77,14 @@ const ROLE_TO_SCALE: ReadonlyArray<[SemanticRole, string]> = [
 ];
 
 // Pure-black alpha scale (Radix `blackA`). Theme-invariant. Floats 0-1.
-const BLACK_ALPHA: Record<StepIndex, number> = {
+export const BLACK_ALPHA: Record<StepIndex, number> = {
   1: 0.012, 2: 0.024, 3: 0.05, 4: 0.075, 5: 0.10, 6: 0.13,
   7: 0.17, 8: 0.24, 9: 0.43, 10: 0.50, 11: 0.62, 12: 0.92,
 };
+
+// Pure-white alpha scale. Same opacity curve as BLACK_ALPHA so the two read
+// as a matched pair when stacked on contrasting backgrounds.
+export const WHITE_ALPHA: Record<StepIndex, number> = BLACK_ALPHA;
 
 function hexToRgba(hex: string): RGBA {
   const h = hex.replace('#', '');
@@ -99,6 +103,7 @@ function alphaColorToRgba(c: AlphaColor): RGBA {
 // 'gray.0'      → { scale: 'gray',  step: '0',  isAlpha: false, themed: true }
 // 'gray.a10'    → { scale: 'gray',  step: '10', isAlpha: true,  themed: true }
 // 'black.a8'    → { scale: 'black', step: '8',  isAlpha: true,  themed: false }
+// 'white.a8'    → { scale: 'white', step: '8',  isAlpha: true,  themed: false }
 // 'white-fixed' → { scale: 'white-fixed', step: '', isAlpha: false, themed: false }
 function parseRef(ref: string): { scale: string; step: string; isAlpha: boolean; themed: boolean } {
   if (ref === 'white-fixed') {
@@ -107,7 +112,7 @@ function parseRef(ref: string): { scale: string; step: string; isAlpha: boolean;
   const [scale, stepRaw] = ref.split('.');
   const isAlpha = stepRaw.startsWith('a');
   const step = isAlpha ? stepRaw.slice(1) : stepRaw;
-  const themed = scale !== 'black';
+  const themed = scale !== 'black' && scale !== 'white';
   return { scale, step, isAlpha, themed };
 }
 
@@ -159,6 +164,7 @@ function refToPath(ref: string, theme: 'light' | 'dark', namingConfig: NamingCon
   const { scale, step, isAlpha, themed } = parseRef(ref);
   if (scale === 'white-fixed') return ['white-fixed'];
   if (scale === 'black') return [`black-a`, step];
+  if (scale === 'white') return [`white-a`, step];
   const userName = scaleToUserName(scale, namingConfig);
   const scaleName = isAlpha ? `${userName}-a` : userName;
   return themed ? [theme, scaleName, step] : [scaleName, step];
@@ -172,6 +178,7 @@ function refToFallback(
   const { scale, step, isAlpha } = parseRef(ref);
   if (scale === 'white-fixed') return { r: 1, g: 1, b: 1, a: 1 };
   if (scale === 'black') return { r: 0, g: 0, b: 0, a: BLACK_ALPHA[Number(step) as StepIndex] };
+  if (scale === 'white') return { r: 1, g: 1, b: 1, a: WHITE_ALPHA[Number(step) as StepIndex] };
 
   const data = input[theme];
   const pair = ROLE_TO_SCALE.find(([, sn]) => sn === scale);
@@ -306,6 +313,13 @@ export function buildVariableStructure(
       key: `prim:black-a:${step}`,
       path: ['black-a', String(step)],
       valuesByMode: { Default: { r: 0, g: 0, b: 0, a: BLACK_ALPHA[step] } },
+    });
+  }
+  for (const step of STEP_INDICES) {
+    primitiveVars.push({
+      key: `prim:white-a:${step}`,
+      path: ['white-a', String(step)],
+      valuesByMode: { Default: { r: 1, g: 1, b: 1, a: WHITE_ALPHA[step] } },
     });
   }
   primitiveVars.push({

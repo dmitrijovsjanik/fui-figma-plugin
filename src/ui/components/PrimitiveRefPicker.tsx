@@ -75,6 +75,7 @@ function resolveSwatchColor(
 ): string {
   if (scale === 'white-fixed') return '#ffffff';
   if (scale === 'black') return `rgba(0, 0, 0, ${BLACK_ALPHA[step] ?? 0})`;
+  if (scale === 'white') return `rgba(255, 255, 255, ${BLACK_ALPHA[step] ?? 0})`;
   if (!previewResult) return 'transparent';
 
   const role: SemanticRole | undefined = scale === '{role}'
@@ -93,8 +94,8 @@ interface ScaleOption {
   value: string;
   label: string;
   // When set, the dropdown row shows a small swatch using the *current* step/alpha
-  // applied to this scale. For 'white-fixed' / 'black' the swatch is fixed.
-  kind: 'normal' | 'black' | 'white-fixed';
+  // applied to this scale. For 'white-fixed' / 'black' / 'white' the swatch is fixed.
+  kind: 'normal' | 'black' | 'white' | 'white-fixed';
 }
 
 export function PrimitiveRefPicker(props: PrimitiveRefPickerProps) {
@@ -102,6 +103,8 @@ export function PrimitiveRefPicker(props: PrimitiveRefPickerProps) {
   const parsed = parseRefValue(value);
   const isWhiteFixed = parsed.scale === 'white-fixed';
   const isBlack = parsed.scale === 'black';
+  const isWhite = parsed.scale === 'white';
+  const isFixedAlpha = isBlack || isWhite;
 
   const scaleOptions: ScaleOption[] = (() => {
     if (mode === 'slot') {
@@ -111,6 +114,7 @@ export function PrimitiveRefPicker(props: PrimitiveRefPickerProps) {
       .filter(s => includeSecondary || s !== 'secondary')
       .map(s => ({ value: s, label: s, kind: 'normal' as const }));
     opts.push({ value: 'black', label: 'black α', kind: 'black' as const });
+    opts.push({ value: 'white', label: 'white α', kind: 'white' as const });
     opts.push({ value: 'white-fixed', label: 'white-fixed', kind: 'white-fixed' as const });
     return opts;
   })();
@@ -118,7 +122,7 @@ export function PrimitiveRefPicker(props: PrimitiveRefPickerProps) {
   // Step options
   const stepValues: number[] = (() => {
     if (isWhiteFixed) return [0];
-    if (isBlack) return [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+    if (isFixedAlpha) return [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
     if (parsed.isAlpha) return [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
     return [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
   })();
@@ -128,10 +132,10 @@ export function PrimitiveRefPicker(props: PrimitiveRefPickerProps) {
       onChange('white-fixed');
       return;
     }
-    if (next === 'black') {
-      // Black is alpha-only — switch to alpha and keep step (or default to 8).
+    if (next === 'black' || next === 'white') {
+      // Fixed alpha scales — alpha-only; pick step (or default to 8).
       const step = parsed.step === 0 ? 8 : parsed.step;
-      onChange(`black.a${step}`);
+      onChange(`${next}.a${step}`);
       return;
     }
     const step = parsed.step === 0 && parsed.isAlpha ? 1 : parsed.step;
@@ -144,7 +148,7 @@ export function PrimitiveRefPicker(props: PrimitiveRefPickerProps) {
   };
 
   const handleAlphaToggle = () => {
-    if (isWhiteFixed || isBlack) return;
+    if (isWhiteFixed || isFixedAlpha) return;
     const isAlpha = !parsed.isAlpha;
     const step = isAlpha && parsed.step === 0 ? 1 : parsed.step;
     onChange(buildRef({ scale: parsed.scale, step, isAlpha }));
@@ -164,7 +168,9 @@ export function PrimitiveRefPicker(props: PrimitiveRefPickerProps) {
             ? '#ffffff'
             : opt.kind === 'black'
               ? `rgba(0,0,0,${BLACK_ALPHA[parsed.step] ?? 0.24})`
-              : resolveSwatchColor(opt.value, parsed.step || 9, parsed.isAlpha, previewRole, previewResult);
+              : opt.kind === 'white'
+                ? `rgba(255,255,255,${BLACK_ALPHA[parsed.step] ?? 0.24})`
+                : resolveSwatchColor(opt.value, parsed.step || 9, parsed.isAlpha, previewRole, previewResult);
           return (
             <PickerOption
               key={opt.value}
@@ -207,7 +213,7 @@ export function PrimitiveRefPicker(props: PrimitiveRefPickerProps) {
         toggleable
         pressed={parsed.isAlpha}
         onClick={handleAlphaToggle}
-        disabled={isWhiteFixed || isBlack}
+        disabled={isWhiteFixed || isFixedAlpha}
         title={parsed.isAlpha ? 'Alpha scale — click to use solid' : 'Solid scale — click to use alpha'}
       >
         α
