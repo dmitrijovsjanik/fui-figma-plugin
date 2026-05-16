@@ -12,6 +12,11 @@
 
 import { useRef, useState, useEffect, useCallback } from 'react';
 import { Dropdown } from '../../components/Dropdown/Dropdown';
+import { MenuItem } from '../../components/Menu/MenuItem';
+import { Button } from '../../components/Button/Button';
+import { ChevronDownIcon } from '../../components/Button/ChevronDownIcon';
+import { PAD_CLASS, TEXT_CLASS, MENU_ITEM_HEIGHT } from '../../tokens/size';
+import selectStyles from '../../components/Input/Select.module.css';
 import {
   PRIMITIVE_SCALE_NAMES,
   type GenerationResult,
@@ -192,26 +197,20 @@ export function PrimitiveRefPicker(props: PrimitiveRefPickerProps) {
       />
 
       {/* Alpha toggle */}
-      <button
-        type="button"
+      <Button
+        kind="text"
+        buttonType="tertiary"
+        status="neutral"
+        padSize="sm"
+        textSize={12}
+        toggleable
+        pressed={parsed.isAlpha}
         onClick={handleAlphaToggle}
         disabled={isWhiteFixed || isBlack}
         title={parsed.isAlpha ? 'Alpha scale — click to use solid' : 'Solid scale — click to use alpha'}
-        style={{
-          height: 28,
-          padding: '0 8px',
-          borderRadius: 6,
-          border: '1px solid var(--fui-border-neutral-secondary, rgba(0,0,0,0.15))',
-          background: parsed.isAlpha ? 'var(--fui-bg-accent-secondary, rgba(99, 102, 241, 0.1))' : 'transparent',
-          color: 'var(--fui-fg-neutral-primary)',
-          fontSize: 12,
-          fontWeight: 500,
-          cursor: isWhiteFixed || isBlack ? 'not-allowed' : 'pointer',
-          opacity: isWhiteFixed || isBlack ? 0.5 : 1,
-        }}
       >
         α
-      </button>
+      </Button>
     </div>
   );
 }
@@ -229,6 +228,7 @@ function SwatchPicker(props: {
 }) {
   const { widthPx, currentLabel, currentSwatch, disabled, renderOptions } = props;
   const triggerRef = useRef<HTMLButtonElement>(null);
+  const anchorRef = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(false);
 
   const close = useCallback(() => setOpen(false), []);
@@ -241,50 +241,47 @@ function SwatchPicker(props: {
     return () => window.removeEventListener('keydown', onKey);
   }, [open, close]);
 
+  // Reuse the Select component's field classes so the trigger inherits the
+  // same background/border/hover treatment as every other Select in the app.
+  const fieldCls = [
+    selectStyles.field,
+    PAD_CLASS.sm,
+    TEXT_CLASS[12],
+    open && selectStyles.focused,
+    disabled && selectStyles.disabled,
+  ].filter(Boolean).join(' ');
+
   return (
-    <>
+    <div ref={anchorRef} style={{ position: 'relative', minWidth: widthPx }}>
       <button
         type="button"
         ref={triggerRef}
         disabled={disabled}
         onClick={() => !disabled && setOpen(o => !o)}
+        className={fieldCls}
         style={{
-          height: 28,
-          minWidth: widthPx,
-          padding: '0 8px',
-          borderRadius: 6,
-          border: '1px solid var(--fui-border-neutral-secondary, rgba(0,0,0,0.15))',
-          background: 'var(--fui-bg-primary, #fff)',
+          width: '100%',
           cursor: disabled ? 'not-allowed' : 'pointer',
-          opacity: disabled ? 0.6 : 1,
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: 6,
-          fontSize: 12,
-          color: 'var(--fui-fg-neutral-primary)',
           textAlign: 'left',
+          font: 'inherit',
         }}
       >
         {currentSwatch !== undefined && <SwatchTile color={currentSwatch} size={14} />}
-        <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-          {currentLabel}
-        </span>
-        <span style={{ fontSize: 9, opacity: 0.5 }}>▾</span>
+        <span className={selectStyles.value}>{currentLabel}</span>
+        <ChevronDownIcon className={[selectStyles.chevron, open && selectStyles.chevronOpen].filter(Boolean).join(' ')} />
       </button>
       <Dropdown
-        anchorRef={triggerRef}
+        anchorRef={anchorRef}
         open={open}
         onClose={close}
-        itemHeight={24}
+        itemHeight={MENU_ITEM_HEIGHT.sm}
         maxVisible={8}
-        matchWidth={0}
-        variant="dense"
+        matchWidth={8}
+        offsetX={-4}
       >
-        <div style={{ display: 'flex', flexDirection: 'column', padding: 4, gap: 1 }}>
-          {renderOptions()}
-        </div>
+        {renderOptions()}
       </Dropdown>
-    </>
+    </div>
   );
 }
 
@@ -295,39 +292,20 @@ function PickerOption(props: {
   onSelect: () => void;
 }) {
   const { selected, swatch, label, onSelect } = props;
-  const [hover, setHover] = useState(false);
   return (
-    <button
-      type="button"
+    <MenuItem
+      padSize="sm"
+      textSize={12}
+      selected={selected}
+      leadSlot={<SwatchTile color={swatch} size={14} />}
       onMouseDown={(e) => { e.preventDefault(); onSelect(); }}
-      onMouseEnter={() => setHover(true)}
-      onMouseLeave={() => setHover(false)}
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: 8,
-        height: 24,
-        padding: '0 8px',
-        border: 'none',
-        borderRadius: 4,
-        background: selected
-          ? 'var(--fui-bg-accent-secondary, rgba(99,102,241,0.12))'
-          : hover
-            ? 'var(--fui-overlay-hover, rgba(0,0,0,0.05))'
-            : 'transparent',
-        cursor: 'pointer',
-        fontSize: 12,
-        color: 'var(--fui-fg-neutral-primary)',
-        textAlign: 'left',
-      }}
     >
-      <SwatchTile color={swatch} size={14} />
-      <span style={{ flex: 1 }}>{label}</span>
-      {selected && <span style={{ fontSize: 11, opacity: 0.7 }}>✓</span>}
-    </button>
+      {label}
+    </MenuItem>
   );
 }
 
+// Round color swatch — used in trigger, dropdown rows and inline previews.
 function SwatchTile({ color, size }: { color: string; size: number }) {
   const isTransparent = color === 'transparent';
   return (
@@ -336,7 +314,7 @@ function SwatchTile({ color, size }: { color: string; size: number }) {
         width: size,
         height: size,
         flexShrink: 0,
-        borderRadius: 3,
+        borderRadius: '50%',
         background: isTransparent
           ? 'repeating-conic-gradient(#ccc 0% 25%, #fff 0% 50%) 50% / 6px 6px'
           : color,

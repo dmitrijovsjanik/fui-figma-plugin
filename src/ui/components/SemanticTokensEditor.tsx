@@ -569,7 +569,7 @@ function SlotPreviewSwatch({ role, slot, previewResult, namingConfig }: {
     <div
       title={`${namingConfig.roleNames[role]}-${slot.suffix}`}
       style={{
-        width: 14, height: 14, borderRadius: 3,
+        width: 14, height: 14, borderRadius: '50%',
         background: color === 'transparent'
           ? 'repeating-conic-gradient(#ccc 0% 25%, #fff 0% 50%) 50% / 6px 6px'
           : color,
