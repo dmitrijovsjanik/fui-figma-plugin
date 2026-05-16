@@ -303,16 +303,8 @@ export function generateLightThemeScale(options: ScaleGeneratorOptions): {
     step9C = peakChroma;
   }
 
-  // Contrast neutral: pin step 9 to pure black; step 10 to 30% L of black
-  // (i.e. L = 0.3). Step 11 stays Radix-relative below. Rest of the scale
-  // (steps 1-8, 12) is computed normally so the curve still feels familiar.
-  if (isNeutral && contrastNeutral) {
-    step9L = 0;
-    step9C = 0;
-  }
-
   // Steps 10, 11 relative to step 9 (Radix pattern)
-  const step10L = isNeutral && contrastNeutral ? 0.3 : step9L - 0.028;
+  const step10L = step9L - 0.028;
   const baseStep11Drop = 0.093;
   const extraDrop = Math.max(0, step9L - LIGHT_STEP9_BASE_L) * 1.15;
   const step11L = step9L - baseStep11Drop - extraDrop;
@@ -325,14 +317,24 @@ export function generateLightThemeScale(options: ScaleGeneratorOptions): {
   const finalL = computeUnifiedSteps(bgL, step9L, step10L, step11L, LIGHT_STEP12_L, false, effectivePositions);
 
   for (const step of STEP_INDICES) {
-    const l = finalL[step];
-    const c = step === 9
-      ? step9C
-      : isNeutral && contrastNeutral && step === 10
-        ? 0
-        : isNeutral
-          ? neutralChromaForStep(step, peakChroma)
-          : chromaForStep(step, peakChroma, step9L);
+    // Contrast neutral is applied here as a *post-hoc override* on steps 9/10
+    // only. We do NOT feed L=0 back into computeUnifiedSteps — that would
+    // reshape the entire curve. Steps 1-8 and 11-12 stay on the regular path.
+    let l = finalL[step];
+    let c: number;
+    if (isNeutral && contrastNeutral && step === 9) {
+      l = 0;
+      c = 0;
+    } else if (isNeutral && contrastNeutral && step === 10) {
+      l = 0.3;
+      c = 0;
+    } else if (step === 9) {
+      c = step9C;
+    } else if (isNeutral) {
+      c = neutralChromaForStep(step, peakChroma);
+    } else {
+      c = chromaForStep(step, peakChroma, step9L);
+    }
 
     const mapped = gamutMapOklch({ l, c, h: hue }, gamut);
     oklchScale[step] = mapped.oklch;
@@ -415,16 +417,8 @@ export function generateDarkThemeScale(options: ScaleGeneratorOptions): {
       : peakChroma;
   }
 
-  // Contrast neutral in dark theme: step 9 → pure white, step 10 → L 0.7
-  // (i.e. 30% step away from white, the dark-mode mirror of the light-theme
-  // 0.3 L). Rest of the scale unchanged.
-  if (isNeutral && contrastNeutral) {
-    step9L = 1;
-    step9C = 0;
-  }
-
   // In dark mode: hover is lighter, text steps are high-lightness
-  const step10L = isNeutral && contrastNeutral ? 0.7 : step9L + 0.039;
+  const step10L = step9L + 0.039;
   const step11L = step9L + 0.115;
 
   // Unified step computation
@@ -434,14 +428,24 @@ export function generateDarkThemeScale(options: ScaleGeneratorOptions): {
   const finalL = computeUnifiedSteps(bgL, step9L, step10L, step11L, DARK_STEP12_L, true, effectivePositions);
 
   for (const step of STEP_INDICES) {
-    const l = finalL[step];
-    const c = step === 9
-      ? step9C
-      : isNeutral && contrastNeutral && step === 10
-        ? 0
-        : isNeutral
-          ? neutralChromaForStep(step, peakChroma)
-          : darkChromaForStep(step, peakChroma);
+    // Contrast neutral applied as a post-hoc override on steps 9/10 only —
+    // mirror of the light-theme treatment. Steps 1-8 and 11-12 stay on the
+    // regular dark-mode curve.
+    let l = finalL[step];
+    let c: number;
+    if (isNeutral && contrastNeutral && step === 9) {
+      l = 1;
+      c = 0;
+    } else if (isNeutral && contrastNeutral && step === 10) {
+      l = 0.7;
+      c = 0;
+    } else if (step === 9) {
+      c = step9C;
+    } else if (isNeutral) {
+      c = neutralChromaForStep(step, peakChroma);
+    } else {
+      c = darkChromaForStep(step, peakChroma);
+    }
 
     const mapped = gamutMapOklch({ l, c, h: hue }, gamut);
     oklchScale[step] = mapped.oklch;
