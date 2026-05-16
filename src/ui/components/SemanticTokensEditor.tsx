@@ -200,15 +200,10 @@ function SectionEditor({ section, onChange, onRemove, namingConfig, previewResul
 
       {!collapsed && (
         <>
-          {/* Standalone */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-            <SubHeader>Standalone tokens</SubHeader>
-            {section.standalone.length === 0 && <EmptyHint>No standalone tokens.</EmptyHint>}
-            {section.standalone.length > 0 && (
-              <ThemeColumnsHeader
-                prefixWidth={STANDALONE_PREFIX_WIDTH}
-                showDark={section.standalone.some(t => typeof t.ref !== 'string')}
-              />
+          <GroupPanel title="Standalone tokens">
+            <ColumnHeaders nameLabel="Name" />
+            {section.standalone.length === 0 && (
+              <EmptyRow>No standalone tokens.</EmptyRow>
             )}
             {section.standalone.map(tok => (
               <StandaloneRow
@@ -221,20 +216,20 @@ function SectionEditor({ section, onChange, onRemove, namingConfig, previewResul
                 includeSecondary={includeSecondary}
               />
             ))}
-            <Button buttonType="tertiary" status="neutral" padSize="sm" textSize={12} onClick={addStandalone}>
-              + Add standalone token
-            </Button>
-          </div>
+            <div style={{
+              padding: '6px 8px',
+              borderTop: '1px solid var(--fui-border-neutral-tertiary, rgba(0,0,0,0.06))',
+            }}>
+              <Button buttonType="tertiary" status="neutral" padSize="sm" textSize={12} onClick={addStandalone}>
+                + Add standalone token
+              </Button>
+            </div>
+          </GroupPanel>
 
-          {/* Role slots */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-            <SubHeader>Role-slot templates</SubHeader>
-            {section.roleSlots.length === 0 && <EmptyHint>No role slots.</EmptyHint>}
-            {section.roleSlots.length > 0 && (
-              <ThemeColumnsHeader
-                prefixWidth={SLOT_PREFIX_WIDTH}
-                showDark={section.roleSlots.some(s => typeof s.ref !== 'string')}
-              />
+          <GroupPanel title="Role-slot templates">
+            <ColumnHeaders nameLabel="Suffix" />
+            {section.roleSlots.length === 0 && (
+              <EmptyRow>No role slots.</EmptyRow>
             )}
             {section.roleSlots.map(slot => (
               <RoleSlotRow
@@ -248,34 +243,30 @@ function SectionEditor({ section, onChange, onRemove, namingConfig, previewResul
                 includeSecondary={includeSecondary}
               />
             ))}
-            <Button buttonType="tertiary" status="neutral" padSize="sm" textSize={12} onClick={addSlot}>
-              + Add role slot
-            </Button>
-          </div>
+            <div style={{
+              padding: '6px 8px',
+              borderTop: '1px solid var(--fui-border-neutral-tertiary, rgba(0,0,0,0.06))',
+            }}>
+              <Button buttonType="tertiary" status="neutral" padSize="sm" textSize={12} onClick={addSlot}>
+                + Add role slot
+              </Button>
+            </div>
+          </GroupPanel>
         </>
       )}
     </div>
   );
 }
 
-function SubHeader({ children }: { children: React.ReactNode }) {
+function EmptyRow({ children }: { children: React.ReactNode }) {
   return (
     <div style={{
-      fontSize: 11,
-      fontWeight: 600,
-      textTransform: 'uppercase',
-      letterSpacing: 0.5,
-      color: 'var(--fui-fg-neutral-secondary)',
-      marginTop: 4,
+      padding: '8px 12px',
+      fontSize: 12,
+      color: 'var(--fui-fg-neutral-tertiary, var(--fui-neutral-8))',
+      fontStyle: 'italic',
+      borderTop: '1px solid var(--fui-border-neutral-tertiary, rgba(0,0,0,0.06))',
     }}>
-      {children}
-    </div>
-  );
-}
-
-function EmptyHint({ children }: { children: React.ReactNode }) {
-  return (
-    <div style={{ fontSize: 12, color: 'var(--fui-fg-neutral-tertiary, var(--fui-neutral-8))', fontStyle: 'italic' }}>
       {children}
     </div>
   );
@@ -309,101 +300,70 @@ function StandaloneRow({ sectionName, token, onChange, onRemove, previewResult, 
   };
 
   return (
+    <TokenRow
+      prefix={`${sectionName}/`}
+      nameValue={token.name}
+      onNameChange={(v) => onChange({ name: v })}
+      lightPicker={
+        <PrimitiveRefPicker
+          mode="standalone"
+          value={refLight}
+          onChange={(v) => isPerTheme ? setRef({ light: v, dark: refDark }) : setRef(v)}
+          previewResult={previewResult}
+          includeSecondary={includeSecondary}
+        />
+      }
+      darkPicker={isPerTheme ? (
+        <PrimitiveRefPicker
+          mode="standalone"
+          value={refDark}
+          onChange={(v) => setRef({ light: refLight, dark: v })}
+          previewResult={previewResult}
+          includeSecondary={includeSecondary}
+        />
+      ) : null}
+      isPerTheme={isPerTheme}
+      onTogglePerTheme={togglePerTheme}
+      onRemove={onRemove}
+    />
+  );
+}
+
+// One shared column model for every token row across both groups (Standalone
+// and Role-slot). Keeping these widths in one place is what makes the editor
+// visually a table — column positions stay identical regardless of group or
+// whether an individual row is per-theme.
+const COL = {
+  prefix: 90,        // 'bg/' or 'bg/{role}-'
+  name: 200,         // name / suffix input
+  ref: 230,          // single Light or Dark picker
+  actions: 88,       // L/D toggle + delete button
+  gap: 8,
+} as const;
+
+function Cell({ width, children, align = 'flex-start' }: {
+  width: number;
+  children?: React.ReactNode;
+  align?: React.CSSProperties['justifyContent'];
+}) {
+  return (
     <div style={{
+      width,
+      flexShrink: 0,
       display: 'flex',
       alignItems: 'center',
-      gap: 8,
-      padding: '6px 8px',
-      borderRadius: 8,
-      background: 'var(--fui-bg-surface-2, var(--fui-neutral-1))',
+      justifyContent: align,
     }}>
-      <span style={{ fontSize: 12, color: 'var(--fui-fg-neutral-tertiary, var(--fui-neutral-8))', minWidth: 32 }}>
-        {sectionName}/
-      </span>
-      <div style={{ flex: '0 0 160px' }}>
-        <TextInline
-          value={token.name}
-          onChange={(e) => onChange({ name: e.target.value })}
-          padSize="sm"
-          textSize={12}
-          showLabel={false}
-          showCaption={false}
-        />
-      </div>
-
-      {isPerTheme ? (
-        <>
-          <RefCell>
-            <PrimitiveRefPicker
-              mode="standalone"
-              value={refLight}
-              onChange={(v) => setRef({ light: v, dark: refDark })}
-              previewResult={previewResult}
-              includeSecondary={includeSecondary}
-            />
-          </RefCell>
-          <RefCell>
-            <PrimitiveRefPicker
-              mode="standalone"
-              value={refDark}
-              onChange={(v) => setRef({ light: refLight, dark: v })}
-              previewResult={previewResult}
-              includeSecondary={includeSecondary}
-            />
-          </RefCell>
-        </>
-      ) : (
-        <RefCell>
-          <PrimitiveRefPicker
-            mode="standalone"
-            value={refLight}
-            onChange={setRef}
-            previewResult={previewResult}
-            includeSecondary={includeSecondary}
-          />
-        </RefCell>
-      )}
-
-      <button
-        type="button"
-        onClick={togglePerTheme}
-        title={isPerTheme ? 'Same ref for light & dark' : 'Different refs per theme'}
-        style={{
-          marginLeft: 'auto',
-          height: 24, padding: '0 8px', borderRadius: 4,
-          border: '1px solid var(--fui-border-neutral-secondary, rgba(0,0,0,0.15))',
-          background: isPerTheme ? 'var(--fui-bg-accent-secondary, rgba(99,102,241,0.1))' : 'transparent',
-          fontSize: 11, cursor: 'pointer',
-          color: 'var(--fui-fg-neutral-primary)',
-        }}
-      >
-        L/D
-      </button>
-      <Button buttonType="tertiary" status="error" padSize="sm" textSize={12} onClick={onRemove}>
-        ×
-      </Button>
+      {children}
     </div>
   );
 }
 
-// Fixed widths for the columns inside a token row. Defining them here lets the
-// group header (Light / Dark) align with the same column positions even though
-// the prefix part (section label + name input) differs between standalone and
-// role-slot rows.
-const REF_COL_WIDTH = 230;
-const STANDALONE_PREFIX_WIDTH = 32 /* section label */ + 8 /* gap */ + 160 /* name input */;
-const SLOT_PREFIX_WIDTH = 80 /* sectionName/{role}- */ + 8 + 140 /* suffix input */;
-
-function RefCell({ children }: { children: React.ReactNode }) {
-  return <div style={{ width: REF_COL_WIDTH, flexShrink: 0 }}>{children}</div>;
-}
-
-// One-line column header rendered above a list of token rows. Aligns to the
-// same column positions as the rows so "Light" sits over light pickers.
-function ThemeColumnsHeader({ prefixWidth, showDark }: { prefixWidth: number; showDark: boolean }) {
+// Column header row — always shows "Light" + "Dark" columns regardless of how
+// many rows are per-theme. That way Dark stays in the same x position when the
+// user toggles L/D on individual rows.
+function ColumnHeaders({ nameLabel }: { nameLabel: string }) {
   const labelStyle: React.CSSProperties = {
-    width: REF_COL_WIDTH,
-    flexShrink: 0,
     fontSize: 10,
     fontWeight: 600,
     textTransform: 'uppercase',
@@ -414,18 +374,111 @@ function ThemeColumnsHeader({ prefixWidth, showDark }: { prefixWidth: number; sh
     <div style={{
       display: 'flex',
       alignItems: 'center',
-      gap: 8,
-      paddingLeft: 8,
-      paddingRight: 8,
+      gap: COL.gap,
+      padding: '4px 8px',
+      borderBottom: '1px solid var(--fui-border-neutral-tertiary, rgba(0,0,0,0.08))',
     }}>
-      <div style={{ width: prefixWidth, flexShrink: 0 }} />
-      <span style={labelStyle}>Light</span>
-      {showDark && (
-        <>
-          <span style={{ width: 12, flexShrink: 0 }} />
-          <span style={labelStyle}>Dark</span>
-        </>
-      )}
+      <Cell width={COL.prefix}><span style={labelStyle}>Path</span></Cell>
+      <Cell width={COL.name}><span style={labelStyle}>{nameLabel}</span></Cell>
+      <Cell width={COL.ref}><span style={labelStyle}>Light</span></Cell>
+      <Cell width={COL.ref}><span style={labelStyle}>Dark</span></Cell>
+      <Cell width={COL.actions} align="flex-end"><span style={labelStyle}>&nbsp;</span></Cell>
+    </div>
+  );
+}
+
+// Single token row using the shared column model. Used by both Standalone and
+// Role-slot rows so column positions stay identical.
+function TokenRow(props: {
+  prefix: string;
+  nameValue: string;
+  onNameChange: (v: string) => void;
+  lightPicker: React.ReactNode;
+  darkPicker: React.ReactNode | null;
+  isPerTheme: boolean;
+  onTogglePerTheme: () => void;
+  onRemove: () => void;
+  trailing?: React.ReactNode;
+}) {
+  const { prefix, nameValue, onNameChange, lightPicker, darkPicker, isPerTheme, onTogglePerTheme, onRemove, trailing } = props;
+  return (
+    <div style={{
+      display: 'flex',
+      alignItems: 'center',
+      gap: COL.gap,
+      padding: '6px 8px',
+      borderTop: '1px solid var(--fui-border-neutral-tertiary, rgba(0,0,0,0.06))',
+    }}>
+      <Cell width={COL.prefix}>
+        <span style={{
+          fontSize: 12,
+          color: 'var(--fui-fg-neutral-tertiary, var(--fui-neutral-8))',
+          whiteSpace: 'nowrap',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+        }}>{prefix}</span>
+      </Cell>
+      <Cell width={COL.name}>
+        <div style={{ width: '100%' }}>
+          <TextInline
+            value={nameValue}
+            onChange={(e) => onNameChange(e.target.value)}
+            padSize="sm"
+            textSize={12}
+            showLabel={false}
+            showCaption={false}
+          />
+        </div>
+      </Cell>
+      <Cell width={COL.ref}>{lightPicker}</Cell>
+      <Cell width={COL.ref}>{darkPicker /* may be null — empty cell preserves alignment */}</Cell>
+      <Cell width={COL.actions} align="flex-end">
+        <div style={{ display: 'flex', gap: 4 }}>
+          <button
+            type="button"
+            onClick={onTogglePerTheme}
+            title={isPerTheme ? 'Same ref for light & dark' : 'Different refs per theme'}
+            style={{
+              height: 24, padding: '0 8px', borderRadius: 4,
+              border: '1px solid var(--fui-border-neutral-secondary, rgba(0,0,0,0.15))',
+              background: isPerTheme ? 'var(--fui-bg-accent-secondary, rgba(99,102,241,0.1))' : 'transparent',
+              fontSize: 11, cursor: 'pointer',
+              color: 'var(--fui-fg-neutral-primary)',
+            }}
+          >L/D</button>
+          <Button buttonType="tertiary" status="error" padSize="sm" textSize={12} onClick={onRemove}>×</Button>
+        </div>
+      </Cell>
+      {trailing}
+    </div>
+  );
+}
+
+// Group panel — a labelled, bordered container for one logical group of tokens
+// (Standalone or Role-slot templates).
+function GroupPanel({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <div style={{
+      display: 'flex',
+      flexDirection: 'column',
+      borderRadius: 10,
+      border: '1px solid var(--fui-border-neutral-tertiary, rgba(0,0,0,0.1))',
+      background: 'var(--fui-bg-surface-2, var(--fui-neutral-1))',
+      overflow: 'hidden',
+    }}>
+      <div style={{
+        padding: '8px 12px',
+        fontSize: 11,
+        fontWeight: 600,
+        textTransform: 'uppercase',
+        letterSpacing: 0.5,
+        color: 'var(--fui-fg-neutral-secondary)',
+        background: 'var(--fui-bg-surface-1, var(--fui-neutral-2))',
+        borderBottom: '1px solid var(--fui-border-neutral-tertiary, rgba(0,0,0,0.08))',
+      }}>{title}</div>
+      <div style={{ display: 'flex', flexDirection: 'column' }}>
+        {children}
+      </div>
     </div>
   );
 }
@@ -456,96 +509,47 @@ function RoleSlotRow({ sectionName, slot, onChange, onRemove, namingConfig, prev
   const roles: SemanticRole[] = SEMANTIC_ROLES.filter(r => r !== 'secondary' || includeSecondary);
 
   return (
-    <div style={{
-      display: 'flex',
-      alignItems: 'center',
-      gap: 8,
-      padding: '6px 8px',
-      borderRadius: 8,
-      background: 'var(--fui-bg-surface-2, var(--fui-neutral-1))',
-    }}>
-      <span style={{ fontSize: 12, color: 'var(--fui-fg-neutral-tertiary, var(--fui-neutral-8))', minWidth: 80 }}>
-        {sectionName}/{'{role}'}-
-      </span>
-      <div style={{ flex: '0 0 140px' }}>
-        <TextInline
-          value={slot.suffix}
-          onChange={(e) => onChange({ suffix: e.target.value })}
-          padSize="sm"
-          textSize={12}
-          showLabel={false}
-          showCaption={false}
+    <TokenRow
+      prefix={`${sectionName}/{role}-`}
+      nameValue={slot.suffix}
+      onNameChange={(v) => onChange({ suffix: v })}
+      lightPicker={
+        <PrimitiveRefPicker
+          mode="slot"
+          value={refLight}
+          onChange={(v) => isPerTheme ? setRef({ light: v, dark: refDark }) : setRef(v)}
+          previewResult={previewResult}
+          previewRole="brand"
+          includeSecondary={includeSecondary}
         />
-      </div>
-
-      {isPerTheme ? (
-        <>
-          <RefCell>
-            <PrimitiveRefPicker
-              mode="slot"
-              value={refLight}
-              onChange={(v) => setRef({ light: v, dark: refDark })}
+      }
+      darkPicker={isPerTheme ? (
+        <PrimitiveRefPicker
+          mode="slot"
+          value={refDark}
+          onChange={(v) => setRef({ light: refLight, dark: v })}
+          previewResult={previewResult}
+          previewRole="brand"
+          includeSecondary={includeSecondary}
+        />
+      ) : null}
+      isPerTheme={isPerTheme}
+      onTogglePerTheme={togglePerTheme}
+      onRemove={onRemove}
+      trailing={
+        <div style={{ display: 'flex', gap: 2, paddingLeft: COL.gap }}>
+          {roles.map(role => (
+            <SlotPreviewSwatch
+              key={role}
+              role={role}
+              slot={slot}
               previewResult={previewResult}
-              previewRole="brand"
-              includeSecondary={includeSecondary}
+              namingConfig={namingConfig}
             />
-          </RefCell>
-          <RefCell>
-            <PrimitiveRefPicker
-              mode="slot"
-              value={refDark}
-              onChange={(v) => setRef({ light: refLight, dark: v })}
-              previewResult={previewResult}
-              previewRole="brand"
-              includeSecondary={includeSecondary}
-            />
-          </RefCell>
-        </>
-      ) : (
-        <RefCell>
-          <PrimitiveRefPicker
-            mode="slot"
-            value={refLight}
-            onChange={setRef}
-            previewResult={previewResult}
-            previewRole="brand"
-            includeSecondary={includeSecondary}
-          />
-        </RefCell>
-      )}
-
-      <button
-        type="button"
-        onClick={togglePerTheme}
-        title={isPerTheme ? 'Same ref for light & dark' : 'Different refs per theme'}
-        style={{
-          marginLeft: 'auto',
-          height: 24, padding: '0 8px', borderRadius: 4,
-          border: '1px solid var(--fui-border-neutral-secondary, rgba(0,0,0,0.15))',
-          background: isPerTheme ? 'var(--fui-bg-accent-secondary, rgba(99,102,241,0.1))' : 'transparent',
-          fontSize: 11, cursor: 'pointer',
-          color: 'var(--fui-fg-neutral-primary)',
-        }}
-      >
-        L/D
-      </button>
-      <Button buttonType="tertiary" status="error" padSize="sm" textSize={12} onClick={onRemove}>
-        ×
-      </Button>
-
-      {/* Live preview: tiny swatch per role */}
-      <div style={{ display: 'flex', gap: 2, marginLeft: 4 }}>
-        {roles.map(role => (
-          <SlotPreviewSwatch
-            key={role}
-            role={role}
-            slot={slot}
-            previewResult={previewResult}
-            namingConfig={namingConfig}
-          />
-        ))}
-      </div>
-    </div>
+          ))}
+        </div>
+      }
+    />
   );
 }
 
