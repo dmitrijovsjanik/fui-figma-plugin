@@ -437,7 +437,7 @@ export function generateDarkThemeScale(options: ScaleGeneratorOptions): {
       l = 1;
       c = 0;
     } else if (isNeutral && contrastNeutral && step === 10) {
-      l = 0.7;
+      l = 0.6;
       c = 0;
     } else if (step === 9) {
       c = step9C;
