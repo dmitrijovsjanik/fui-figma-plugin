@@ -305,6 +305,7 @@ function StandaloneRow({ sectionName, token, onChange, onRemove, lightResult, da
           value={light}
           onChange={(v) => setRef({ light: v })}
           previewResult={lightResult}
+          invertedPreviewResult={darkResult}
           includeSecondary={includeSecondary}
           invert={lightInvert === true}
           onInvertChange={(v) => setRef({ lightInvert: v ? true : undefined })}
@@ -316,6 +317,7 @@ function StandaloneRow({ sectionName, token, onChange, onRemove, lightResult, da
           value={dark}
           onChange={(v) => setRef({ dark: v })}
           previewResult={darkResult}
+          invertedPreviewResult={lightResult}
           includeSecondary={includeSecondary}
           invert={darkInvert === true}
           onInvertChange={(v) => setRef({ darkInvert: v ? true : undefined })}
@@ -333,7 +335,7 @@ function StandaloneRow({ sectionName, token, onChange, onRemove, lightResult, da
 const COL = {
   prefix: 90,        // 'bg/' or 'bg/{role}-'
   name: 200,         // name / suffix input
-  ref: 230,          // single Light or Dark picker
+  ref: 290,          // single Light or Dark picker (scale + step + α + inv)
   actions: 40,       // delete button
   gap: 8,            // gap inside a column (e.g. between scale + step picker)
   colGap: 24,        // gap between distinct columns — emphasises Light vs Dark
@@ -505,6 +507,7 @@ function RoleSlotRow({ sectionName, slot, onChange, onRemove, namingConfig, ligh
           value={light}
           onChange={(v) => setRef({ light: v })}
           previewResult={lightResult}
+          invertedPreviewResult={darkResult}
           previewRole="brand"
           includeSecondary={includeSecondary}
           invert={lightInvert === true}
@@ -517,6 +520,7 @@ function RoleSlotRow({ sectionName, slot, onChange, onRemove, namingConfig, ligh
           value={dark}
           onChange={(v) => setRef({ dark: v })}
           previewResult={darkResult}
+          invertedPreviewResult={lightResult}
           previewRole="brand"
           includeSecondary={includeSecondary}
           invert={darkInvert === true}

@@ -33,6 +33,8 @@ export interface PrimitiveRefPickerProps {
   includeSecondary?: boolean;     // hide 'secondary' scale option if false
   previewRole?: SemanticRole;     // used to render swatch for {role}-based refs
   previewResult?: GenerationResult | null;
+  // The OPPOSITE theme's palette — used to colour the swatch when invert is on.
+  invertedPreviewResult?: GenerationResult | null;
   // Theme-invert toggle: when true, this ref is resolved against the OPPOSITE
   // primitive theme. Only meaningful for themed scales (not black/white/white-fixed).
   invert?: boolean;
@@ -103,7 +105,10 @@ interface ScaleOption {
 }
 
 export function PrimitiveRefPicker(props: PrimitiveRefPickerProps) {
-  const { mode, value, onChange, includeSecondary = true, previewRole, previewResult, invert = false, onInvertChange } = props;
+  const { mode, value, onChange, includeSecondary = true, previewRole, previewResult, invertedPreviewResult, invert = false, onInvertChange } = props;
+  // When inverted, look up colors in the opposite-theme palette so the swatch
+  // shows what Figma will actually emit at sync time.
+  const activePreview = invert ? (invertedPreviewResult ?? previewResult) : previewResult;
   const parsed = parseRefValue(value);
   const isWhiteFixed = parsed.scale === 'white-fixed';
   const isBlack = parsed.scale === 'black';
@@ -158,13 +163,13 @@ export function PrimitiveRefPicker(props: PrimitiveRefPickerProps) {
     onChange(buildRef({ scale: parsed.scale, step, isAlpha }));
   };
 
-  const triggerSwatch = resolveSwatchColor(parsed.scale, parsed.step, parsed.isAlpha, previewRole, previewResult);
+  const triggerSwatch = resolveSwatchColor(parsed.scale, parsed.step, parsed.isAlpha, previewRole, activePreview);
 
   return (
     <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
       {/* Scale picker — no swatch in trigger; the step picker already shows the resolved color. */}
       <SwatchPicker
-        widthPx={130}
+        widthPx={110}
         currentLabel={scaleOptions.find(o => o.value === parsed.scale)?.label ?? parsed.scale}
         disabled={mode === 'slot'}
         renderOptions={() => scaleOptions.map(opt => {
@@ -174,7 +179,7 @@ export function PrimitiveRefPicker(props: PrimitiveRefPickerProps) {
               ? `rgba(0,0,0,${BLACK_ALPHA[parsed.step] ?? 0.24})`
               : opt.kind === 'white'
                 ? `rgba(255,255,255,${BLACK_ALPHA[parsed.step] ?? 0.24})`
-                : resolveSwatchColor(opt.value, parsed.step || 9, parsed.isAlpha, previewRole, previewResult);
+                : resolveSwatchColor(opt.value, parsed.step || 9, parsed.isAlpha, previewRole, activePreview);
           return (
             <PickerOption
               key={opt.value}
@@ -194,7 +199,7 @@ export function PrimitiveRefPicker(props: PrimitiveRefPickerProps) {
         currentSwatch={triggerSwatch}
         disabled={isWhiteFixed}
         renderOptions={() => stepValues.map(s => {
-          const swatch = resolveSwatchColor(parsed.scale, s, parsed.isAlpha, previewRole, previewResult);
+          const swatch = resolveSwatchColor(parsed.scale, s, parsed.isAlpha, previewRole, activePreview);
           return (
             <PickerOption
               key={s}
