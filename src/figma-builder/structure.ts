@@ -213,6 +213,12 @@ export function expandSemanticConfig(
   includeSecondary: boolean,
 ): VariableSpec[] {
   const out: VariableSpec[] = [];
+  // Tracks the final Figma path of every emitted token. Multiple specs may
+  // resolve to the same path (e.g. a standalone `fg/neutral-tertiary` plus
+  // a role-slot `tertiary` expanded for the `neutral` role). createVariable
+  // throws on duplicate names, so we keep the first occurrence and drop the
+  // rest with a warning. Standalone tokens come first so they win.
+  const seenPaths = new Set<string>();
 
   for (const section of config.sections) {
     // Section name passes through SemanticNamingConfig overrides if present;
@@ -226,9 +232,16 @@ export function expandSemanticConfig(
       if (!includeSecondary && refTargetsSecondary(tok.ref)) continue;
       const { light, dark } = tok.ref;
       const displayName = translateStandaloneName(tok.name, namingConfig);
+      const path = [sectionLabel, displayName];
+      const pathKey = path.join('/');
+      if (seenPaths.has(pathKey)) {
+        console.warn(`[expandSemanticConfig] dropping duplicate standalone token "${pathKey}" (key ${tok.id})`);
+        continue;
+      }
+      seenPaths.add(pathKey);
       out.push({
         key: `sem:${tok.id}`,
-        path: [sectionLabel, displayName],
+        path,
         description: tok.description ?? '',
         valuesByMode: {
           Light: { aliasOf: { collection: PRIMITIVES, path: refToPath(light, 'light', namingConfig) } },
@@ -248,9 +261,16 @@ export function expandSemanticConfig(
         const { light, dark } = expandedRef;
         const roleLabel = namingConfig.roleNames[role];
         const tokenName = `${roleLabel}-${slot.suffix}`;
+        const path = [sectionLabel, tokenName];
+        const pathKey = path.join('/');
+        if (seenPaths.has(pathKey)) {
+          console.warn(`[expandSemanticConfig] dropping role-slot expansion "${pathKey}" — name already taken (slot ${slot.id} × role ${role})`);
+          continue;
+        }
+        seenPaths.add(pathKey);
         out.push({
           key: `sem:${slot.id}:${role}`,
-          path: [sectionLabel, tokenName],
+          path,
           description: slot.description ? applyRoleToDescription(slot.description, role, namingConfig) : '',
           valuesByMode: {
             Light: { aliasOf: { collection: PRIMITIVES, path: refToPath(light, 'light', namingConfig) } },
