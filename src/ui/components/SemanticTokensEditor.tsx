@@ -30,7 +30,8 @@ export interface SemanticTokensEditorProps {
   config: SemanticConfig;
   onChange: (next: SemanticConfig) => void;
   namingConfig: NamingConfig;
-  previewResult: GenerationResult | null;
+  lightResult: GenerationResult | null;
+  darkResult: GenerationResult | null;
   includeSecondary: boolean;
   onExit: () => void;
 }
@@ -39,7 +40,8 @@ export function SemanticTokensEditor({
   config,
   onChange,
   namingConfig,
-  previewResult,
+  lightResult,
+  darkResult,
   includeSecondary,
   onExit,
 }: SemanticTokensEditorProps) {
@@ -98,7 +100,8 @@ export function SemanticTokensEditor({
           onChange={(patch) => updateSection(section.id, patch)}
           onRemove={() => removeSection(section.id)}
           namingConfig={namingConfig}
-          previewResult={previewResult}
+          lightResult={lightResult}
+          darkResult={darkResult}
           includeSecondary={includeSecondary}
         />
       ))}
@@ -117,11 +120,12 @@ interface SectionEditorProps {
   onChange: (patch: Partial<SemanticSectionConfig>) => void;
   onRemove: () => void;
   namingConfig: NamingConfig;
-  previewResult: GenerationResult | null;
+  lightResult: GenerationResult | null;
+  darkResult: GenerationResult | null;
   includeSecondary: boolean;
 }
 
-function SectionEditor({ section, onChange, onRemove, namingConfig, previewResult, includeSecondary }: SectionEditorProps) {
+function SectionEditor({ section, onChange, onRemove, namingConfig, lightResult, darkResult, includeSecondary }: SectionEditorProps) {
   const [collapsed, setCollapsed] = useState(false);
 
   const updateStandalone = (id: string, patch: Partial<StandaloneToken>) => {
@@ -212,7 +216,8 @@ function SectionEditor({ section, onChange, onRemove, namingConfig, previewResul
                 token={tok}
                 onChange={(p) => updateStandalone(tok.id, p)}
                 onRemove={() => removeStandalone(tok.id)}
-                previewResult={previewResult}
+                lightResult={lightResult}
+                darkResult={darkResult}
                 includeSecondary={includeSecondary}
               />
             ))}
@@ -239,7 +244,8 @@ function SectionEditor({ section, onChange, onRemove, namingConfig, previewResul
                 onChange={(p) => updateSlot(slot.id, p)}
                 onRemove={() => removeSlot(slot.id)}
                 namingConfig={namingConfig}
-                previewResult={previewResult}
+                lightResult={lightResult}
+                darkResult={darkResult}
                 includeSecondary={includeSecondary}
               />
             ))}
@@ -279,11 +285,12 @@ interface StandaloneRowProps {
   token: StandaloneToken;
   onChange: (patch: Partial<StandaloneToken>) => void;
   onRemove: () => void;
-  previewResult: GenerationResult | null;
+  lightResult: GenerationResult | null;
+  darkResult: GenerationResult | null;
   includeSecondary: boolean;
 }
 
-function StandaloneRow({ sectionName, token, onChange, onRemove, previewResult, includeSecondary }: StandaloneRowProps) {
+function StandaloneRow({ sectionName, token, onChange, onRemove, lightResult, darkResult, includeSecondary }: StandaloneRowProps) {
   const { light, dark } = token.ref;
   const setRef = (ref: PrimitiveRef) => onChange({ ref });
 
@@ -297,7 +304,7 @@ function StandaloneRow({ sectionName, token, onChange, onRemove, previewResult, 
           mode="standalone"
           value={light}
           onChange={(v) => setRef({ light: v, dark })}
-          previewResult={previewResult}
+          previewResult={lightResult}
           includeSecondary={includeSecondary}
         />
       }
@@ -306,7 +313,7 @@ function StandaloneRow({ sectionName, token, onChange, onRemove, previewResult, 
           mode="standalone"
           value={dark}
           onChange={(v) => setRef({ light, dark: v })}
-          previewResult={previewResult}
+          previewResult={darkResult}
           includeSecondary={includeSecondary}
         />
       }
@@ -461,11 +468,12 @@ interface RoleSlotRowProps {
   onChange: (patch: Partial<RoleSlot>) => void;
   onRemove: () => void;
   namingConfig: NamingConfig;
-  previewResult: GenerationResult | null;
+  lightResult: GenerationResult | null;
+  darkResult: GenerationResult | null;
   includeSecondary: boolean;
 }
 
-function RoleSlotRow({ sectionName, slot, onChange, onRemove, namingConfig, previewResult, includeSecondary }: RoleSlotRowProps) {
+function RoleSlotRow({ sectionName, slot, onChange, onRemove, namingConfig, lightResult, darkResult, includeSecondary }: RoleSlotRowProps) {
   const { light, dark } = slot.ref;
   const setRef = (ref: PrimitiveRef) => onChange({ ref });
 
@@ -481,7 +489,7 @@ function RoleSlotRow({ sectionName, slot, onChange, onRemove, namingConfig, prev
           mode="slot"
           value={light}
           onChange={(v) => setRef({ light: v, dark })}
-          previewResult={previewResult}
+          previewResult={lightResult}
           previewRole="brand"
           includeSecondary={includeSecondary}
         />
@@ -491,7 +499,7 @@ function RoleSlotRow({ sectionName, slot, onChange, onRemove, namingConfig, prev
           mode="slot"
           value={dark}
           onChange={(v) => setRef({ light, dark: v })}
-          previewResult={previewResult}
+          previewResult={darkResult}
           previewRole="brand"
           includeSecondary={includeSecondary}
         />
@@ -504,7 +512,7 @@ function RoleSlotRow({ sectionName, slot, onChange, onRemove, namingConfig, prev
               key={role}
               role={role}
               slot={slot}
-              previewResult={previewResult}
+              previewResult={lightResult}
               namingConfig={namingConfig}
             />
           ))}

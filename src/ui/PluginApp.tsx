@@ -428,6 +428,7 @@ export function PluginApp() {
   }
 
   if (tokensEditorOpen) {
+    const both = generateBothThemes();
     return (
       <div
         style={{
@@ -441,7 +442,8 @@ export function PluginApp() {
             config={semanticConfig}
             onChange={setSemanticConfig}
             namingConfig={namingConfig}
-            previewResult={result}
+            lightResult={both.lightResult}
+            darkResult={both.darkResult}
             includeSecondary={config.secondary?.mode !== 'off'}
             onExit={() => setTokensEditorOpen(false)}
           />
