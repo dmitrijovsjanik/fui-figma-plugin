@@ -148,11 +148,10 @@ export function PrimitiveRefPicker(props: PrimitiveRefPickerProps) {
 
   return (
     <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-      {/* Scale picker */}
+      {/* Scale picker — no swatch in trigger; the step picker already shows the resolved color. */}
       <SwatchPicker
         widthPx={130}
         currentLabel={scaleOptions.find(o => o.value === parsed.scale)?.label ?? parsed.scale}
-        currentSwatch={triggerSwatch}
         disabled={mode === 'slot'}
         renderOptions={() => scaleOptions.map(opt => {
           const swatch = opt.kind === 'white-fixed'
@@ -222,7 +221,9 @@ export function PrimitiveRefPicker(props: PrimitiveRefPickerProps) {
 function SwatchPicker(props: {
   widthPx: number;
   currentLabel: string;
-  currentSwatch: string;
+  // Optional — when omitted, the trigger renders without a swatch tile. Used
+  // for the scale dropdown where the step picker already shows the color.
+  currentSwatch?: string;
   disabled?: boolean;
   renderOptions: () => React.ReactNode;
 }) {
@@ -264,7 +265,7 @@ function SwatchPicker(props: {
           textAlign: 'left',
         }}
       >
-        <SwatchTile color={currentSwatch} size={14} />
+        {currentSwatch !== undefined && <SwatchTile color={currentSwatch} size={14} />}
         <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
           {currentLabel}
         </span>
