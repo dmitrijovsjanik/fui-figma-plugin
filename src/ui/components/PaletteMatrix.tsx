@@ -329,7 +329,10 @@ export function PaletteMatrix({ palette, oklchPalette, alphaPalette, onCopy, sec
 
   const isDark = theme === 'dark';
   const bgL = hexToOklch(backgroundColor).l;
-  const step9L = oklchPalette.neutral[9].l;
+  // step9L drives Position/Lc input math for the whole matrix. Read it from
+  // the brand role rather than neutral — contrast-neutral pins neutral[9] to
+  // pure black/white, which would otherwise wreck the curve solver here.
+  const step9L = oklchPalette.brand[9].l;
   const defaultStep9to12 = computeDefaultStep9to12L(defaultStep9L, isDark);
 
   const displayRoles = secondaryActive
