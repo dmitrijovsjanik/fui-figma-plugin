@@ -349,7 +349,11 @@ export function PaletteMatrix({ palette, oklchPalette, alphaPalette, onCopy, sec
   return (
     <div style={{ display: 'grid', gridTemplateColumns: 'auto repeat(12, 1fr)', gap: 4, marginBottom: 24 }}>
       {/* Color rows */}
-      {displayRoles.map(role => (
+      {displayRoles.map(role => {
+      // Row-wide hover flag: any cell in this role being hovered flips the
+      // entire row to the checkerboard backdrop, not just the single cell.
+      const rowHovered = hoveredCell !== null && hoveredCell.startsWith(`${role}-`);
+      return (
         <div key={role} style={{ ...gridStyle, marginBottom: 2 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 0 }}>
             <Dot color={role as DotColor} size={14} />
@@ -371,13 +375,13 @@ export function PaletteMatrix({ palette, oklchPalette, alphaPalette, onCopy, sec
             const isTextOnly = !isFill && (step === 11 || step === 12);
 
             // Stack a translucent color layer over a checkerboard so any alpha
-            // in the swatch reveals the pattern. Only shown on hover for the
-            // main matrix; FixedAlphaScales below shows it permanently.
+            // in the swatch reveals the pattern. The whole row flips together
+            // (rowHovered) — hovering one swatch reveals alpha in every step.
             const swatchBg: React.CSSProperties = isTextOnly
               ? { color }
               : isBorder
                 ? { boxShadow: `inset 0 0 0 2px ${color}` }
-                : isHovered
+                : rowHovered
                   ? checkerboardWithOverlay(color)
                   : { backgroundColor: color };
             return (
@@ -432,7 +436,8 @@ export function PaletteMatrix({ palette, oklchPalette, alphaPalette, onCopy, sec
             );
           })}
         </div>
-      ))}
+      );
+      })}
 
       {/* Step position / APCA contrast inputs */}
       <div style={{ ...gridStyle, marginTop: 4 }}>
@@ -575,7 +580,7 @@ export function PaletteMatrix({ palette, oklchPalette, alphaPalette, onCopy, sec
 // Standard 6×6 checkerboard pattern used to reveal alpha in swatches.
 // Two stacked linear gradients build the chequer; tile size 12px (two 6px
 // squares per row). Layered under a solid-color overlay via background-image.
-const CHECKER_TILE = 12;
+const CHECKER_TILE = 18;
 const CHECKER_LIGHT = '#fff';
 const CHECKER_DARK = '#d4d4d4';
 const CHECKER_BG =
