@@ -204,6 +204,12 @@ function SectionEditor({ section, onChange, onRemove, namingConfig, previewResul
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
             <SubHeader>Standalone tokens</SubHeader>
             {section.standalone.length === 0 && <EmptyHint>No standalone tokens.</EmptyHint>}
+            {section.standalone.length > 0 && (
+              <ThemeColumnsHeader
+                prefixWidth={STANDALONE_PREFIX_WIDTH}
+                showDark={section.standalone.some(t => typeof t.ref !== 'string')}
+              />
+            )}
             {section.standalone.map(tok => (
               <StandaloneRow
                 key={tok.id}
@@ -224,6 +230,12 @@ function SectionEditor({ section, onChange, onRemove, namingConfig, previewResul
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
             <SubHeader>Role-slot templates</SubHeader>
             {section.roleSlots.length === 0 && <EmptyHint>No role slots.</EmptyHint>}
+            {section.roleSlots.length > 0 && (
+              <ThemeColumnsHeader
+                prefixWidth={SLOT_PREFIX_WIDTH}
+                showDark={section.roleSlots.some(s => typeof s.ref !== 'string')}
+              />
+            )}
             {section.roleSlots.map(slot => (
               <RoleSlotRow
                 key={slot.id}
@@ -320,8 +332,8 @@ function StandaloneRow({ sectionName, token, onChange, onRemove, previewResult, 
       </div>
 
       {isPerTheme ? (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <RefCol label="Light">
+        <>
+          <RefCell>
             <PrimitiveRefPicker
               mode="standalone"
               value={refLight}
@@ -329,8 +341,8 @@ function StandaloneRow({ sectionName, token, onChange, onRemove, previewResult, 
               previewResult={previewResult}
               includeSecondary={includeSecondary}
             />
-          </RefCol>
-          <RefCol label="Dark">
+          </RefCell>
+          <RefCell>
             <PrimitiveRefPicker
               mode="standalone"
               value={refDark}
@@ -338,16 +350,18 @@ function StandaloneRow({ sectionName, token, onChange, onRemove, previewResult, 
               previewResult={previewResult}
               includeSecondary={includeSecondary}
             />
-          </RefCol>
-        </div>
+          </RefCell>
+        </>
       ) : (
-        <PrimitiveRefPicker
-          mode="standalone"
-          value={refLight}
-          onChange={setRef}
-          previewResult={previewResult}
-          includeSecondary={includeSecondary}
-        />
+        <RefCell>
+          <PrimitiveRefPicker
+            mode="standalone"
+            value={refLight}
+            onChange={setRef}
+            previewResult={previewResult}
+            includeSecondary={includeSecondary}
+          />
+        </RefCell>
       )}
 
       <button
@@ -372,17 +386,46 @@ function StandaloneRow({ sectionName, token, onChange, onRemove, previewResult, 
   );
 }
 
-function RefCol({ label, children }: { label: string; children: React.ReactNode }) {
+// Fixed widths for the columns inside a token row. Defining them here lets the
+// group header (Light / Dark) align with the same column positions even though
+// the prefix part (section label + name input) differs between standalone and
+// role-slot rows.
+const REF_COL_WIDTH = 230;
+const STANDALONE_PREFIX_WIDTH = 32 /* section label */ + 8 /* gap */ + 160 /* name input */;
+const SLOT_PREFIX_WIDTH = 80 /* sectionName/{role}- */ + 8 + 140 /* suffix input */;
+
+function RefCell({ children }: { children: React.ReactNode }) {
+  return <div style={{ width: REF_COL_WIDTH, flexShrink: 0 }}>{children}</div>;
+}
+
+// One-line column header rendered above a list of token rows. Aligns to the
+// same column positions as the rows so "Light" sits over light pickers.
+function ThemeColumnsHeader({ prefixWidth, showDark }: { prefixWidth: number; showDark: boolean }) {
+  const labelStyle: React.CSSProperties = {
+    width: REF_COL_WIDTH,
+    flexShrink: 0,
+    fontSize: 10,
+    fontWeight: 600,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    color: 'var(--fui-fg-neutral-tertiary, var(--fui-neutral-8))',
+  };
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-      <span style={{
-        fontSize: 10,
-        fontWeight: 600,
-        textTransform: 'uppercase',
-        letterSpacing: 0.5,
-        color: 'var(--fui-fg-neutral-tertiary, var(--fui-neutral-8))',
-      }}>{label}</span>
-      {children}
+    <div style={{
+      display: 'flex',
+      alignItems: 'center',
+      gap: 8,
+      paddingLeft: 8,
+      paddingRight: 8,
+    }}>
+      <div style={{ width: prefixWidth, flexShrink: 0 }} />
+      <span style={labelStyle}>Light</span>
+      {showDark && (
+        <>
+          <span style={{ width: 12, flexShrink: 0 }} />
+          <span style={labelStyle}>Dark</span>
+        </>
+      )}
     </div>
   );
 }
@@ -436,8 +479,8 @@ function RoleSlotRow({ sectionName, slot, onChange, onRemove, namingConfig, prev
       </div>
 
       {isPerTheme ? (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <RefCol label="Light">
+        <>
+          <RefCell>
             <PrimitiveRefPicker
               mode="slot"
               value={refLight}
@@ -446,8 +489,8 @@ function RoleSlotRow({ sectionName, slot, onChange, onRemove, namingConfig, prev
               previewRole="brand"
               includeSecondary={includeSecondary}
             />
-          </RefCol>
-          <RefCol label="Dark">
+          </RefCell>
+          <RefCell>
             <PrimitiveRefPicker
               mode="slot"
               value={refDark}
@@ -456,17 +499,19 @@ function RoleSlotRow({ sectionName, slot, onChange, onRemove, namingConfig, prev
               previewRole="brand"
               includeSecondary={includeSecondary}
             />
-          </RefCol>
-        </div>
+          </RefCell>
+        </>
       ) : (
-        <PrimitiveRefPicker
-          mode="slot"
-          value={refLight}
-          onChange={setRef}
-          previewResult={previewResult}
-          previewRole="brand"
-          includeSecondary={includeSecondary}
-        />
+        <RefCell>
+          <PrimitiveRefPicker
+            mode="slot"
+            value={refLight}
+            onChange={setRef}
+            previewResult={previewResult}
+            previewRole="brand"
+            includeSecondary={includeSecondary}
+          />
+        </RefCell>
       )}
 
       <button
